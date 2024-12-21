@@ -12,15 +12,13 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-image: url('default_background.jpg'); /* Фоновое изображение по умолчанию */
-            background-size: cover;
-            color: #fff;
+            background: #f0f0f0;
             transition: background-color 0.3s, color 0.3s;
         }
         .container {
             text-align: center;
             background: rgba(0, 0, 0, 0.5);
-            padding: 20px;
+            padding: 40px;
             border-radius: 10px;
         }
         h1 {
@@ -32,6 +30,7 @@
             border: none;
             border-radius: 5px;
             font-size: 1.5rem; /* Увеличенный размер текста в поиске */
+            width: calc(100% - 40px); /* Широкая строка поиска */
         }
         button {
             padding: 15px 30px;
@@ -61,32 +60,48 @@
         .settings-button:hover {
             background-color: rgba(0, 0, 0, 0.9);
         }
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
 
 <div class="container" id="settings-container">
     <h1>Настройки ScreamDev Search</h1>
-    <label for="search-engine">Выберите поисковую систему:</label>
-    <select id="search-engine">
-        <option value="google">Google</option>
-        <option value="yandex">Яндекс</option>
-        <option value="bing">Bing</option>
-    </select>
+    <div id="step1" class="step active">
+        <h2>Шаг 1: Выберите поисковую систему</h2>
+        <label for="search-engine">Выберите поисковую систему:</label>
+        <select id="search-engine">
+            <option value="google">Google</option>
+            <option value="yandex">Яндекс</option>
+            <option value="bing">Bing</option>
+        </select>
+        <button onclick="nextStep(1)">Далее</button>
+    </div>
     
-    <label for="custom-title">Заголовок (по желанию):</label>
-    <input type="text" id="custom-title" placeholder="ScreamDev Search" />
-    
-    <label for="background-upload">Загрузите собственное фоновое изображение:</label>
-    <input type="file" id="background-upload" />
-    
-    <button onclick="saveSettings()">Сохранить настройки</button>
+    <div id="step2" class="step">
+        <h2>Шаг 2: Заголовок (по желанию)</h2>
+        <label for="custom-title">Заголовок:</label>
+        <input type="text" id="custom-title" placeholder="ScreamDev Search" />
+        <button onclick="nextStep(2)">Далее</button>
+    </div>
+
+    <div id="step3" class="step">
+        <h2>Шаг 3: Загрузите фон</h2>
+        <label for="background-upload">Загрузите собственное фоновое изображение:</label>
+        <input type="file" id="background-upload" />
+        <button onclick="saveSettings()">Сохранить настройки</button>
+    </div>
 </div>
 
 <div class="container" id="search-container" style="display: none;">
     <h1 id="page-title">ScreamDev Search</h1>
-    <form id="search-form" action="" method="GET" target="_blank">
-        <input type="text" name="q" placeholder="Введите запрос..." required />
+    <form id="search-form" action="#" method="GET" onsubmit="performSearch(); return false;">
+        <input type="text" name="q" id="search-input" placeholder="Введите запрос..." required />
         <button type="submit">Поиск</button>
     </form>
 </div>
@@ -94,6 +109,11 @@
 <button class="settings-button" onclick="toggleSettings()">⚙️</button>
 
 <script>
+    function nextStep(currentStep) {
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        document.getElementById(`step${currentStep + 1}`).classList.add('active');
+    }
+
     function saveSettings() {
         const searchEngine = document.getElementById('search-engine').value;
         const customTitle = document.getElementById('custom-title').value;
@@ -108,13 +128,16 @@
             reader.onload = function() {
                 document.body.style.backgroundImage = `url(${reader.result})`;
                 document.cookie = `background=${reader.result}; path=/; max-age=31536000`;
+                document.getElementById('settings-container').style.display = 'none';
+                document.getElementById('search-container').style.display = 'block';
+                initializeSettings();
             };
             reader.readAsDataURL(backgroundUpload);
+        } else {
+            document.getElementById('settings-container').style.display = 'none';
+            document.getElementById('search-container').style.display = 'block';
+            initializeSettings();
         }
-
-        // Настройка форм поиска
-        setSearchAction(searchEngine);
-        initializeSettings();
     }
 
     function getCookie(name) {
@@ -140,11 +163,31 @@
         }
     }
 
+    function performSearch() {
+        const searchInput = document.getElementById('search-input').value;
+        const searchEngine = getCookie('searchEngine') || 'google';
+        let searchUrl;
+
+        switch (searchEngine) {
+            case 'google':
+                searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchInput);
+                break;
+            case 'yandex':
+                searchUrl = 'https://yandex.ru/search/?text=' + encodeURIComponent(searchInput);
+                break;
+            case 'bing':
+                searchUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(searchInput);
+                break;
+        }
+        
+        window.location.href = searchUrl; // Переход на страницу с результатами поиска
+    }
+
     function initializeSettings() {
         const searchEngine = getCookie('searchEngine') || 'google';
         const customTitle = getCookie('customTitle') || 'ScreamDev Search';
         const background = getCookie('background');
-        
+
         // Настраиваем поисковую систему
         document.getElementById('search-engine').value = searchEngine;
 
@@ -163,7 +206,7 @@
 
     function toggleSettings() {
         const settingsContainer = document.getElementById('settings-container');
-        if (settingsContainer.style.display === "none") {
+        if (settingsContainer.style.display === "none" || settingsContainer.style.display === "") {
             settingsContainer.style.display = "block";
             document.getElementById('search-container').style.display = 'none';
         } else {
