@@ -6,7 +6,7 @@
     <title>Данные игрока Brawl Stars</title>
     <script>
         async function fetchPlayerData() {
-            const playerTag = "%23YCJJVYPU"; // Тег игрока (код "%23" - это символ "#")
+            const playerTag = encodeURIComponent("#YCJJVYPU"); // Кодируем тег игрока
             const apiKey = "ваш_ключ_здесь"; // Замените на ваш API ключ
 
             try {
