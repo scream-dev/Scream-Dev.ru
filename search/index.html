@@ -160,6 +160,8 @@
 <button class="settings-button" onclick="toggleSettings()">⚙️</button>
 
 <script>
+    let lastSearchQuery = ""; // Переменная для хранения последнего запроса
+
     function nextStep(currentStep) {
         document.getElementById(`step${currentStep}`).classList.remove('active');
         document.getElementById(`step${currentStep + 1}`).classList.add('active');
@@ -212,23 +214,26 @@
     }
 
     function performSearch() {
-        const searchInput = document.getElementById('search-input').value;
+        const searchInput = document.getElementById('search-input');
+        const searchQuery = searchInput.value; // Сохраняем текущий введённый запрос
         const searchEngine = getCookie('searchEngine') || 'google';
         let searchUrl;
 
         switch (searchEngine) {
             case 'google':
-                searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchInput);
+                searchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchQuery);
                 break;
             case 'yandex':
-                searchUrl = 'https://yandex.ru/search/?text=' + encodeURIComponent(searchInput);
+                searchUrl = 'https://yandex.ru/search/?text=' + encodeURIComponent(searchQuery);
                 break;
             case 'bing':
-                searchUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(searchInput);
+                searchUrl = 'https://www.bing.com/search?q=' + encodeURIComponent(searchQuery);
                 break;
         }
         
+        lastSearchQuery = searchQuery; // Обновляем последний запрос
         window.location.href = searchUrl; // Переход на страницу с результатами поиска
+        searchInput.value = ""; // Очищаем поле ввода
     }
 
     function initializeSettings() {
@@ -252,6 +257,10 @@
         // Показываем контейнер для поиска и скрываем настройки
         document.getElementById('settings-container').style.display = 'none';
         document.getElementById('search-container').style.display = 'block';
+        
+        // Установка предыдущего запроса в поле ввода (если он есть)
+        const searchInput = document.getElementById('search-input');
+        searchInput.value = lastSearchQuery;
     }
 
     function toggleSettings() {
