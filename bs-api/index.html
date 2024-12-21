@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Brawl Stars API Query</title>
+    <title>Данные игрока Brawl Stars</title>
     <script>
         async function fetchPlayerData() {
-            const playerTag = "#YCJJVYPU"; // Ваш тег
-            const apiKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiIsImtpZCI6IjI4YTMxOGY3LTAwMDAtYTFlYi03ZmExLTJjNzQzM2M2Y2NhNSJ9.eyJpc3MiOiJzdXBlcmNlbGwiLCJhdWQiOiJzdXBlcmNlbGw6Z2FtZWFwaSIsImp0aSI6IjM1YzUwMmJlLWFiMjAtNDkwMC05MWE4LTUzYWRmMjE5N2M1YSIsImlhdCI6MTczNDc5MTg4Miwic3ViIjoiZGV2ZWxvcGVyLzNkZWY0ZTI3LWNjZTYtYzU2Ni05ZTg2LTk1NTcyMTUzYzM0ZCIsInNjb3BlcyI6WyJicmF3bHN0YXJzIl0sImxpbWl0cyI6W3sidGllciI6ImRldmVsb3Blci9zaWx2ZXIiLCJ0eXBlIjoidGhyb3R0bGluZyJ9LHsiY2lkcnMiOlsiMTg1LjE5OS4xMDkuMTUzIiwiMTg1LjE5OS4xMDguMTUzIiwiMTg1LjE5OS4xMTAuMTUzIiwiMTg1LjE5OS4xMTEuMTUzIiwiOC44LjguOCJdLCJ0eXBlIjoiY2xpZW50In1dfQ.5H2GXQDrOusBbjBvp3siHbHvB1EuPVQRchJhTghQ57FKK_DByGuouKHCgLQg28-g8uPPtQSHGJw3cAqsOxgxjQ";
+            const playerTag = "%23YCJJVYPU"; // Тег игрока (код "%23" - это символ "#")
+            const apiKey = "ваш_ключ_здесь"; // Замените на ваш API ключ
 
             try {
                 const response = await fetch(`https://api.brawlstars.com/v1/players/${playerTag}`, {
