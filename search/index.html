@@ -25,8 +25,12 @@
             max-width: 600px;
             width: 100%;
         }
-        h1, h2 {
+        h1 {
             font-size: 3rem; /* Увеличенный размер заголовка */
+            color: #fff;
+        }
+        h2 {
+            font-size: 2rem; /* Увеличенный размер заголовка */
             color: #fff;
         }
         input[type="text"], select {
@@ -35,7 +39,13 @@
             border: none;
             border-radius: 5px;
             font-size: 1.5rem; /* Увеличенный размер текста в поиске */
-            width: calc(100% - 40px); /* Широкая строка поиска */
+            width: 100%; /* Установлено на 100% для обычного состояния */
+            max-width: calc(100% - 40px); /* Ограничение на максимальную ширину */
+            box-sizing: border-box;
+            transition: width 0.2s; /* Плавное изменение ширины */
+        }
+        input[type="text"]:focus {
+            width: calc(100% - 40px); /* Максимальная ширина при фокусе */
         }
         button {
             padding: 15px 30px;
@@ -106,8 +116,8 @@
 <body>
 
 <div class="container" id="settings-container">
-    <h1>Настройки ScreamDev Search</h1>
     <div id="step1" class="step active">
+        <h1>Настройки</h1>
         <h2>Шаг 1: Выберите поисковую систему</h2>
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Google_logo_2015.svg/2560px-Google_logo_2015.svg.png" alt="Google">
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Yandex_logo.svg/1280px-Yandex_logo.svg.png" alt="Yandex">
@@ -132,6 +142,7 @@
     <div id="step3" class="step">
         <h2>Шаг 3: Загрузите фон</h2>
         <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Blue_background_vector.svg/1200px-Blue_background_vector.svg.png" alt="Background">
+        <p>Эта функция пока что не реализована.</p>
         <label for="background-upload">Загрузите собственное фоновое изображение:</label>
         <input type="file" id="background-upload" accept="image/*" />
         <button onclick="saveSettings()">Сохранить настройки</button>
