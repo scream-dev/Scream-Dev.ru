@@ -165,9 +165,10 @@
         
         if (backgroundUpload) {
             const reader = new FileReader();
-            reader.onload = function() {
-                document.body.style.backgroundImage = `url(${reader.result})`;
-                document.cookie = `background=${encodeURIComponent(reader.result)}; path=/; max-age=31536000`;
+            reader.onload = function(event) {
+                const backgroundImage = event.target.result;
+                document.body.style.backgroundImage = `url(${backgroundImage})`;
+                document.cookie = `background=${encodeURIComponent(backgroundImage)}; path=/; max-age=31536000`;
                 initializeSettings();
             };
             reader.readAsDataURL(backgroundUpload);
@@ -233,6 +234,8 @@
         // Устанавливаем фоновое изображение
         if (background) {
             document.body.style.backgroundImage = `url(${decodeURIComponent(background)})`;
+        } else {
+            document.body.style.backgroundImage = '';
         }
 
         // Показываем контейнер для поиска и скрываем настройки
@@ -242,6 +245,13 @@
 
     function toggleSettings() {
         const settingsContainer = document.getElementById('settings-container');
+        // Сброс настроек и переход к первому шагу
+        document.getElementById('step1').classList.add('active');
+        document.getElementById('step2').classList.remove('active');
+        document.getElementById('step3').classList.remove('active');
+        document.getElementById('custom-title').value = '';
+        document.getElementById('background-upload').value = '';
+
         if (settingsContainer.style.display === "none" || settingsContainer.style.display === "") {
             settingsContainer.style.display = "block";
             document.getElementById('search-container').style.display = 'none';
@@ -252,13 +262,9 @@
     }
 
     // Проверяем, есть ли уже настройки в cookies
-    if (!getCookie('searchEngine')) {
-        document.addEventListener("DOMContentLoaded", function() {
-            initializeSettings();
-        });
-    } else {
+    document.addEventListener("DOMContentLoaded", function() {
         initializeSettings();
-    }
+    });
 
     // Подстраивание под темную/светлую тему
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
