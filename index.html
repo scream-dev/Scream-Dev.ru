@@ -1,6 +1,163 @@
 <!DOCTYPE html>
 <html lang="ru">
-<div id="overlay" onclick="closeLogin()" style="display: none;">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scream [dev]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Agu+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-family: 'Agu Display', sans-serif;
+            background: linear-gradient(90deg, #ff6a00, #ee0979);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s;
+        }
+
+        header h1:hover {
+            transform: scale(1.1);
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 1em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ff6a00;
+        }
+
+        #loginButton {
+            cursor: pointer;
+            background-color: #ff6a00;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        #loginButton:hover {
+            background-color: #ee0979;
+        }
+
+        .user-icon {
+            width: 30px;
+            height: 30px;
+            background-image: url('https://ionoto.ru/upload/medialibrary/a1f/tcs61nk83dig738gik8qtkcx6ue7sgek.png');
+            background-size: cover;
+            border-radius: 50%;
+            margin-left: 20px;
+            cursor: pointer;
+        }
+
+        .user-icon:hover {
+            opacity: 0.8;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999; /* Над шапкой */
+        }
+
+        #loginWindow {
+            background-color: #181818; /* Темная тема окна логина */
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #loginWindow input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #2f2f2f; /* Цвет фона для полей ввода */
+            color: white; /* Цвет текста */
+        }
+
+        #loginWindow input::placeholder {
+            color: #888; /* Цвет плейсхолдера */
+        }
+
+        #main-content {
+            padding-top: 120px; /* Отступ, чтобы контент не заходил за шапку */
+            text-align: center;
+        }
+
+        #main-content img {
+            max-width: 70%;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><a href="/" style="color: white; text-decoration: none;">Scream [dev]</a></h1>
+    <nav>
+        <a href="https://scream-dev.ru/weather">Погода</a>
+        <a href="https://scream-dev.ru/webstore">Расширения</a>
+        <a href="https://scream-dev.ru/anarxgrif_code">Шифр</a>
+        <a href="https://scream-dev.ru/clicker">Кликер</a>
+        <button id="loginButton">Войти</button>
+    </nav>
+</header>
+
+<div id="overlay" onclick="closeLogin()">
     <div id="loginWindow" onclick="event.stopPropagation();">
         <h3>Войти</h3>
         <input type="text" id="username" placeholder="Логин">
@@ -18,74 +175,6 @@
 <footer>
     <p>© 2023 Scream [dev]. Все права защищены.</p>
 </footer>
-
-<style>
-    body {
-        font-family: 'Roboto', sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #121212;
-        color: #fff;
-    }
-
-    #overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: none;
-        justify-content: center;
-        align-items: center;
-        z-index: 999; /* Над шапкой */
-    }
-
-    #loginWindow {
-        background-color: #181818; /* Темная тема окна логина */
-        padding: 30px;
-        border-radius: 8px;
-        text-align: center;
-        color: white;
-        max-width: 400px;
-        width: 100%;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    #loginWindow input {
-        margin: 10px 0;
-        padding: 10px;
-        width: 90%;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        background-color: #2f2f2f; /* Цвет фона для полей ввода */
-        color: white; /* Цвет текста */
-    }
-
-    #loginWindow input::placeholder {
-        color: #888; /* Цвет плейсхолдера */
-    }
-
-    #main-content {
-        padding-top: 120px; /* Отступ, чтобы контент не заходил за шапку */
-        text-align: center;
-    }
-
-    #main-content img {
-        max-width: 70%;
-        height: auto;
-        margin: 20px 0;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-    }
-
-    footer {
-        text-align: center;
-        padding: 20px;
-        background-color: #1e1e1e;
-        color: #fff;
-    }
-</style>
 
 <script>
     // Проверка на наличие сохраненного аккаунта
@@ -164,3 +253,6 @@
         return null;
     }
 </script>
+
+</body>
+</html>
