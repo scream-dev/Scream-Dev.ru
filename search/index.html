@@ -17,12 +17,17 @@
         }
         .container {
             text-align: center;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.7);
             padding: 40px;
             border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 0.5s ease-in-out;
+            max-width: 600px;
+            width: 100%;
         }
-        h1 {
+        h1, h2 {
             font-size: 3rem; /* Увеличенный размер заголовка */
+            color: #fff;
         }
         input[type="text"], select {
             padding: 15px;
@@ -40,6 +45,7 @@
             color: white;
             cursor: pointer;
             font-size: 1.2rem;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #0056b3;
@@ -62,9 +68,38 @@
         }
         .step {
             display: none;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
         .step.active {
             display: block;
+            opacity: 1;
+        }
+        #step1 img, #step2 img, #step3 img {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px 0;
+            animation: slideIn 0.5s ease-in-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
     </style>
 </head>
@@ -74,6 +109,9 @@
     <h1>Настройки ScreamDev Search</h1>
     <div id="step1" class="step active">
         <h2>Шаг 1: Выберите поисковую систему</h2>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Google_logo_2015.svg/2560px-Google_logo_2015.svg.png" alt="Google">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Yandex_logo.svg/1280px-Yandex_logo.svg.png" alt="Yandex">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Bing_logo_logo.svg/2560px-Bing_logo_logo.svg.png" alt="Bing">
         <label for="search-engine">Выберите поисковую систему:</label>
         <select id="search-engine">
             <option value="google">Google</option>
@@ -85,6 +123,7 @@
     
     <div id="step2" class="step">
         <h2>Шаг 2: Заголовок (по желанию)</h2>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Personal_Logo.svg/1024px-Personal_Logo.svg.png" alt="Title">
         <label for="custom-title">Заголовок:</label>
         <input type="text" id="custom-title" placeholder="ScreamDev Search" />
         <button onclick="nextStep(2)">Далее</button>
@@ -92,8 +131,9 @@
 
     <div id="step3" class="step">
         <h2>Шаг 3: Загрузите фон</h2>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Blue_background_vector.svg/1200px-Blue_background_vector.svg.png" alt="Background">
         <label for="background-upload">Загрузите собственное фоновое изображение:</label>
-        <input type="file" id="background-upload" />
+        <input type="file" id="background-upload" accept="image/*" />
         <button onclick="saveSettings()">Сохранить настройки</button>
     </div>
 </div>
@@ -127,15 +167,11 @@
             const reader = new FileReader();
             reader.onload = function() {
                 document.body.style.backgroundImage = `url(${reader.result})`;
-                document.cookie = `background=${reader.result}; path=/; max-age=31536000`;
-                document.getElementById('settings-container').style.display = 'none';
-                document.getElementById('search-container').style.display = 'block';
+                document.cookie = `background=${encodeURIComponent(reader.result)}; path=/; max-age=31536000`;
                 initializeSettings();
             };
             reader.readAsDataURL(backgroundUpload);
         } else {
-            document.getElementById('settings-container').style.display = 'none';
-            document.getElementById('search-container').style.display = 'block';
             initializeSettings();
         }
     }
@@ -196,7 +232,7 @@
 
         // Устанавливаем фоновое изображение
         if (background) {
-            document.body.style.backgroundImage = `url(${background})`;
+            document.body.style.backgroundImage = `url(${decodeURIComponent(background)})`;
         }
 
         // Показываем контейнер для поиска и скрываем настройки
