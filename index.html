@@ -1,297 +1,166 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Случайная страна и её столица</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            overflow: hidden;
-        }
-        h1 {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .country-capital {
-            font-size: 48px; /* Увеличен размер шрифта для главного элемента */
-            font-weight: bold;
-            margin: 20px 0;
-            opacity: 0;
-            transition: opacity 0.5s;
-            text-align: center;
-        }
-        .capital {
-            font-size: 36px; /* Размер шрифта для столицы */
-        }
-        .timer {
-            font-size: 18px;
-            margin-top: 10px;
-            color: #555;
-            text-align: center;
-        }
-        .buttons {
-            display: none;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .buttons button {
-            font-size: 18px;
-            margin: 0 10px;
-            padding: 10px;
-            cursor: pointer;
-        }
-        .top-countries {
-            margin-top: 20px;
-            max-width: 200px; 
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-            text-align: left;
-            position: absolute;
-            right: 20px; /* Расположение справа */
-            top: 100px;
-        }
-        .top-countries strong {
-            font-size: 20px;
-            text-align: center;
-            display: block;
-            margin-bottom: 10px;
-        }
-        .guess-count {
-            margin-top: 20px;
-            max-width: 200px; 
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-            text-align: left;
-            position: absolute;
-            left: 20px; /* Расположение слева */
-            top: 100px;
-        }
-        .clear-cookies {
-            margin-top: 20px;
-            font-size: 16px;
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #ff4c4c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .clear-cookies:hover {
-            background-color: #ff3333;
-        }
-        .content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            flex-grow: 1;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Случайная страна и её столица</h1>
-    <div class="content">
-        <div class="country-capital" id="country"></div>
-        <div class="capital" id="capital"></div>
-        <div class="timer" id="timer"></div>
-        <div class="buttons" id="buttons">
-            <button id="checkmark">✔️</button>
-            <button id="cross">❌</button>
-        </div>
+<div id="overlay" onclick="closeLogin()" style="display: none;">
+    <div id="loginWindow" onclick="event.stopPropagation();">
+        <h3>Войти</h3>
+        <input type="text" id="username" placeholder="Логин">
+        <input type="password" id="password" placeholder="Пароль">
+        <button onclick="login()">Войти</button>
     </div>
-    <div class="guess-count" id="guessCount"></div>
-    <div class="top-countries" id="topCountries"></div>
-    <button class="clear-cookies" id="clearCookies">Очистить куки</button>
+</div>
 
-    <script>
-        const countries = [
-            { name: "Нигерия", capital: "Абуджа", weight: getWeight("Нигерия") || 1, guessed: 0 },
-            { name: "Египет", capital: "Каир", weight: getWeight("Египет") || 1, guessed: 0 },
-            { name: "Эфиопия", capital: "Аддис-Абеба", weight: getWeight("Эфиопия") || 1, guessed: 0 },
-            { name: "Алжир", capital: "Алжир", weight: getWeight("Алжир") || 1, guessed: 0 },
-            { name: "ЮАР", capital: "Претония", weight: getWeight("ЮАР") || 1, guessed: 0 },
-            { name: "Демократическая Республика Конго", capital: "Киншаса", weight: getWeight("Демократическая Республика Конго") || 1, guessed: 0 },
-            { name: "Кения", capital: "Найроби", weight: getWeight("Кения") || 1, guessed: 0 },
-            { name: "Танзания", capital: "Додома", weight: getWeight("Танзания") || 1, guessed: 0 },
-            { name: "Морокко", capital: "Рабат", weight: getWeight("Морокко") || 1, guessed: 0 },
-            { name: "Ливия", capital: "Триполи", weight: getWeight("Ливия") || 1, guessed: 0 },
-            { name: "Мали", capital: "Бамако", weight: getWeight("Мали") || 1, guessed: 0 },
-            { name: "Сенегал", capital: "Дакар", weight: getWeight("Сенегал") || 1, guessed: 0 },
-            { name: "Кот-де-ивуар", capital: "Абиджан", weight: getWeight("Кот-де-ивуар") || 1, guessed: 0 },
-            { name: "Мозамбик", capital: "Мапуту", weight: getWeight("Мозамбик") || 1, guessed: 0 },
-            { name: "Ангола", capital: "Луанда", weight: getWeight("Ангола") || 1, guessed: 0 },
-            { name: "Намибия", capital: "Виндук", weight: getWeight("Намибия") || 1, guessed: 0 },
-            { name: "Судан", capital: "Хартум", weight: getWeight("Судан") || 1, guessed: 0 },
-            { name: "Гвинея", capital: "Канакри", weight: getWeight("Гвинея") || 1, guessed: 0 },
-            { name: "Либерия", capital: "Монровия", weight: getWeight("Либерия") || 1, guessed: 0 },
-            { name: "Замбия", capital: "Лусака", weight: getWeight("Замбия") || 1, guessed: 0 }
-        ];
+<div id="main-content">
+    <h2>Scream [dev]</h2>
+    <p>Личный сайт разработчика</p>
+    <img src="https://avatars.mds.yandex.net/i?id=54b828bc325102b8b66ac1510bd9762c_l-13468156-images-thumbs&n=13" alt="Картинка на главной странице">
+</div>
 
-        function getWeight(countryName) {
-            const cookieValue = document.cookie.split('; ').find(row => row.startsWith(countryName));
-            return cookieValue ? parseInt(cookieValue.split('=')[1]) : null;
+<footer>
+    <p>© 2023 Scream [dev]. Все права защищены.</p>
+</footer>
+
+<style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #121212;
+        color: #fff;
+    }
+
+    #overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999; /* Над шапкой */
+    }
+
+    #loginWindow {
+        background-color: #181818; /* Темная тема окна логина */
+        padding: 30px;
+        border-radius: 8px;
+        text-align: center;
+        color: white;
+        max-width: 400px;
+        width: 100%;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    #loginWindow input {
+        margin: 10px 0;
+        padding: 10px;
+        width: 90%;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background-color: #2f2f2f; /* Цвет фона для полей ввода */
+        color: white; /* Цвет текста */
+    }
+
+    #loginWindow input::placeholder {
+        color: #888; /* Цвет плейсхолдера */
+    }
+
+    #main-content {
+        padding-top: 120px; /* Отступ, чтобы контент не заходил за шапку */
+        text-align: center;
+    }
+
+    #main-content img {
+        max-width: 70%;
+        height: auto;
+        margin: 20px 0;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px;
+        background-color: #1e1e1e;
+        color: #fff;
+    }
+</style>
+
+<script>
+    // Проверка на наличие сохраненного аккаунта
+    window.onload = function() {
+        const savedUsername = getCookie('username');
+        if (savedUsername) {
+            alert(`${savedUsername}: Вы вошли в аккаунт!`);
+            updateLoginButton(savedUsername);
         }
+    };
 
-        function setWeight(countryName, weight) {
-            document.cookie = `${countryName}=${weight}; path=/;`;
+    function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Тестовый аккаунт
+        if (username === "test_account" && password === "onlyforscreamdev") {
+            setCookie('username', username, 7); // Сохранение аккаунта в куки на 7 дней
+            alert(`${username}: Вы вошли в тестовый аккаунт!`);
+            updateLoginButton(username);
+            closeLogin();
+        } else {
+            alert('Неверный логин или пароль!');
         }
+    }
 
-        function getRandomCountry() {
-            const totalWeight = countries.reduce((sum, country) => sum + country.weight, 0);
-            let randomWeight = Math.floor(Math.random() * totalWeight);
-            return countries.find(country => {
-                randomWeight -= country.weight;
-                return randomWeight < 0;
-            });
+    function updateLoginButton(username) {
+        const loginButton = document.getElementById('loginButton');
+        loginButton.style.display = 'none'; // Скрыть кнопку "Войти"
+
+        const userIcon = document.createElement('div');
+        userIcon.className = 'user-icon';
+        userIcon.onclick = function() { logout(); };
+        document.querySelector('nav').appendChild(userIcon); // Добавляем иконку пользователя в навигацию
+        
+        // Сохраняем и отображаем сообщение о входе
+        alert(`${username}: Вы вошли в аккаунт!`); 
+    }
+
+    function logout() {
+        setCookie('username', '', -1); // Удалить куку
+        const userIcon = document.querySelector('.user-icon');
+        if (userIcon) {
+            userIcon.remove(); // Удаляем иконку пользователя
         }
+        document.getElementById('loginButton').style.display = 'block'; // Возвращаем кнопку "Войти"
+    }
 
-        let currentCountry = getRandomCountry();
+    function closeLogin() {
+        document.getElementById('overlay').style.display = 'none'; // Закрыть окно
+    }
 
-        function showCountry() {
-            if (!currentCountry) {
-                currentCountry = getRandomCountry();
-            }
+    document.getElementById('loginButton').onclick = function() {
+        document.getElementById('overlay').style.display = 'flex'; // Показать окно логина
+    }
 
-            const countryElement = document.getElementById("country");
-            const capitalElement = document.getElementById("capital");
-            const timerElement = document.getElementById("timer");
-            const buttonsElement = document.getElementById("buttons");
-
-            countryElement.textContent = currentCountry.name;
-            countryElement.style.opacity = 0; // Скрыть
-            capitalElement.style.display = 'none'; // Скрыть столицу
-            timerElement.textContent = '3'; // Сбросить таймер
-            buttonsElement.style.display = 'none'; // Скрыть кнопки
-
-            setTimeout(() => {
-                countryElement.style.opacity = 1; // Показать страну
-                startTimer(3, currentCountry.capital); // Начать таймер на 3 секунды
-            }, 100);
+    // Функции для работы с куки
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
         }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
 
-        function startTimer(seconds, capitalText) {
-            let remainingTime = seconds;
-
-            const timerElement = document.getElementById("timer");
-            const capitalElement = document.getElementById("capital");
-            const buttonsElement = document.getElementById("buttons");
-
-            const timerInterval = setInterval(() => {
-                timerElement.textContent = remainingTime;
-                remainingTime--;
-
-                if (remainingTime < 0) {
-                    clearInterval(timerInterval);
-                    timerElement.textContent = '';
-                    showCapital(capitalText);
-                }
-            }, 1000);
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
         }
-
-        function showCapital(capitalText) {
-            const capitalElement = document.getElementById("capital");
-            const buttonsElement = document.getElementById("buttons");
-            capitalElement.textContent = capitalText;
-            capitalElement.style.display = 'block'; // Показать столицу
-            capitalElement.style.opacity = 0; // Скрыть
-
-            setTimeout(() => {
-                capitalElement.style.opacity = 1; // Показать столицу
-            }, 100);
-
-            // Показываем кнопки после показа столицы
-            buttonsElement.style.display = 'flex';
-
-            // Устанавливаем обработчики событий
-            const checkmarkButton = document.getElementById("checkmark");
-            const crossButton = document.getElementById("cross");
-
-            checkmarkButton.onclick = () => {
-                handleUserInput(true);
-            };
-
-            crossButton.onclick = () => {
-                handleUserInput(false);
-            };
-        }
-
-        function handleUserInput(approved) {
-            if (approved) {
-                currentCountry.weight = Math.max(1, currentCountry.weight - 1); // Уменьшаем вес (шанс показа) минимально до 1
-                currentCountry.guessed += 1; // Увеличиваем счетчик угаданных стран
-            } else {
-                currentCountry.weight += 1; // Увеличиваем вес (шанс показа)
-            }
-
-            setWeight(currentCountry.name, currentCountry.weight); // Сохраняем вес в куки
-
-            // Обнуляем текущую страну и показываем следующую
-            currentCountry = getRandomCountry();
-            document.getElementById("buttons").style.display = 'none';
-            setTimeout(showCountry, 500); // Задержка перед показом следующей страны
-
-            updateTopCountries();
-            updateGuessCount();
-        }
-
-        function updateTopCountries() {
-            const topCountriesElement = document.getElementById("topCountries");
-            const totalWeight = countries.reduce((sum, country) => sum + country.weight, 0);
-            const sortedCountries = countries.slice().sort((a, b) => b.weight - a.weight).slice(0, 5);
-
-            topCountriesElement.innerHTML = '<strong>Топ 5 стран:</strong><br>';
-            sortedCountries.forEach(country => {
-                const percentage = ((country.weight / totalWeight) * 100).toFixed(2);
-                topCountriesElement.innerHTML += `<span style="font-size: 18px;">${country.name}: ${percentage}%</span><br>`;
-            });
-
-            // Дополним списком всех стран
-            topCountriesElement.innerHTML += '<strong>Все страны:</strong><br>';
-            countries.forEach(country => {
-                const percentage = ((country.weight / totalWeight) * 100).toFixed(2);
-                topCountriesElement.innerHTML += `${country.name}: ${percentage}%<br>`;
-            });
-        }
-
-        function updateGuessCount() {
-            const guessCountElement = document.getElementById("guessCount");
-            guessCountElement.innerHTML = '<strong>Счетчик угаданных стран:</strong><br>';
-            countries.forEach(country => {
-                guessCountElement.innerHTML += `${country.name}: ${country.guessed} раз(а)<br>`;
-            });
-        }
-
-        document.getElementById("clearCookies").onclick = function() {
-            countries.forEach(country => {
-                setWeight(country.name, 1); // Сбросить все веса до 1
-                country.guessed = 0; // Сбросить счетчики угаданных стран до 0
-            });
-            updateTopCountries();
-            updateGuessCount();
-        };
-
-        // Инициализацияд
-        showCountry();
-        updateTopCountries();
-        updateGuessCount();
-
-    </script>
-
-</body>
-</html>
+        return null;
+    }
+</script>
