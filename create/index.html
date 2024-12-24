@@ -57,12 +57,31 @@
     </div>
 
     <script>
-        function createPage() {
+        async function createPage() {
             const pageName = document.getElementById('pageName').value.trim();
 
             if (pageName) {
-                // Перенаправление на новую страницу
-                window.location.href = `site/${pageName}`;
+                try {
+                    const response = await fetch('http://localhost:3000/create-page', { // Замените на адрес вашего сервера
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ pageName })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Ошибка при создании страницы');
+                    }
+
+                    const result = await response.text(); // Или используйте response.json() если ваш сервер возвращает JSON
+                    alert(result); // Показываем сообщение об успехе или об ошибке
+
+                    // Опционально: перенаправление на новую страницу после успешного создания
+                    window.location.href = `site/${pageName}`;
+                } catch (error) {
+                    alert(error.message);
+                }
             } else {
                 alert('Пожалуйста, введите название страницы.');
             }
