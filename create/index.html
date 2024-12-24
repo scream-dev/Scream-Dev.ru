@@ -3,89 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Создать страницу</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
-
-        input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-
-        button {
-            padding: 10px 15px;
-            border: none;
-            background-color: #5cb85c;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #4cae4c;
-        }
-
-        h1 {
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Создать новую страницу</h1>
-        <input type="text" id="pageName" placeholder="Введите название страницы (например, site2)">
-        <button onclick="createPage()">Создать</button>
-    </div>
-
+    <title>Создание страницы на GitHub</title>
     <script>
         async function createPage() {
-            const pageName = document.getElementById('pageName').value.trim();
+            const pageName = document.getElementById('page-name').value;
 
-            if (pageName) {
-                try {
-                    const response = await fetch('http://localhost:3000/create-page', { // Замените на адрес вашего сервера
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ pageName })
-                    });
+            const response = await fetch('https://c7.play2go.cloud:20080', { // Убедитесь, что путь верный
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ pageName })
+            });
 
-                    if (!response.ok) {
-                        throw new Error('Ошибка при создании страницы');
-                    }
-
-                    const result = await response.text(); // Или используйте response.json() если ваш сервер возвращает JSON
-                    alert(result); // Показываем сообщение об успехе или об ошибке
-
-                    // Опционально: перенаправление на новую страницу после успешного создания
-                    window.location.href = `site/${pageName}`;
-                } catch (error) {
-                    alert(error.message);
-                }
+            if (response.ok) {
+                const data = await response.json();
+                // Перенаправление на созданную страницу
+                window.location.href = data.url;
             } else {
-                alert('Пожалуйста, введите название страницы.');
+                const error = await response.json();
+                console.error('Ошибка при создании страницы:', error);
+                alert('Произошла ошибка: ' + error.error); // Можно изменить сообщение
             }
         }
     </script>
+</head>
+<body>
+    <h1>Создание новой страницы на GitHub</h1>
+    <input type="text" id="page-name" placeholder="Введите имя страницы" required>
+    <button onclick="createPage()">Создать страницу</button>
 </body>
 </html>
