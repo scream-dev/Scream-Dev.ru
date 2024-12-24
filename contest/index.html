@@ -11,99 +11,195 @@
             margin: 0;
             padding: 20px;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: center;
         }
         h1 {
             text-align: center;
             color: #343a40;
         }
-        .winner {
+        .section {
             background-color: #ffffff;
             border: 1px solid #dee2e6;
             border-radius: 8px;
-            padding: 20px;
-            margin: 10px;
+            margin: 20px 0;
+            width: 80%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 300px;
+        }
+        .section-header {
+            padding: 15px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: #ffffff;
+            border-radius: 8px 8px 0 0;
+        }
+        .winners {
+            display: none; /* Скрываем подкатегории по умолчанию */
+            padding: 15px;
+            text-align: center;
+        }
+        .winner {
+            background-color: #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
             transition: transform 0.2s;
         }
         .winner:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
         .photos {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             margin: 10px 0;
         }
         .photos img {
             width: 45%;
             border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
         }
         .link {
-            text-align: center;
-            display: block;
-            margin-top: 10px;
             color: #007bff;
             text-decoration: none;
+            display: block;
+            margin-top: 10px;
         }
         .link:hover {
             text-decoration: underline;
+        }
+        .full-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .full-screen img {
+            max-width: 90%;
+            max-height: 90%;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            cursor: pointer;
+            font-size: 24px;
         }
     </style>
 </head>
 <body>
     <h1>Победители конкурса</h1>
-    <div id="winners-container"></div>
+    <div class="full-screen" id="full-screen">
+        <span class="close-btn" onclick="closeFullScreen()">×</span>
+        <img id="full-screen-img" src="" alt="Full Screen Image" />
+    </div>
+
+    <div class="section">
+        <div class="section-header" onclick="toggleWinners('500r')">Приз: 500 рублей</div>
+        <div class="winners" id="500r">
+            <div class="winner">
+                <p>Переписка</p>
+                <div class="photos">
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" onclick="showFullScreen(this.src)" />
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" onclick="showFullScreen(this.src)" />
+                </div>
+                <p>Доказательство</p>
+                <a class="link" href="https://t.me/weekcats" target="_blank">t.me/weekcats</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header" onclick="toggleWinners('telegram')">Приз: Telegram Premium</div>
+        <div class="winners" id="telegram">
+            <div class="winner">
+                <p>Переписка</p>
+                <div class="photos">
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" onclick="showFullScreen(this.src)" />
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" onclick="showFullScreen(this.src)" />
+                </div>
+                <p>Доказательство</p>
+                <a class="link" href="https://t.me/weekcats" target="_blank">t.me/weekcats</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header" onclick="toggleWinners('50stars')">Приз: 50 звёзд</div>
+        <div class="winners" id="50stars">
+            <div class="winner">
+                <p>Переписка</p>
+                <div class="photos">
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" onclick="showFullScreen(this.src)" />
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" onclick="showFullScreen(this.src)" />
+                </div>
+                <p>Доказательство</p>
+                <a class="link" href="https://t.me/weekcats" target="_blank">t.me/weekcats</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header" onclick="toggleWinners('15stars')">Приз: 15 звёзд</div>
+        <div class="winners" id="15stars">
+            ${Array.from({ length: 7 }, (_, i) => `
+                <div class="winner">
+                    <p>Переписка</p>
+                    <div class="photos">
+                        <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" onclick="showFullScreen(this.src)" />
+                        <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" onclick="showFullScreen(this.src)" />
+                    </div>
+                    <p>Доказательство</p>
+                    <a class="link" href="https://t.me/weekcats" target="_blank">t.me/weekcats</a>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-header" onclick="toggleWinners('ticket')">Приз: Билет на конкурс</div>
+        <div class="winners" id="ticket">
+            ${Array.from({ length: 15 }, (_, i) => `
+                <div class="winner">
+                    <p>Переписка</p>
+                    <div class="photos">
+                        <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" onclick="showFullScreen(this.src)" />
+                        <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" onclick="showFullScreen(this.src)" />
+                    </div>
+                    <p>Доказательство</p>
+                    <a class="link" href="https://t.me/weekcats" target="_blank">t.me/weekcats</a>
+                </div>
+            `).join('')}
+        </div>
+    </div>
 
     <script>
-        const winners = [
-            { prize: "500 рублей" },
-            { prize: "Telegram Premium" },
-            { prize: "50 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "15 звёзд" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" },
-            { prize: "Билет на конкурс" }
-        ];
+        function toggleWinners(sectionId) {
+            const winners = document.getElementById(sectionId);
+            if (winners.style.display === "none" || winners.style.display === "") {
+                winners.style.display = "block";
+            } else {
+                winners.style.display = "none";
+            }
+        }
 
-        const container = document.getElementById('winners-container');
+        function showFullScreen(src) {
+            const fullScreen = document.getElementById('full-screen');
+            const fullScreenImg = document.getElementById('full-screen-img');
+            fullScreenImg.src = src;
+            fullScreen.style.display = "flex";
+        }
 
-        winners.forEach((winner, index) => {
-            const winnerDiv = document.createElement('div');
-            winnerDiv.classList.add('winner');
-            winnerDiv.innerHTML = `
-                <h2>Пункт ${index + 1}</h2>
-                <p>Приз: ${winner.prize}</p>
-                <div class="photos">
-                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" />
-                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" />
-                </div>
-                <p>Переписка</p>
-                <p>Доказательство</p>
-                <a class="link" href="https://t.me/weekcats" target="_blank">Ссылка на конкурс</a>
-            `;
-            container.appendChild(winnerDiv);
-        });
+        function closeFullScreen() {
+            document.getElementById('full-screen').style.display = "none";
+        }
     </script>
 </body>
 </html>
