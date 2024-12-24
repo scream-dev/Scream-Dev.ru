@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Победители конкурса</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+        h1 {
+            text-align: center;
+            color: #343a40;
+        }
+        .winner {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            transition: transform 0.2s;
+        }
+        .winner:hover {
+            transform: scale(1.05);
+        }
+        .photos {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .photos img {
+            width: 45%;
+            border-radius: 5px;
+        }
+        .link {
+            text-align: center;
+            display: block;
+            margin-top: 10px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>Победители конкурса</h1>
+    <div id="winners-container"></div>
+
+    <script>
+        const winners = [
+            { prize: "500 рублей" },
+            { prize: "Telegram Premium" },
+            { prize: "50 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "15 звёзд" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" },
+            { prize: "Билет на конкурс" }
+        ];
+
+        const container = document.getElementById('winners-container');
+
+        winners.forEach((winner, index) => {
+            const winnerDiv = document.createElement('div');
+            winnerDiv.classList.add('winner');
+            winnerDiv.innerHTML = `
+                <h2>Пункт ${index + 1}</h2>
+                <p>Приз: ${winner.prize}</p>
+                <div class="photos">
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Переписка" />
+                    <img src="https://cdn1.ozone.ru/s3/multimedia-0/c600/6605727516.jpg" alt="Доказательство" />
+                </div>
+                <p>Переписка</p>
+                <p>Доказательство</p>
+                <a class="link" href="https://t.me/weekcats" target="_blank">Ссылка на конкурс</a>
+            `;
+            container.appendChild(winnerDiv);
+        });
+    </script>
+</body>
+</html>
