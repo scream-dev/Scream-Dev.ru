@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Многоязычный переводчик</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            animation: fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            resize: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #007BFF;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Переводчик</h1>
+    <textarea id="textToTranslate" placeholder="Введите текст..."></textarea>
+    <select id="languageSelect">
+        <option value="en">Английский</option>
+        <option value="fr">Французский</option>
+        <option value="de">Немецкий</option>
+        <option value="es">Испанский</option>
+        <option value="ru">Русский</option>
+        <option value="ar">Арабский</option>
+        <option value="zh">Китайский (упрощенный)</option>
+        <option value="ja">Японский</option>
+        <option value="ko">Корейский</option>
+        <option value="pt">Португальский</option>
+        <option value="it">Итальянский</option>
+        <option value="nl">Нидерландский</option>
+        <option value="sv">Шведский</option>
+        <option value="da">Датский</option>
+        <option value="no">Норвежский</option>
+        <option value="fi">Финский</option>
+        <option value="pl">Польский</option>
+        <option value="hu">Венгерский</option>
+        <option value="cs">Чешский</option>
+        <option value="sk">Словацкий</option>
+        <option value="ro">Румынский</option>
+        <option value="tr">Турецкий</option>
+        <option value="th">Тайский</option>
+        <option value="vi">Вьетнамский</option>
+        <option value="ms">Малайский</option>
+        <option value="sw">Суахили</option>
+        <option value="bn">Бенгальский</option>
+        <option value="tel">Телугу</option>
+        <option value="ta">Тамильский</option>
+        <option value="ml">Малаялам</option>
+        <option value="kn">Каннада</option>
+        <option value="gu">Гуджарати</option>
+        <option value="mr">Маратхи</option>
+        <option value="ur">Урду</option>
+        <option value="si">Сингальский</option>
+        <option value="hy">Армянский</option>
+        <option value="az">Азербайджанский</option>
+        <option value="ka">Грузинский</option>
+        <option value="km">Кхмерский</option>
+        <option value="la">Латинский</option>
+        <option value="lv">Латышский</option>
+        <option value="lt">Литвинский</option>
+        <option value="et">Эстонский</option>
+        <option value="mk">Македонский</option>
+        <option value="ms">Малайский</option>
+        <option value="am">Амхарский</option>
+        <option value="ne">Непальский</option>
+        <option value="mn">Монгольский</option>
+        <option value="ps">Пашто</option>
+        <option value="sd">Синди</option>
+        <option value="so">Сомалийский</option>
+        <option value="is">Исландский</option>
+        <option value="mt">Мальтийский</option>
+        <option value="yi">Идиш</option>
+        <option value="jw">Яванский</option>
+        <option value="ba">Башкирский</option>
+        <option value="tt">Татарский</option>
+        <option value="pa">Пенджабский</option>
+        <option value="sc">Сардинский</option>
+        <option value="su">Сунданский</option>
+        <option value="xh">Ксоса</option>
+        <option value="zu">Зулу</option>
+        <option value="cy">Валлийский</option>
+        <option value="tl">Тагальский</option>
+        <option value="ku">Курдский</option>
+        <option value="la">Латинский</option>
+        <option value="oc">Окситанский</option>
+        <option value="sq">Албанский</option>
+        <option value="ht">Гаитянский креольский</option>
+        <option value="sn">Шона</option>
+        <option value="tg">Таджикский</option>
+        <option value="ky">Киргизский</option>
+        <option value="uz">Узбекский</option>
+        <option value="ay">Аймара</option>
+        <option value="gu">Гуджарати</option>
+        <option value="ka">Грузинский</option>
+        <option value="ml">Малаялам</option>
+        <option value="ta">Тамильский</option>
+        <option value="be">Белорусский</option>
+        <option value="lv">Латышский</option>
+        <option value="sl">Словенский</option>
+        <option value="sq">Албанский</option>
+        <option value="fo">Фарерский</option>
+        <option value="br">Бретонский</option>
+        <option value="zu">Зулу</option>
+        <option value="ro">Румынский</option>
+        <option value="ru">Русский</option>
+    </select>
+    <button id="translateButton">Перевести</button>
+    <div class="result" id="translatedText"></div>
+</div>
+
+<script>
+    const translateButton = document.getElementById('translateButton');
+    const textToTranslate = document.getElementById('textToTranslate');
+    const languageSelect = document.getElementById('languageSelect');
+    const translatedText = document.getElementById('translatedText');
+
+    translateButton.addEventListener('click', () => {
+        const text = textToTranslate.value;
+        const targetLanguage = languageSelect.value;
+
+        if (!text) {
+            translatedText.innerText = "Пожалуйста, введите текст для перевода.";
+            return;
+        }
+
+        translateText(text, targetLanguage);
+    });
+
+    function translateText(text, targetLanguage) {
+        const apiKey = 'ВАШ_КЛЮЧ_API'; // Замените на ваш API ключ.
+        const url = `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`;
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                q: text,
+                target: targetLanguage
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const translation = data.data.translations[0].translatedText;
+            translatedText.innerText = translation;
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            translatedText.innerText = "Произошла ошибка при переводе.";
+        });
+    }
+</script>
+
+</body>
+                                      </html>
