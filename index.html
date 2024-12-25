@@ -140,49 +140,6 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
-        #projects-container {
-            margin: 20px auto;
-            width: 90%;
-            max-width: 800px;
-            text-align: center;
-        }
-
-        #projects-title {
-            font-size: 2.5em;
-            margin: 20px 0;
-        }
-
-        #project-cards {
-            display: flex;
-            justify-content: center;
-            transition: transform 0.5s ease;
-        }
-
-        .project-card {
-            background-color: #2f2f2f;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 10px;
-            flex: 1;
-            max-width: 250px;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            transform: scale(0);
-            transition: transform 0.5s, opacity 0.5s;
-            cursor: pointer; /* Указатель на CTA */
-        }
-
-        .project-card.active {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .emoji {
-            font-size: 50px;
-            margin-bottom: 10px;
-        }
-
         footer {
             text-align: center;
             padding: 20px;
@@ -219,31 +176,14 @@
     <img src="https://avatars.mds.yandex.net/i?id=54b828bc325102b8b66ac1510bd9762c_l-13468156-images-thumbs&n=13" alt="Картинка на главной странице">
 </div>
 
-<!-- Раздел "Мои проекты" -->
-<div id="projects-container">
-    <h2 id="projects-title">Мои проекты</h2>
-    
-    <div id="project-cards">
-        <div class="project-card active" data-url="https://scream-dev.ru/search" data-title="Поиск" data-text="Разработанный мной сайт для поиска в интернете, с кастомизацией" data-emoji="🔍">
-            <div class="emoji"></div>
-            <h3 class="project-header"></h3>
-            <p class="project-description"></p>
-        </div>
-        <div class="project-card" data-url="https://scream-dev.ru/weather" data-title="Погода" data-text="Сервис погоды, который высчитывает погоду по собственному алгоритму" data-emoji="🌩️">
-            <div class="emoji"></div>
-            <h3 class="project-header"></h3>
-            <p class="project-description"></p>
-        </div>
-        <div class="project-card" data-url="https://scream-dev.ru/cat" data-title="Шифр" data-text="Шуточный шифр на кошачьем языке" data-emoji="😺">
-            <div class="emoji"></div>
-            <h3 class="project-header"></h3>
-            <p class="project-description"></p>
-        </div>
-    </div>
-</div>
-
 <footer>
-    <p>© 2023 Scream [dev]. Все права защищены.</p>
+    <div style="display: flex; align-items: center; justify-content: center;">
+        <p style="margin-right: 10px;">© 2025 Scream [dev]. Все права защищены.</p>
+        <span style="margin-right: 5px;">Source Code</span>
+        <a href="https://github.com/scream-dev/Scream-Dev.ru" target="_blank">
+            <img src="https://img.shields.io/badge/GitHub-181717?logo=github&logoColor=white" alt="GitHub" style="width: 30px; height: 30px;">
+        </a>
+    </div>
 </footer>
 
 <script>
@@ -322,35 +262,6 @@
         }
         return null;
     }
-
-    // Логика для автоматического переключения карточек проектов
-    const cards = document.querySelectorAll('.project-card');
-    let currentIndex = 0;
-
-    function updateCards() {
-        cards.forEach((card, index) => {
-            if (index === currentIndex) {
-                card.classList.add('active');
-                card.querySelector('.project-header').innerText = card.getAttribute('data-title');
-                card.querySelector('.project-description').innerText = card.getAttribute('data-text');
-                card.querySelector('.emoji').innerText = card.getAttribute('data-emoji');
-            } else {
-                card.classList.remove('active');
-            }
-        });
-    }
-
-    // Функция для автоматического переключения карточек
-    function autoSwitchCards() {
-        currentIndex = (currentIndex + 1) % cards.length; // Переход к следующему индексу
-        updateCards();
-    }
-
-    // Запускаем автоматическое переключение каждые 3 секунды
-    setInterval(autoSwitchCards, 3000);
-
-    // Инициализация карточек
-    updateCards();
 </script>
 
 </body>
