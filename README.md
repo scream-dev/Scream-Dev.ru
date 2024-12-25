@@ -7,3 +7,6 @@ This repository is provided solely for reading and reviewing the site code to ma
 As mentioned above, it is forbidden to use this repository for copying and further using it for your own purposes. In case of violation of the rules specified here, it will be a violation of copyright law.
 ## Getting permission
 To obtain permission to use the code freely or not completely freely for your own purposes, you can contact me using one of the following methods.
+## `[✈️Telegram](https://t.me/ScreamDev)`
+## `[🥽Discord](https://scream-dev.ru/links/discord)`
+## `[🐈GitHub](https://github.com/scream-dev/Scream-Dev.ru/pulls)`
