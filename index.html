@@ -74,25 +74,6 @@
             margin-bottom: 10px;
         }
 
-        .nav-buttons {
-            margin-top: 20px;
-        }
-
-        button {
-            background-color: #ff6a00;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            color: white;
-            margin: 0 10px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #ee0979;
-        }
-
         @media (max-width: 600px) {
             #project-cards {
                 flex-direction: column;
@@ -153,11 +134,6 @@
             <h3 class="project-header"></h3>
             <p class="project-description"></p>
         </div>
-    </div>
-
-    <div class="nav-buttons">
-        <button id="prev-btn">Назад</button>
-        <button id="next-btn">Вперед</button>
     </div>
 </div>
 
@@ -242,7 +218,7 @@
         return null;
     }
 
-    // Логика для переключения между карточками проектов
+    // Логика для автоматического переключения карточек проектов
     const cards = document.querySelectorAll('.project-card');
     let currentIndex = 0;
 
@@ -259,23 +235,14 @@
         });
     }
 
-    document.getElementById('next-btn').onclick = function() {
-        currentIndex = (currentIndex + 1) % cards.length;
+    // Функция для автоматического переключения карточек
+    function autoSwitchCards() {
+        currentIndex = (currentIndex + 1) % cards.length; // Переход к следующему индексу
         updateCards();
-    };
+    }
 
-    document.getElementById('prev-btn').onclick = function() {
-        currentIndex = (currentIndex - 1 + cards.length) % cards.length;
-        updateCards();
-    };
-
-    // Перенаправление при клике на карточку
-    cards.forEach(card => {
-        card.onclick = function() {
-            const url = card.getAttribute('data-url');
-            window.location.href = url; // Перенаправление на соответствующий URL
-        }
-    });
+    // Запускаем автоматическое переключение каждые 3 секунды
+    setInterval(autoSwitchCards, 3000);
 
     // Инициализация карточек
     updateCards();
