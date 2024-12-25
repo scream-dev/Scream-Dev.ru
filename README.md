@@ -3,3 +3,5 @@ This repository is provided solely for reading and reviewing the site code to ma
 `DO NOT USE MY CODE FOR YOUR OWN PURPOSES WITHOUT PERMISSION`
 
 ---------------------------
+# Copyright
+As mentioned above, it is forbidden to use this repository for copying and further using it for your own purposes. In case of violation of the rules specified here, it will be a violation of copyright law.
