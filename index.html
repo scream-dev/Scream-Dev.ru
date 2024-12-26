@@ -5,21 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redirect Based on Country</title>
     <script>
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + '=' + encodeURIComponent(value) + '; expires=' + expires + '; path=/';
+        }
+
+        function getCookie(name) {
+            return document.cookie.split('; ')
+                .reduce((r, v) => {
+                    const parts = v.split('=');
+                    return parts[0] === name ? decodeURIComponent(parts[1]) : r;
+                }, '');
+        }
+
         function redirectToCountryPage() {
+            const userLanguage = getCookie('user_language');
+
+            if (userLanguage) {
+                // Перенаправление по куки
+                switch (userLanguage) {
+                    case 'ru':
+                        window.location.href = 'https://scream-dev.ru/ru';
+                        break;
+                    case 'ua':
+                        window.location.href = 'https://scream-dev.ru/ua';
+                        break;
+                    default:
+                        window.location.href = 'https://scream-dev.ru/en';
+                }
+                return;
+            }
+
             // Используем API для получения информации о стране по IP
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
                     const country = data.country_code; // получаем код страны
 
-                    // Перенаправляем в зависимости от страны
-                    if (country === 'RU' || country === 'BY' || country === 'UA' || country === 'KZ') {
-                        window.location.href = 'https://scream-dev.ru/ru';
+                    let language;
+                    if (country === 'RU' || country === 'BY' || country === 'KZ') {
+                        language = 'ru';
                     } else if (country === 'UA') {
-                        window.location.href = 'https://scream-dev.ru/ua';
+                        language = 'ua';
                     } else {
-                        window.location.href = 'https://scream-dev.ru/en';
+                        language = 'en';
                     }
+
+                    setCookie('user_language', language, 7); // Сохраняем язык в куки на 7 дней
+
+                    // Перенаправляем на нужную страницу
+                    window.location.href = `https://scream-dev.ru/${language}`;
                 })
                 .catch(error => {
                     console.error('Ошибка при получении информации о стране:', error);
@@ -32,6 +67,5 @@
     </script>
 </head>
 <body>
-    <h1>Определение страны...</h1>
 </body>
 </html>
