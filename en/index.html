@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scream [dev]</title>
+    
+    <!-- Adding site icon -->
+    <link rel="icon" href="icon.jpg" type="image/jpeg"> <!-- Specify image type -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Agu+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-family: 'Agu Display', sans-serif;
+            background: linear-gradient(90deg, #ff6a00, #ee0979);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: transform 0.3s;
+        }
+
+        header h1:hover {
+            transform: scale(1.1);
+        }
+
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-left: 20px;
+            font-size: 1em;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #ff6a00;
+        }
+
+        #loginButton {
+            cursor: pointer;
+            background-color: #ff6a00;
+            border: none;
+            padding: 10px 15px;
+            color: white;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+
+        #loginButton:hover {
+            background-color: #ee0979;
+        }
+
+        .user-icon {
+            width: 30px;
+            height: 30px;
+            background-image: url('https://ionoto.ru/upload/medialibrary/a1f/tcs61nk83dig738gik8qtkcx6ue7sgek.png');
+            background-size: cover;
+            border-radius: 50%;
+            margin-left: 20px;
+            cursor: pointer;
+        }
+
+        .user-icon:hover {
+            opacity: 0.8;
+        }
+
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 999; /* Above header */
+        }
+
+        #loginWindow {
+            background-color: #181818; /* Dark theme for login window */
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+            color: white;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #loginWindow input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 90%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #2f2f2f; /* Background color for input fields */
+            color: white; /* Text color */
+        }
+
+        #loginWindow input::placeholder {
+            color: #888; /* Placeholder color */
+        }
+
+        #main-content {
+            padding-top: 120px; /* Margin so content does not go behind header */
+            text-align: center;
+        }
+
+        #main-content img {
+            max-width: 70%;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        #projects-container {
+            margin: 20px auto;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        #projects-title {
+            font-size: 2.5em;
+            margin: 20px 0;
+        }
+
+        #project-cards {
+            display: flex;
+            justify-content: center;
+            transition: transform 0.5s ease;
+        }
+
+        .project-card {
+            background-color: #2f2f2f;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            flex: 1;
+            max-width: 250px;
+            color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transform: scale(0);
+            transition: transform 0.5s, opacity 0.5s;
+            cursor: pointer; /* Pointer for CTA */
+        }
+
+        .project-card.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .emoji {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1><a href="/" style="color: white; text-decoration: none;">Scream [dev]</a></h1>
+    <nav>
+        <a href="https://scream-dev.ru/weather">Weather</a>
+        <a href="https://scream-dev.ru/webstore">Extensions</a>
+        <a href="https://scream-dev.ru/anarxgrif_code">Cipher</a>
+        <a href="https://scream-dev.ru/clicker">Clicker</a>
+        <button id="loginButton">Log In</button>
+    </nav>
+</header>
+
+<div id="overlay" onclick="closeLogin()">
+    <div id="loginWindow" onclick="event.stopPropagation();">
+        <h3>Log In</h3>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="login()">Log In</button>
+    </div>
+</div>
+
+<div id="main-content">
+    <h2>Scream [dev]</h2>
+    <p>Developer's personal site</p>
+    <img src="https://avatars.mds.yandex.net/i?id=54b828bc325102b8b66ac1510bd9762c_l-13468156-images-thumbs&n=13" alt="Main page image">
+</div>
+
+<!-- My Projects Section -->
+<div id="projects-container">
+    <h2 id="projects-title">My Projects</h2>
+    
+    <div id="project-cards">
+        <div class="project-card active" data-url="https://scream-dev.ru/search" data-title="Search" data-text="A site I developed for searching the internet, with customization" data-emoji="🔍">
+            <div class="emoji"></div>
+            <h3 class="project-header"></h3>
+            <p class="project-description"></p>
+        </div>
+        <div class="project-card" data-url="https://scream-dev.ru/weather" data-title="Weather" data-text="A weather service that calculates the weather using its own algorithms" data-emoji="🌩️">
+            <div class="emoji"></div>
+            <h3 class="project-header"></h3>
+            <p class="project-description"></p>
+        </div>
+        <div class="project-card" data-url="https://scream-dev.ru/cat" data-title="Cipher" data-text="A playful cipher in cat language" data-emoji="😺">
+            <div class="emoji"></div>
+            <h3 class="project-header"></h3>
+            <p class="project-description"></p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>© 2023 Scream [dev]. All rights reserved.</p>
+</footer>
+
+<script>
+    // Checking for saved account
+    window.onload = function() {
+        const savedUsername = getCookie('username');
+        if (savedUsername) {
+            alert(`${savedUsername}: You are logged in!`);
+            updateLoginButton(savedUsername);
+        }
+    };
+
+    function login() {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        // Test account
+        if (username === "test_account" && password === "onlyforscreamdev") {
+            setCookie('username', username, 7); // Saving account cookie for 7 days
+            alert(`${username}: You have logged into the test account!`);
+            updateLoginButton(username);
+            closeLogin();
+        } else {
+            alert('Invalid username or password!');
+        }
+    }
+
+    function updateLoginButton(username) {
+        const loginButton = document.getElementById('loginButton');
+        loginButton.style.display = 'none'; // Hide the "Log In" button
+
+        const userIcon = document.createElement('div');
+        userIcon.className = 'user-icon';
+        userIcon.onclick = function() { logout(); };
+        document.querySelector('nav').appendChild(userIcon); // Add user icon to navigation
+        
+        // Save and display login message
+        alert(`${username}: You are logged in!`); 
+    }
+
+    function logout() {
+        setCookie('username', '', -1); // Remove cookie
+        const userIcon = document.querySelector('.user-icon');
+        if (userIcon) {
+            userIcon.remove(); // Remove user icon
+        }
+        document.getElementById('loginButton').style.display = 'block'; // Show "Log In" button
+    }
+
+    function closeLogin() {
+        document.getElementById('overlay').style.display = 'none'; // Close window
+    }
+
+    document.getElementById('loginButton').onclick = function() {
+        document.getElementById('overlay').style.display = 'flex'; // Show login window
+    }
+
+    // Cookie management functions
+    function setCookie(name, value, days) {
+        let expires = "";
+        if (days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/";
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    // Logic for automatically switching project cards
+    const cards = document.querySelectorAll('.project-card');
+    let currentIndex = 0;
+
+    function updateCards() {
+        cards.forEach((card, index) => {
+            if (index === currentIndex) {
+                card.classList.add('active');
+                card.querySelector('.project-header').innerText = card.getAttribute('data-title');
+                card.querySelector('.project-description').innerText = card.getAttribute('data-text');
+                card.querySelector('.emoji').innerText = card.getAttribute('data-emoji');
+            } else {
+                card.classList.remove('active');
+            }
+        });
+    }
+
+    // Function for automatic switching of cards
+    function autoSwitchCards() {
+        currentIndex = (currentIndex + 1) % cards.length; // Move to the next index
+        updateCards();
+    }
+
+    // Start auto-switch every 3 seconds
+    setInterval(autoSwitchCards, 3000);
+
+    // Initialize cards
+    updateCards();
+</script>
+
+</body>
+</html>
