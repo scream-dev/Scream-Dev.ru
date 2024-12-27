@@ -1,1 +1,172 @@
-Здесь скоро будет сайт
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ты - бог!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            animation: fadeIn 1s;
+        }
+
+        p {
+            text-align: center;
+            animation: fadeIn 1.2s;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #3e8e41;
+            transform: scale(1.05);
+        }
+
+        #div-cookies, #div-html, #div-css, #div-console {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            background-color: #f7f7f7;
+        }
+
+        #cookies-content {
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+
+        textarea, #console-input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ты - бог!</h1>
+        <p>На этом сайте вы свободны в своих действиях полностью!</p>
+        <div class="nav">
+            <button class="btn" onclick="openDiv('div-cookies')">Куки</button>
+            <button class="btn" onclick="openDiv('div-html')">Html</button>
+            <button class="btn" onclick="openDiv('div-css')">Css</button>
+            <button class="btn" onclick="openDiv('div-console')">Консоль</button>
+            <button class="btn" onclick="clearPage()">Очистка</button>
+        </div>
+        <div id="div-cookies">
+            <h2>Куки:</h2>
+            <button class="btn" onclick="createCookie()">Создать cookie</button>
+            <button class="btn" onclick="showCookies()">Показать cookies</button>
+            <div id="cookies-content"></div>
+        </div>
+        <div id="div-html">
+            <h2>Html:</h2>
+            <textarea id="html-code" rows="10" placeholder="Редактируйте HTML код здесь..."></textarea>
+            <button class="btn" onclick="saveHtml()">Сохранить изменения</button>
+        </div>
+        <div id="div-css">
+            <h2>Css:</h2>
+            <textarea id="css-code" rows="10" placeholder="Редактируйте CSS код здесь..."></textarea>
+            <button class="btn" onclick="saveCss()">Сохранить изменения</button>
+        </div>
+        <div id="div-console">
+            <h2>Консоль:</h2>
+            <input id="console-input" type="text" placeholder="Введите текст для консоли...">
+            <button class="btn" onclick="consoleLog()">Вывести в консоль</button>
+        </div>
+    </div>
+
+    <script>
+        function openDiv(id) {
+            const divs = ['div-cookies', 'div-html', 'div-css', 'div-console'];
+            divs.forEach(divId => {
+                document.getElementById(divId).style.display = divId === id ? "block" : "none";
+            });
+        }
+
+        function createCookie() {
+            const name = prompt("Введите имя cookie:");
+            const value = prompt("Введите значение cookie:");
+            if (name && value) {
+                document.cookie = `${name}=${value};`;
+                alert(`Cookie "${name}" создано!`);
+            }
+        }
+
+        function showCookies() {
+            const cookies = document.cookie.split("; ");
+            const content = cookies.map(cookie => cookie).join("<br>") || "Куки отсутствуют.";
+            document.getElementById("cookies-content").innerHTML = content;
+        }
+
+        function saveHtml() {
+            const code = document.getElementById("html-code").value;
+            document.body.innerHTML = code;
+            // Call to 'openDiv' to reset visibility of sections after saving
+            openDiv('div-html');
+        }
+
+        function saveCss() {
+            const code = document.getElementById("css-code").value;
+            const style = document.createElement("style");
+            style.innerHTML = code;
+            document.head.appendChild(style);
+            // Call to 'openDiv' to reset visibility of sections after saving
+            openDiv('div-css');
+        }
+
+        function consoleLog() {
+            const input = document.getElementById("console-input").value;
+            console.log(input);
+            alert("Текст выведен в консоль!");
+            // Clear input field after logging
+            document.getElementById("console-input").value = '';
+        }
+
+        function clearPage() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
