@@ -196,10 +196,14 @@
 <header>
     <h1><a href="/" style="color: white; text-decoration: none;">Scream [dev]</a></h1>
     <nav>
-        <a href="https://scream-dev.ru/weather">Weather</a>
-        <a href="https://scream-dev.ru/webstore">Extensions</a>
-        <a href="https://scream-dev.ru/anarxgrif_code">Cipher</a>
-        <a href="https://scream-dev.ru/clicker">Clicker</a>
+        <script>
+            let buttonsVisible = true; // Change to true to show buttons, false to hide them
+        </script>
+        <span style="display: none;" id="weatherButton"><a href="https://scream-dev.ru/weather">Weather</a></span>
+        <span style="display: none;" id="extensionsButton"><a href="https://scream-dev.ru/webstore">Extensions</a></span>
+        <span style="display: none;" id="cipherButton"><a href="https://scream-dev.ru/anarxgrif_code">Cipher</a></span>
+        <span style="display: none;" id="clickerButton"><a href="https://scream-dev.ru/clicker">Clicker</a></span>
+        
         <button id="loginButton">Log In</button>
     </nav>
 </header>
@@ -253,6 +257,13 @@
         if (savedUsername) {
             alert(`${savedUsername}: You are logged in!`);
             updateLoginButton(savedUsername);
+        }
+        // Conditional button visibility
+        if (buttonsVisible) {
+            document.getElementById('weatherButton').style.display = 'inline';
+            document.getElementById('extensionsButton').style.display = 'inline';
+            document.getElementById('cipherButton').style.display = 'inline';
+            document.getElementById('clickerButton').style.display = 'inline';
         }
     };
 
