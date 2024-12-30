@@ -100,6 +100,7 @@
                 timeString += String(minutes).padStart(2, '0') + " : ";
             }
 
+            // Всегда добавляем секунды
             timeString += String(seconds).padStart(2, '0');
 
             document.getElementById('time').textContent = timeString;
