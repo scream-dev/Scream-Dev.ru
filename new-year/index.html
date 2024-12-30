@@ -60,14 +60,18 @@
 
             // Проверяем значение куки "timeZone"
             const timeZone = getCookie('timeZone');
-
             let targetDate;
 
-            if (timeZone === 'dev10') {
-                // Если в кукe "timeZone" значение "dev10", устанавливаем отсчет на следующие 10 секунд
-                targetDate = new Date(now.getTime() + 10 * 1000);
-            } else {
-                // Устанавливаем дату следующего Нового года
+            if (timeZone && timeZone.startsWith('dev_')) {
+                // Извлекаем число из значения куки
+                const seconds = parseInt(timeZone.split('_')[1], 10);
+                if (!isNaN(seconds)) {
+                    targetDate = new Date(now.getTime() + seconds * 1000); // Установка времени на указанное количество секунд
+                }
+            }
+
+            if (!targetDate) {
+                // Если таймер не установлен, то устанавливаем до следующего Нового года
                 const nextYear = now.getFullYear() + 1; // Следующий год
                 targetDate = new Date(nextYear, 0, 1); // 1 января следующего года в полночь
             }
