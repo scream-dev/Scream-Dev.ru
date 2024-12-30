@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Таймер до Нового года</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
-    <link rel="icon" href="icon.png" type="image/png"> <!-- Проверьте правильность имени файла -->
+    <link rel="icon" href="icon.png" type="image/png">
     <style>
         body {
             margin: 0;
@@ -15,7 +15,7 @@
             height: 100vh;
             color: white;
             font-family: 'Roboto', sans-serif;
-            background-image: url('background.jpg'); /* Обновлено имя файла фона */
+            background-image: url('background.jpg'); 
             background-size: cover;
             background-position: center;
             transition: background-image 0.5s ease;
@@ -28,7 +28,7 @@
         }
 
         .time {
-            font-size: 10vw; /* Почти на весь экран */
+            font-size: 10vw; 
         }
 
         .timer {
@@ -60,6 +60,13 @@
 
             // Проверяем значение куки "timeZone"
             const timeZone = getCookie('timeZone');
+
+            // Проверяем значение куки на 'dev_' и зависаем на 00:00:00:00, если оно найдено
+            if (timeZone && timeZone.startsWith('dev_')) {
+                document.getElementById('time').textContent = "00 : 00 : 00 : 00";
+                return; // Прерываем выполнение, если находим 'dev_'
+            }
+
             let targetDate;
 
             if (timeZone && timeZone.startsWith('dev_')) {
