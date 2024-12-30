@@ -35,8 +35,6 @@
             filter: drop-shadow(2px 2px 15px rgba(0, 0, 0, 0.5));
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.4.0/confetti.min.js"></script>
 </head>
 <body>
     <div class="timer">
@@ -60,12 +58,22 @@
         function updateTime() {
             const now = new Date();
 
-            // Устанавливаем дату следующего Нового года
-            const nextYear = now.getFullYear() + 1; // Следующий год
-            const newYearDate = new Date(nextYear, 0, 1); // 1 января следующего года в полночь
+            // Проверяем значение куки "timeZone"
+            const timeZone = getCookie('timeZone');
+
+            let targetDate;
+
+            if (timeZone === 'dev10') {
+                // Если в кукe "timeZone" значение "dev10", устанавливаем отсчет на следующие 10 секунд
+                targetDate = new Date(now.getTime() + 10 * 1000);
+            } else {
+                // Устанавливаем дату следующего Нового года
+                const nextYear = now.getFullYear() + 1; // Следующий год
+                targetDate = new Date(nextYear, 0, 1); // 1 января следующего года в полночь
+            }
 
             // Разница во времени
-            const timeDiff = newYearDate - now;
+            const timeDiff = targetDate - now;
 
             // Если время вышло
             if (timeDiff < 0) {
