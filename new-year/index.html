@@ -48,22 +48,50 @@
 </head>
 <body>
     <div class="timer">
-        <div class="time" id="time">00:00:00</div>
-        <p class="label">Часы</p>
-        <p class="label">Минуты</p>
-        <p class="label">Секунды</p>
+        <div class="time" id="time">00 : 00 : 00 : 00</div>
+        <p class="label">Дни  Часы  Минуты  Секунды</p>
     </div>
 
     <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function setCookie(name, value, days) {
+            const date = new Date();
+            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+            const expires = `expires=${date.toUTCString()}`;
+            document.cookie = `${name}=${value}; ${expires}; path=/`;
+        }
+
         function updateTime() {
-            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZoneName: 'short' };
-            const timeString = new Date().toLocaleTimeString('ru-RU', options);
-            const timeParts = timeString.split(':');
+            const timeZone = getCookie('timeZone') || Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const now = new Date();
+            const utcOffset = now.getTimezoneOffset() * 60000; // Конвертация в миллисекунды
+            const localTime = new Date(now.getTime() + utcOffset + (new Date().getTimezoneOffset() * 60000));
+
+            // Получаем дни, часы, минуты и секунды
+            const days = Math.floor((localTime - new Date(localTime.getUTCFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
+            const hours = localTime.getHours();
+            const minutes = localTime.getMinutes();
+            const seconds = localTime.getSeconds();
 
             // Обновляем отображение времени
-            document.getElementById('time').textContent = timeParts.join(':');
+            document.getElementById('time').textContent = 
+                String(days).padStart(2, '0') + " : " +
+                String(hours).padStart(2, '0') + " : " +
+                String(minutes).padStart(2, '0') + " : " +
+                String(seconds).padStart(2, '0');
         }
-        
+
+        // Сохраняем часовой пояс в куки, если он еще не сохранён
+        const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (!getCookie('timeZone')) {
+            setCookie('timeZone', timeZone, 7);
+        }
+
         // Изменяем фон в зависимости от темы
         const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         document.body.style.backgroundImage = isDarkMode ? "url('dark.jpg')" : "url('light.jpg')";
