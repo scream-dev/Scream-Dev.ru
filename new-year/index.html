@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Таймер</title>
+    <title>Таймер до Нового года</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
-    <link rel="icon" href="icon.jpg" type="image/jpeg"> <!-- Измените тип в зависимости от вашего файла -->
-
+    <link rel="icon" href="icon.png" type="image/png"> <!-- Проверьте правильность имени файла -->
     <style>
         body {
             margin: 0;
@@ -16,7 +15,7 @@
             height: 100vh;
             color: white;
             font-family: 'Roboto', sans-serif;
-            background-image: url('light.jpg'); /* Замените на light.png для PNG или dark.png для темной темы */
+            background-image: url('background.jpg'); /* Обновлено имя файла фона */
             background-size: cover;
             background-position: center;
             transition: background-image 0.5s ease;
@@ -32,15 +31,6 @@
             font-size: 10vw; /* Почти на весь экран */
         }
 
-        .label {
-            font-size: 2vw; /* Подписи к времени */
-            margin: 0;
-            line-height: 1;
-            opacity: 0.8;
-            position: relative;
-        }
-
-        /* Стили для добавления тени таймеру */
         .timer {
             filter: drop-shadow(2px 2px 15px rgba(0, 0, 0, 0.5));
         }
@@ -49,7 +39,6 @@
 <body>
     <div class="timer">
         <div class="time" id="time">00 : 00 : 00 : 00</div>
-        <p class="label">Дни  Часы  Минуты  Секунды</p>
     </div>
 
     <script>
@@ -67,16 +56,20 @@
         }
 
         function updateTime() {
-            const timeZone = getCookie('timeZone') || Intl.DateTimeFormat().resolvedOptions().timeZone;
             const now = new Date();
-            const utcOffset = now.getTimezoneOffset() * 60000; // Конвертация в миллисекунды
-            const localTime = new Date(now.getTime() + utcOffset + (new Date().getTimezoneOffset() * 60000));
 
-            // Получаем дни, часы, минуты и секунды
-            const days = Math.floor((localTime - new Date(localTime.getUTCFullYear(), 0, 0)) / (1000 * 60 * 60 * 24));
-            const hours = localTime.getHours();
-            const minutes = localTime.getMinutes();
-            const seconds = localTime.getSeconds();
+            // Устанавливаем дату следующего Нового года
+            const nextYear = now.getFullYear() + 1; // Следующий год
+            const newYearDate = new Date(nextYear, 0, 1); // 1 января следующего года в полночь
+
+            // Разница во времени
+            const timeDiff = newYearDate - now;
+
+            // Вычисляем дни, часы, минуты и секунды
+            const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
             // Обновляем отображение времени
             document.getElementById('time').textContent = 
@@ -92,9 +85,8 @@
             setCookie('timeZone', timeZone, 7);
         }
 
-        // Изменяем фон в зависимости от темы
-        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.body.style.backgroundImage = isDarkMode ? "url('dark.jpg')" : "url('light.jpg')";
+        // Фон теперь статичен и не зависит от темы
+        document.body.style.backgroundImage = "url('background.jpg')"; // Установили одно и то же изображение
 
         setInterval(updateTime, 1000);
         updateTime();
