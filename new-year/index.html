@@ -64,46 +64,42 @@
             let targetDate;
 
             if (timeZone && timeZone.startsWith('dev_')) {
+                // Извлекаем число из значения куки
                 const seconds = parseInt(timeZone.split('_')[1], 10);
                 if (!isNaN(seconds)) {
+                    // Устанавливаем время окончания отсчёта
                     targetDate = new Date(now.getTime() + seconds * 1000);
                 }
             }
 
+            // Устанавливаем отсчет до следующего Нового года, если значение времени не было получено 
             if (!targetDate) {
-                const nextYear = now.getFullYear() + 1;
-                targetDate = new Date(nextYear, 0, 1);
+                const nextYear = now.getFullYear() + 1; // Следующий год
+                targetDate = new Date(nextYear, 0, 1); // 1 января следующего года в полночь
             }
 
+            // Разница во времени
             const timeDiff = targetDate - now;
 
+            // Если время вышло
             if (timeDiff < 0) {
                 clearInterval(timer);
                 endCountdown();
                 return;
             }
 
+            // Вычисляем дни, часы, минуты и секунды
             const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
 
-            let timeString = '';
-
-            // Логика отображения
-            if (days > 0) {
-                timeString += String(days).padStart(2, '0') + " : ";
-                timeString += String(hours).padStart(2, '0') + " : ";
-            } else if (days === 0 && hours > 0) {
-                timeString += String(hours).padStart(2, '0') + " : ";
-            } else if (days === 0 && hours === 0 && minutes > 0) {
-                timeString += String(minutes).padStart(2, '0') + " : ";
-            }
-
-            // Всегда добавляем секунды
-            timeString += String(seconds).padStart(2, '0');
-
-            document.getElementById('time').textContent = timeString;
+            // Обновляем отображение времени
+            document.getElementById('time').textContent = 
+                String(days).padStart(2, '0') + " : " +
+                String(hours).padStart(2, '0') + " : " +
+                String(minutes).padStart(2, '0') + " : " +
+                String(seconds).padStart(2, '0');
         }
 
         function endCountdown() {
@@ -112,7 +108,7 @@
         }
 
         function launchConfetti() {
-            const duration = 5 * 1000; 
+            const duration = 5 * 1000; // Длительность конфетти
             const animationEnd = Date.now() + duration;
 
             (function frame() {
@@ -137,6 +133,7 @@
             })();
         }
 
+        // Сохраняем часовой пояс в куки, если он еще не сохранён
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         if (!getCookie('timeZone')) {
             setCookie('timeZone', timeZone, 7);
