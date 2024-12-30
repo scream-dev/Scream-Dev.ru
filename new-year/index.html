@@ -3,28 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отсчёт</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+    <title>Таймер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="icon.jpg" type="image/jpeg"> <!-- Измените тип в зависимости от вашего файла -->
+
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            background-image: url('light.jpg'); /* Замените на light.png для PNG или dark.png для темной темы */
+            background-size: cover;
+            background-position: center;
+            transition: background-image 0.5s ease;
+        }
+
+        .timer {
+            text-align: center;
+            position: relative;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .time {
+            font-size: 10vw; /* Почти на весь экран */
+        }
+
+        .label {
+            font-size: 2vw; /* Подписи к времени */
+            margin: 0;
+            line-height: 1;
+            opacity: 0.8;
+            position: relative;
+        }
+
+        /* Стили для добавления тени таймеру */
+        .timer {
+            filter: drop-shadow(2px 2px 15px rgba(0, 0, 0, 0.5));
+        }
+    </style>
 </head>
 <body>
-    <div class="countdown">
-        <div id="days" class="countdown-item">0</div>
-        <div class="countdown-label">Дней</div>
+    <div class="timer">
+        <div class="time" id="time">00:00:00</div>
+        <p class="label">Часы</p>
+        <p class="label">Минуты</p>
+        <p class="label">Секунды</p>
     </div>
-    <div class="countdown">
-        <div id="hours" class="countdown-item">0</div>
-        <div class="countdown-label">Часов</div>
-    </div>
-    <div class="countdown">
-        <div id="minutes" class="countdown-item">0</div>
-        <div class="countdown-label">Минут</div>
-    </div>
-    <div class="countdown">
-        <div id="seconds" class="countdown-item">0</div>
-        <div class="countdown-label">Секунд</div>
-    </div>
-    
-    <script src="script.js"></script>
+
+    <script>
+        function updateTime() {
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZoneName: 'short' };
+            const timeString = new Date().toLocaleTimeString('ru-RU', options);
+            const timeParts = timeString.split(':');
+
+            // Обновляем отображение времени
+            document.getElementById('time').textContent = timeParts.join(':');
+        }
+        
+        // Изменяем фон в зависимости от темы
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.body.style.backgroundImage = isDarkMode ? "url('dark.jpg')" : "url('light.jpg')";
+
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
 </body>
 </html>
