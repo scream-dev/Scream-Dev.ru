@@ -3,24 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отсчёт</title>
+    <title>Обратный отсчет с конфетти</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin: 0;
             padding: 20px;
-            background-color: #f0f0f0;
+            background-color: #282c34;
+            color: white;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 3em;
+            color: #61dafb;
         }
 
         .countdown {
-            margin: 20px;
-            font-size: 2em;
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
         }
 
         .countdown-item {
-            display: inline-block;
-            margin: 10px;
+            margin: 0 15px;
+            font-size: 2.5em;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .countdown-label {
+            font-size: 1em;
         }
 
         .bounce {
@@ -40,19 +55,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.4.0/confetti.min.js"></script>
 </head>
 <body>
+    <h1>Обратный отсчет</h1>
     <div class="countdown">
         <div id="days" class="countdown-item">0</div>
         <div class="countdown-label">Дней</div>
-    </div>
-    <div class="countdown">
         <div id="hours" class="countdown-item">0</div>
         <div class="countdown-label">Часов</div>
-    </div>
-    <div class="countdown">
         <div id="minutes" class="countdown-item">0</div>
         <div class="countdown-label">Минут</div>
-    </div>
-    <div class="countdown">
         <div id="seconds" class="countdown-item">0</div>
         <div class="countdown-label">Секунд</div>
     </div>
