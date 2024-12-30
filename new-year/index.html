@@ -61,24 +61,19 @@
             // Проверяем значение куки "timeZone"
             const timeZone = getCookie('timeZone');
 
-            // Проверяем значение куки на 'dev_' и зависаем на 00:00:00:00, если оно найдено
-            if (timeZone && timeZone.startsWith('dev_')) {
-                document.getElementById('time').textContent = "00 : 00 : 00 : 00";
-                return; // Прерываем выполнение, если находим 'dev_'
-            }
-
             let targetDate;
 
             if (timeZone && timeZone.startsWith('dev_')) {
                 // Извлекаем число из значения куки
                 const seconds = parseInt(timeZone.split('_')[1], 10);
                 if (!isNaN(seconds)) {
-                    targetDate = new Date(now.getTime() + seconds * 1000); // Установка времени на указанное количество секунд
+                    // Устанавливаем время окончания отсчёта
+                    targetDate = new Date(now.getTime() + seconds * 1000);
                 }
             }
 
+            // Устанавливаем отсчет до следующего Нового года, если значение времени не было получено 
             if (!targetDate) {
-                // Если таймер не установлен, то устанавливаем до следующего Нового года
                 const nextYear = now.getFullYear() + 1; // Следующий год
                 targetDate = new Date(nextYear, 0, 1); // 1 января следующего года в полночь
             }
