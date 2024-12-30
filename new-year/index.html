@@ -3,65 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Отсчёт до Нового Года</title>
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            background: linear-gradient(135deg, #1d2b64, #f8cdda);
-            color: #fff;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
-        .countdown {
-            text-align: center;
-            font-size: 5vw;
-            animation: fadeIn 1s;
-        }
-        .time {
-            display: inline-block;
-            margin: 10px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 10px;
-            transition: transform 0.5s;
-        }
-        .time:hover {
-            transform: scale(1.1);
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <title>Отсчёт</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
 </head>
 <body>
     <div class="countdown">
-        <div class="time" id="days">00</div> <span>Дней</span>
-        <div class="time" id="hours">00</div> <span>Часов</span>
-        <div class="time" id="minutes">00</div> <span>Минут</span>
-        <div class="time" id="seconds">00</div> <span>Секунд</span>
+        <div id="days" class="countdown-item">0</div>
+        <div class="countdown-label">Дней</div>
     </div>
-    <script>
-        function updateCountdown() {
-            const now = new Date();
-            const nextYear = new Date(now.getFullYear() + 1, 0, 1, 0, 0, 0);
-            const totalSeconds = Math.floor((nextYear - now) / 1000);
-            const days = Math.floor(totalSeconds / 86400);
-            const hours = Math.floor((totalSeconds % 86400) / 3600);
-            const minutes = Math.floor((totalSeconds % 3600) / 60);
-            const seconds = totalSeconds % 60;
-
-            document.getElementById('days').textContent = String(days).padStart(2, '0');
-            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
-            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
-            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
-        }
-        setInterval(updateCountdown, 1000);
-        updateCountdown();
-    </script>
+    <div class="countdown">
+        <div id="hours" class="countdown-item">0</div>
+        <div class="countdown-label">Часов</div>
+    </div>
+    <div class="countdown">
+        <div id="minutes" class="countdown-item">0</div>
+        <div class="countdown-label">Минут</div>
+    </div>
+    <div class="countdown">
+        <div id="seconds" class="countdown-item">0</div>
+        <div class="countdown-label">Секунд</div>
+    </div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
