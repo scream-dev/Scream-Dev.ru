@@ -92,22 +92,27 @@
         }
     </style>
     <script type="module">
+        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-            apiKey: "Ваш_API_Key",
-            authDomain: "Ваш_Auth_Domain",
-            databaseURL: "https://Ваш_Домен_Базы_Данных",
-            projectId: "Ваш_ID_Проекта",
-            storageBucket: "Ваш_Хранилище_Проекта",
-            messagingSenderId: "Ваш_ID_Отправителя",
-            appId: "Ваш_ID_Приложения",
-            measurementId: "Ваш_ID_Измерения"
+            apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
+            authDomain: "screamdev-ca68a.firebaseapp.com",
+            databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
+            projectId: "screamdev-ca68a",
+            storageBucket: "screamdev-ca68a.firebasestorage.app",
+            messagingSenderId: "513024079698",
+            appId: "1:513024079698:web:912302891a5927df61ac8b",
+            measurementId: "G-W1N63CWZX9"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const database = getDatabase(app);
         const auth = getAuth(app);
 
