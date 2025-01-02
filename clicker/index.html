@@ -36,6 +36,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 20px;
         }
         #click-button:hover {
             background-color: #45a049; /* Темнее зеленый */
@@ -83,12 +84,29 @@
         }
         #leaderboard li {
             padding: 10px;
-            border-bottom: 1px solid #ddd;
             color: #333;
+        }
+        #leaderboard li.top1 {
+            font-size: 24px; /* Размер шрифта для топа 1 */
+            font-weight: bold;
+        }
+        #leaderboard li.top2 {
+            font-size: 22px; /* Размер шрифта для топа 2 */
+            font-weight: bold;
+        }
+        #leaderboard li.top3 {
+            font-size: 20px; /* Размер шрифта для топа 3 */
+            font-weight: bold;
+        }
+        #leaderboard li.other {
+            font-size: 18px; /* Размер шрифта для остальных */
         }
         #current-user {
             margin-top: 20px;
             font-weight: bold;
+        }
+        #logout-button {
+            margin-left: 10px;
         }
     </style>
     <script type="module">
@@ -96,9 +114,9 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
 
-        // Your web app's Firebase configuration
+        // Ваше приложение Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
             authDomain: "screamdev-ca68a.firebaseapp.com",
@@ -110,7 +128,7 @@
             measurementId: "G-W1N63CWZX9"
         };
 
-        // Initialize Firebase
+        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
@@ -123,10 +141,27 @@
         const registerButton = document.getElementById('register-button');
         const loginButton = document.getElementById('login-button');
         const logoutButton = document.getElementById('logout-button');
-        const clearBoardButton = document.getElementById('clear-board-button');
         const currentUserElement = document.getElementById('current-user');
 
         let currentUserId = null;
+
+        // Отслеживание состояния аутентификации
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                currentUserId = user.email; // Используем email как уникальный идентификатор
+                currentUserElement.textContent = `Привет, ${currentUserId}`;
+                loginButton.style.display = 'none';
+                registerButton.style.display = 'none';
+                logoutButton.style.display = 'block';
+            } else {
+                currentUserId = null;
+                currentUserElement.textContent = '';
+                loginButton.style.display = 'block';
+                registerButton.style.display = 'block';
+                logoutButton.style.display = 'none';
+            }
+            updateLeaderboard();
+        });
 
         // Установка обработчиков аутентификации
         registerButton.addEventListener('click', () => {
@@ -136,6 +171,7 @@
             const userRef = ref(database, `users/${username}`);
             set(userRef, { password, clicks: 0 }).then(() => {
                 alert("Регистрация прошла успешно!");
+                signIn(username, password); // Автоматический вход
             }).catch(error => {
                 alert(error.message);
             });
@@ -145,6 +181,10 @@
             const username = usernameInput.value;
             const password = passwordInput.value;
 
+            signIn(username, password);
+        });
+
+        function signIn(username, password) {
             const userRef = ref(database, `users/${username}`);
             onValue(userRef, (snapshot) => {
                 if (snapshot.exists() && snapshot.val().password === password) {
@@ -155,11 +195,11 @@
                     alert("Неверное имя пользователя или пароль");
                 }
             });
-        });
+        }
 
         logoutButton.addEventListener('click', () => {
             currentUserId = null;
-            document.cookie = `username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; // Удаление куки
+            auth.signOut();
             alert("Вы вышли из системы!");
         });
 
@@ -176,50 +216,48 @@
             });
         });
 
-        clearBoardButton.addEventListener('click', () => {
-            if (currentUserId === "ScreamDev") {
-                remove(ref(database, `users`));
-                alert("Лидерборд успешно очищен!");
-            } else {
-                alert("У вас нет прав для этой операции.");
-            }
-        });
+        function updateLeaderboard() {
+            onValue(ref(database, 'users'), (snapshot) => {
+                const users = snapshot.val();
+                leaderboardElement.innerHTML = '';
 
-        onValue(ref(database, 'users'), (snapshot) => {
-            const users = snapshot.val();
-            leaderboardElement.innerHTML = '';
+                if (users) {
+                    const leaderboardArray = Object.entries(users).map(([id, userData]) => ({
+                        id,
+                        clicks: userData.clicks || 0
+                    }));
 
-            if (users) {
-                const leaderboardArray = Object.entries(users).map(([id, userData]) => ({
-                    id,
-                    clicks: userData.clicks || 0
-                }));
+                    leaderboardArray.sort((a, b) => b.clicks - a.clicks);
 
-                leaderboardArray.sort((a, b) => b.clicks - a.clicks);
+                    leaderboardArray.forEach((user, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = `Пользователь ${user.id}: ${user.clicks} кликов`;
 
-                leaderboardArray.forEach(user => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = `Пользователь ${user.id}: ${user.clicks} кликов`;
-                    leaderboardElement.appendChild(listItem);
-                });
-            }
-        });
+                        // Устанавливаем разные CSS классы для различного размера
+                        if (index < 3) {
+                            listItem.className = "top" + (index + 1);
+                        } else {
+                            listItem.className = "other";
+                        }
+                        leaderboardElement.appendChild(listItem);
+                    });
+                }
+            });
+        }
     </script>
 </head>
 <body>
     <h1>Кликер</h1>
-    <button id="click-button">Кликни!</button>
-    <h2>Лидерборд</h2>
-    <ul id="leaderboard"></ul>
-
     <div id="auth">
         <input type="text" id="username" placeholder="Имя пользователя" />
         <input type="password" id="password" placeholder="Пароль" />
         <button id="register-button">Зарегистрироваться</button>
         <button id="login-button">Войти</button>
-        <button id="logout-button">Выйти</button>
-        <button id="clear-board-button">Очистить лидерборд (ScreamDev)</button>
+        <button id="logout-button" style="display:none;">Выйти</button>
     </div>
+    <button id="click-button">Кликни!</button>
+    <h2>Лидерборд</h2>
+    <ul id="leaderboard"></ul>
     <div id="current-user"></div>
 </body>
 </html>
