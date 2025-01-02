@@ -13,15 +13,16 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f0f8ff;
-            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f8ff;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
         }
         h1 {
             margin-bottom: 20px;
             font-size: 36px;
-            color: #333;
         }
         #click-button {
             background-color: #4CAF50; /* Зеленый */
@@ -99,6 +100,21 @@
             #clear-accounts-button {
                 padding: 8px 16px;
             }
+        }
+        /* Темная тема */
+        body.dark-theme {
+            background-color: #333;
+            color: #f0f8ff;
+        }
+        button {
+            border: none;
+            border-radius: 5px;
+        }
+        #theme-toggle {
+            margin-top: 20px;
+            padding: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
     </style>
     <script type="module">
@@ -207,7 +223,7 @@
         });
 
         // Очистка аккаунтов (требует подтверждения)
-        clearAccountsButton.addEventListener('click', () => {
+        document.getElementById('clear-accounts-button').addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите удалить все аккаунты? Это действие необратимо!")) {
                 remove(ref(database, 'users')).then(() => {
                     alert("Все аккаунты были успешно удалены.");
@@ -239,6 +255,11 @@
             });
         }
 
+        // Переключение темы
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
         // Инициализация пользователя при загрузке страницы
         initializeUser();
     </script>
@@ -251,6 +272,7 @@
     </div>
     <button id="click-button">Кликни!</button>
     <button id="clear-accounts-button">Удалить все аккаунты</button>
+    <button id="theme-toggle" onclick="toggleTheme()">Переключить тему</button>
     <h2>Лидерборд</h2>
     <ul id="leaderboard"></ul>
 </body>
