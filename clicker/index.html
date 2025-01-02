@@ -192,10 +192,15 @@
             const username = usernameInput.value;
             const password = passwordInput.value;
 
+            // Проверка на корректность email
+            if (!validateEmail(username)) {
+                alert("Пожалуйста, введите корректный email.");
+                return;
+            }
+
             createUserWithEmailAndPassword(auth, username, password)
                 .then(() => {
                     alert("Регистрация прошла успешно!");
-                    // Автоматически кнопка "Выйти" становится доступной
                 })
                 .catch(error => {
                     alert(error.message);
@@ -206,10 +211,13 @@
             const username = usernameInput.value;
             const password = passwordInput.value;
 
+            // Проверка на корректность email
+            if (!validateEmail(username)) {
+                alert("Пожалуйста, введите корректный email.");
+                return;
+            }
+
             signInWithEmailAndPassword(auth, username, password)
-                .then(() => {
-                    // Убираем уведомление "Вы вошли в систему!"
-                })
                 .catch(error => {
                     alert(error.message);
                 });
@@ -270,6 +278,12 @@
                 }
             });
         }
+
+        // Функция для проверки корректности email
+        function validateEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
     </script>
 </head>
 <body>
@@ -277,7 +291,7 @@
     <div id="auth">
         <button id="login-button">Войти</button>
         <div id="login-dropdown">
-            <input type="text" id="username" placeholder="Имя пользователя" />
+            <input type="text" id="username" placeholder="Имя пользователя (email)" />
             <input type="password" id="password" placeholder="Пароль" />
             <button id="register-button">Зарегистрироваться</button>
             <button id="logout-button" style="display:none;">Выйти</button>
