@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Кликер</title>
-    <link rel="icon" href="icon.png" type="image/png"> <!-- Добавление иконки сайта -->
+    <link rel="icon" href="icon.png" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
     <style>
         body {
@@ -166,6 +166,7 @@
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
         const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
         const loginButton = document.getElementById('login-button');
         const registerButton = document.getElementById('register-button');
         const logoutButton = document.getElementById('logout-button');
@@ -196,7 +197,6 @@
                 return;
             }
 
-            // Проверьте, что пользователь с таким именем существует в базе данных
             const userRef = ref(database, `users/${username}`);
             onValue(userRef, (snapshot) => {
                 if (snapshot.exists()) {
@@ -218,7 +218,6 @@
                 return;
             }
 
-            // Создаем нового пользователя в базе данных
             const userRef = ref(database, `users/${username}`);
             set(userRef, { clicks: 0 })
                 .then(() => {
@@ -274,9 +273,8 @@
 
                     leaderboardArray.forEach((user, index) => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = `${index + 1}. ${user.id} - ${user.clicks}`; // Форматирование списка
+                        listItem.textContent = `${index + 1}. ${user.id} - ${user.clicks}`;
 
-                        // Устанавливаем разные CSS классы для первых трех мест
                         if (index < 3) listItem.className = "top" + (index + 1);
                         else listItem.className = "other";
 
@@ -293,6 +291,7 @@
         <button id="login-button">Войти</button>
         <div id="login-dropdown">
             <input type="text" id="username" placeholder="Имя пользователя" />
+            <input type="password" id="password" placeholder="Пароль" style="display:none;" />
             <button id="register-button">Зарегистрироваться</button>
             <button id="logout-button" style="display:none;">Выйти</button>
         </div>
