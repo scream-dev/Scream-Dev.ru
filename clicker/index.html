@@ -52,7 +52,7 @@
             align-items: center;
             margin-top: 20px;
         }
-        #login-button {
+        #login-button, #register-button {
             background-color: #007BFF;
             color: white;
             border: none;
@@ -61,8 +61,10 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
+            margin: 5px 0;
         }
-        #login-button:hover {
+        #login-button:hover,
+        #register-button:hover {
             background-color: #0056b3;
             transform: scale(1.05);
         }
@@ -143,7 +145,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
@@ -164,8 +166,8 @@
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
         const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
         const loginButton = document.getElementById('login-button');
+        const registerButton = document.getElementById('register-button');
         const logoutButton = document.getElementById('logout-button');
         const currentUserElement = document.getElementById('current-user');
         const clearAccountsButton = document.getElementById('clear-accounts-button');
@@ -178,13 +180,12 @@
                 currentUserId = user.displayName; // Используем имя пользователя как уникальный идентификатор
                 currentUserElement.textContent = `Привет, ${currentUserId}`;
                 logoutButton.style.display = 'block';
-                updateLeaderboard();
             } else {
                 currentUserId = null;
                 currentUserElement.textContent = '';
                 logoutButton.style.display = 'none';
-                updateLeaderboard();
             }
+            updateLeaderboard();
         });
 
         loginButton.addEventListener('click', () => {
@@ -204,9 +205,28 @@
                     logoutButton.style.display = 'block';
                     updateLeaderboard();
                 } else {
-                    alert("Пользователь не найден.");
+                    alert("Пользователь не найден. Зарегистрируйтесь, если вы новый пользователь.");
                 }
             });
+        });
+
+        registerButton.addEventListener('click', () => {
+            const username = usernameInput.value;
+
+            if (!username) {
+                alert("Введите имя пользователя.");
+                return;
+            }
+
+            // Создаем нового пользователя в базе данных
+            const userRef = ref(database, `users/${username}`);
+            set(userRef, { clicks: 0 })
+                .then(() => {
+                    alert("Пользователь зарегистрирован!");
+                })
+                .catch(error => {
+                    alert("Ошибка при регистрации: " + error.message);
+                });
         });
 
         logoutButton.addEventListener('click', () => {
@@ -273,7 +293,7 @@
         <button id="login-button">Войти</button>
         <div id="login-dropdown">
             <input type="text" id="username" placeholder="Имя пользователя" />
-            <input type="password" id="password" placeholder="Пароль" style="display:none;" /> <!-- Поле для пароля, если нужно в дальнейшем -->
+            <button id="register-button">Зарегистрироваться</button>
             <button id="logout-button" style="display:none;">Выйти</button>
         </div>
     </div>
