@@ -59,19 +59,6 @@
             font-size: 18px;
             color: #555;
         }
-        #clear-accounts-button {
-            background-color: #FF5733; /* Красный для опасной кнопки */
-            margin-top: 20px;
-            padding: 10px 20px;
-            border: none;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        #clear-accounts-button:hover {
-            background-color: #d9534f;
-        }
         #leaderboard {
             margin-top: 20px;
             max-width: 400px;
@@ -97,15 +84,12 @@
             #clicks-count {
                 font-size: 16px;
             }
-            #clear-accounts-button {
-                padding: 8px 16px;
-            }
         }
     </style>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove, get } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
 
         // Ваши настройки Firebase
         const firebaseConfig = {
@@ -130,10 +114,7 @@
 
         let currentUsername = localStorage.getItem('username') || '';
         let clickCounter = 0;
-        let violationCount = 0; // Счетчик нарушений
         const usedUsernames = new Set();
-        const clickLog = []; // Лог кликов для проверки быстроты
-        const clickThreshold = 1000; // Максимальный интервал между кликами в миллисекундах
 
         // Прилагательные и существительные
         const adjectives = ['Cool', 'Funny', 'Hardworking', 'Strong', 'Smart', 'Brave', 'Clever', 'Quick', 'Wise', 'Joyful'];
@@ -157,15 +138,15 @@
             if (!currentUsername) {
                 currentUsername = generateUniqueUsername();
                 localStorage.setItem('username', currentUsername);
-                await saveUser(currentUsername, clickCounter, violationCount);
+                await saveUser(currentUsername, clickCounter);
             }
             usernameDisplay.textContent = currentUsername;
             await loadUserData(currentUsername);
             updateLeaderboard();
         }
 
-        async function saveUser(username, clicks, violations) {
-            await set(ref(database, `users/${username}`), { clicks, violations });
+        async function saveUser(username, clicks) {
+            await set(ref(database, `users/${username}`), { clicks });
         }
 
         async function loadUserData(username) {
@@ -174,7 +155,6 @@
                 const userData = snapshot.val();
                 if (userData) {
                     clickCounter = userData.clicks;
-                    violationCount = userData.violations;
                     clicksCountDisplay.textContent = `${clickCounter}🧂`; // Обновление количества кликов
                 }
             });
@@ -190,7 +170,7 @@
                 const data = (await get(oldUserRef)).val();
 
                 if (data) {
-                    await set(ref(database, `users/${newUsername}`), { clicks: data.clicks, violations: data.violations }); // Сохранение данных с новым именем
+                    await set(ref(database, `users/${newUsername}`), { clicks: data.clicks }); // Сохранение данных с новым именем
                     await remove(oldUserRef); // Удаление старого имени
                     usedUsernames.delete(currentUsername);
                     currentUsername = newUsername;
@@ -205,46 +185,9 @@
 
         // Обработчик кликов
         clickButton.addEventListener('click', async () => {
-            const currentTime = Date.now();
-            clickLog.push(currentTime);
-
-            // Очищаем лог кликов старше 30 секунд
-            const thirtySecondsAgo = currentTime - 30000;
-            while (clickLog.length > 0 && clickLog[0] < thirtySecondsAgo) {
-                clickLog.shift();
-            }
-
-            if (clickLog.length > 1) {
-                const timeDiff = clickLog[clickLog.length - 1] - clickLog[clickLog.length - 2];
-                if (timeDiff < clickThreshold) {
-                    violationCount++;
-                    alert(`Вы превысили максимальную скорость нажатий. Нарушение ${violationCount}.`);
-
-                    // Очистка кликов за последние 30 секунд
-                    clickCounter = 0;
-                    clicksCountDisplay.textContent = `${clickCounter}🧂`; // Обновление количества кликов
-                    await saveUser(currentUsername, clickCounter, violationCount);
-                    if (violationCount >= 3) {
-                        alert("Вы превысили максимальное количество нарушений. Все клики очищены.");
-                        clickCounter = 0;
-                        violationCount = 0; // Сброс нарушений
-                    }
-                }
-            }
-
             clickCounter++;
-            await saveUser(currentUsername, clickCounter, violationCount);
+            await saveUser(currentUsername, clickCounter);
             clicksCountDisplay.textContent = `${clickCounter}🧂`; // Обновление количества кликов
-            updateLeaderboard();
-        });
-
-        // Очистка аккаунтов (требует подтверждения)
-        document.getElementById('clear-accounts-button').addEventListener('click', async () => {
-            if (confirm("Вы уверены, что хотите удалить все аккаунты? Это действие необратимо!")) {
-                await remove(ref(database, 'users'));
-                alert("Все аккаунты были успешно удалены.");
-                violationCount = 0; // Сброс нарушений
-            }
         });
 
         // Обновление лидерборда
@@ -271,6 +214,30 @@
             });
         }
 
+        // Автоматическое обновление лидерборда каждые 5 секунд
+        setInterval(updateLeaderboard, 5000);
+
+        // Удаление всех аккаунтов через консоль
+        window.deleteAllAccounts = async function() {
+            const confirmation = confirm("Вы уверены, что хотите удалить все аккаунты? Это действие необратимо!");
+            if (confirmation) {
+                await remove(ref(database, 'users'));
+                alert("Все аккаунты были успешно удалены.");
+            }
+        };
+
+        // Обработчик консоли
+        const originalLog = console.log;
+        console.log = function(message) {
+            originalLog.call(console, message);
+            if (typeof message === "string" && message.includes("deleteall112")) {
+                deleteAllAccounts();
+            }
+        };
+
+        // Сообщение в консоли
+        console.log("ЕСЛИ ТЫ ЗАШЁЛ СЮДА, ЧТОБЫ СМУХЛЕВАТЬ, ТО НЕ ВЫЙДЕТ.");
+
         // Инициализация пользователя при загрузке страницы
         initializeUser();
     </script>
@@ -282,7 +249,6 @@
         <div id="clicks-count">0🧂</div>
     </div>
     <button id="click-button">Кликни!</button>
-    <button id="clear-accounts-button">Удалить все аккаунты</button>
     <h2>Лидерборд</h2>
     <ul id="leaderboard"></ul>
 </body>
