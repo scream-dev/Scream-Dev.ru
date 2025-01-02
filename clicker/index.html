@@ -4,19 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Кликер</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&display=swap" rel="stylesheet">
     <style>
-        body { display: flex; flex-direction: column; align-items: center; }
-        button { font-size: 20px; margin: 20px; }
-        #leaderboard { margin-top: 20px; }
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 36px;
+            color: #333;
+        }
+        button {
+            background-color: #4CAF50; /* Зеленый */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 20px 40px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        button:hover {
+            background-color: #45a049; /* Темнее зеленый */
+            transform: scale(1.05);
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        #leaderboard {
+            margin-top: 20px;
+            max-width: 400px;
+            list-style-type: none;
+            padding: 0;
+        }
+        #leaderboard li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            color: #333;
+        }
     </style>
     <!-- Подключение Firebase -->
     <script type="module">
-        // Импортирование необходимых функций из SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
 
-        // Ваша конфигурация Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
             authDomain: "screamdev-ca68a.firebaseapp.com",
@@ -28,31 +68,24 @@
             measurementId: "G-W1N63CWZX9"
         };
 
-        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-        const database = getDatabase(app); // Инициализация базы данных
+        const database = getDatabase(app);
 
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
-        const userId = Date.now(); // Уникальный идентификатор пользователя (можно заменить)
+        const userId = Date.now();
 
-        // Инициализация кликов для нового пользователя
         set(ref(database, `users/${userId}/clicks`), 0);
 
-        // Обработка клика
         clickButton.addEventListener('click', () => {
             const userClicksRef = ref(database, `users/${userId}/clicks`);
-            onValue(userClicksRef, (snapshot) => {
-                const clicks = snapshot.val() || 0;
-                set(userClicksRef, clicks + 1); // Увеличиваем количество кликов для текущего пользователя
-            });
+            set(userClicksRef, (clicks) => (clicks || 0) + 1); // Увеличиваем количество кликов для текущего пользователя
         });
 
-        // Подписка на обновления лидерборда
         onValue(ref(database, 'users'), (snapshot) => {
             const users = snapshot.val();
-            leaderboardElement.innerHTML = ''; // Очищаем предыдущий лидерборд
+            leaderboardElement.innerHTML = '';
 
             if (users) {
                 const leaderboardArray = Object.entries(users).map(([id, userData]) => ({
@@ -60,10 +93,8 @@
                     clicks: userData.clicks || 0
                 }));
 
-                // Сортируем пользователей по количеству кликов
                 leaderboardArray.sort((a, b) => b.clicks - a.clicks);
 
-                // Отображаем лидерборд
                 leaderboardArray.forEach(user => {
                     const listItem = document.createElement('li');
                     listItem.textContent = `Пользователь ${user.id}: ${user.clicks} кликов`;
