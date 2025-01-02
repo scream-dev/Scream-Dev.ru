@@ -27,9 +27,9 @@
             color: white;
             border: none;
             border-radius: 50%; /* Круглая кнопка */
-            width: 100px;
-            height: 100px;
-            font-size: 24px;
+            width: 150px; /* Увеличение размера кнопки */
+            height: 150px; /* Увеличение размера кнопки */
+            font-size: 32px; /* Увеличение текста на кнопке */
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -46,15 +46,45 @@
             transform: scale(0.95);
         }
         #auth {
-            margin-top: 20px;
+            position: relative; /* Позиционирование для drop-down */
             display: flex;
             flex-direction: column;
             align-items: center;
+            margin-top: 20px;
+        }
+        #login-button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        #login-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        #login-dropdown {
+            display: none; /* Изначально скрыто */
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            z-index: 1;
+            padding: 10px;
+        }
+        #login-button:focus + #login-dropdown,
+        #login-dropdown:hover {
+            display: block; /* Показывать при наведении или фокусе на кнопке */
         }
         input {
             margin: 5px 0;
             padding: 10px;
-            width: 200px;
+            width: 180px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
@@ -85,28 +115,27 @@
         #leaderboard li {
             padding: 10px;
             color: #333;
+            font-size: 18px; /* Размер шрифта для лидерборда */
         }
-        #leaderboard li.top1 {
-            font-size: 24px; /* Размер шрифта для топа 1 */
-            font-weight: bold;
+        #leaderboard li.top1:before {
+            content: "🥇 "; /* Медаль для первого места */
         }
-        #leaderboard li.top2 {
-            font-size: 22px; /* Размер шрифта для топа 2 */
-            font-weight: bold;
+        #leaderboard li.top2:before {
+            content: "🥈 "; /* Медаль для второго места */
         }
-        #leaderboard li.top3 {
-            font-size: 20px; /* Размер шрифта для топа 3 */
-            font-weight: bold;
+        #leaderboard li.top3:before {
+            content: "🥉 "; /* Медаль для третьего места */
         }
         #leaderboard li.other {
-            font-size: 18px; /* Размер шрифта для остальных */
+            /* Остальные элементы без медали */
         }
         #current-user {
             margin-top: 20px;
             font-weight: bold;
         }
-        #logout-button {
-            margin-left: 10px;
+        #clear-accounts-button {
+            background-color: #FF5733; /* Красный для опасной кнопки */
+            margin-top: 20px;
         }
     </style>
     <script type="module">
@@ -114,9 +143,8 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
 
-        // Ваше приложение Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
             authDomain: "screamdev-ca68a.firebaseapp.com",
@@ -128,7 +156,6 @@
             measurementId: "G-W1N63CWZX9"
         };
 
-        // Инициализация Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
@@ -142,65 +169,56 @@
         const loginButton = document.getElementById('login-button');
         const logoutButton = document.getElementById('logout-button');
         const currentUserElement = document.getElementById('current-user');
+        const clearAccountsButton = document.getElementById('clear-accounts-button');
 
         let currentUserId = null;
 
-        // Отслеживание состояния аутентификации
+        // Отслеживаем состояние аутентификации
         onAuthStateChanged(auth, user => {
             if (user) {
                 currentUserId = user.email; // Используем email как уникальный идентификатор
                 currentUserElement.textContent = `Привет, ${currentUserId}`;
-                loginButton.style.display = 'none';
-                registerButton.style.display = 'none';
                 logoutButton.style.display = 'block';
+                updateLeaderboard();
             } else {
                 currentUserId = null;
                 currentUserElement.textContent = '';
-                loginButton.style.display = 'block';
-                registerButton.style.display = 'block';
                 logoutButton.style.display = 'none';
+                updateLeaderboard();
             }
-            updateLeaderboard();
         });
 
-        // Установка обработчиков аутентификации
         registerButton.addEventListener('click', () => {
             const username = usernameInput.value;
             const password = passwordInput.value;
 
-            const userRef = ref(database, `users/${username}`);
-            set(userRef, { password, clicks: 0 }).then(() => {
-                alert("Регистрация прошла успешно!");
-                signIn(username, password); // Автоматический вход
-            }).catch(error => {
-                alert(error.message);
-            });
+            createUserWithEmailAndPassword(auth, username, password)
+                .then(() => {
+                    alert("Регистрация прошла успешно!");
+                    // Автоматически кнопка "Выйти" становится доступной
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
         });
 
         loginButton.addEventListener('click', () => {
             const username = usernameInput.value;
             const password = passwordInput.value;
 
-            signIn(username, password);
+            signInWithEmailAndPassword(auth, username, password)
+                .then(() => {
+                    // Убираем уведомление "Вы вошли в систему!"
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
         });
 
-        function signIn(username, password) {
-            const userRef = ref(database, `users/${username}`);
-            onValue(userRef, (snapshot) => {
-                if (snapshot.exists() && snapshot.val().password === password) {
-                    currentUserId = username;
-                    document.cookie = `username=${username}; path=/`;
-                    alert("Вы вошли в систему!");
-                } else {
-                    alert("Неверное имя пользователя или пароль");
-                }
-            });
-        }
-
         logoutButton.addEventListener('click', () => {
-            currentUserId = null;
-            auth.signOut();
-            alert("Вы вышли из системы!");
+            signOut(auth).then(() => {
+                alert("Вы вышли из системы!");
+            });
         });
 
         clickButton.addEventListener('click', () => {
@@ -214,6 +232,16 @@
                 const clicks = snapshot.val() || 0;
                 set(userRef, clicks + 1);
             });
+        });
+
+        clearAccountsButton.addEventListener('click', () => {
+            if (confirm("Вы уверены, что хотите удалить все аккаунты? Это действие необратимо!")) {
+                remove(ref(database, 'users')).then(() => {
+                    alert("Все аккаунты были успешно удалены.");
+                }).catch(error => {
+                    alert("Ошибка при удалении аккаунтов: " + error.message);
+                });
+            }
         });
 
         function updateLeaderboard() {
@@ -231,14 +259,12 @@
 
                     leaderboardArray.forEach((user, index) => {
                         const listItem = document.createElement('li');
-                        listItem.textContent = `Пользователь ${user.id}: ${user.clicks} кликов`;
+                        listItem.textContent = `${index + 1}. ${user.id} - ${user.clicks}`; // Форматирование списка
 
-                        // Устанавливаем разные CSS классы для различного размера
-                        if (index < 3) {
-                            listItem.className = "top" + (index + 1);
-                        } else {
-                            listItem.className = "other";
-                        }
+                        // Устанавливаем разные CSS классы для первых трех мест
+                        if (index < 3) listItem.className = "top" + (index + 1);
+                        else listItem.className = "other";
+
                         leaderboardElement.appendChild(listItem);
                     });
                 }
@@ -249,13 +275,16 @@
 <body>
     <h1>Кликер</h1>
     <div id="auth">
-        <input type="text" id="username" placeholder="Имя пользователя" />
-        <input type="password" id="password" placeholder="Пароль" />
-        <button id="register-button">Зарегистрироваться</button>
         <button id="login-button">Войти</button>
-        <button id="logout-button" style="display:none;">Выйти</button>
+        <div id="login-dropdown">
+            <input type="text" id="username" placeholder="Имя пользователя" />
+            <input type="password" id="password" placeholder="Пароль" />
+            <button id="register-button">Зарегистрироваться</button>
+            <button id="logout-button" style="display:none;">Выйти</button>
+        </div>
     </div>
     <button id="click-button">Кликни!</button>
+    <button id="clear-accounts-button">Удалить все аккаунты</button>
     <h2>Лидерборд</h2>
     <ul id="leaderboard"></ul>
     <div id="current-user"></div>
