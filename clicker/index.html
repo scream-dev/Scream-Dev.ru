@@ -143,7 +143,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
@@ -165,7 +165,6 @@
         const leaderboardElement = document.getElementById('leaderboard');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
-        const registerButton = document.getElementById('register-button');
         const loginButton = document.getElementById('login-button');
         const logoutButton = document.getElementById('logout-button');
         const currentUserElement = document.getElementById('current-user');
@@ -176,7 +175,7 @@
         // Отслеживаем состояние аутентификации
         onAuthStateChanged(auth, user => {
             if (user) {
-                currentUserId = user.email; // Используем email как уникальный идентификатор
+                currentUserId = user.displayName; // Используем имя пользователя как уникальный идентификатор
                 currentUserElement.textContent = `Привет, ${currentUserId}`;
                 logoutButton.style.display = 'block';
                 updateLeaderboard();
@@ -188,45 +187,33 @@
             }
         });
 
-        registerButton.addEventListener('click', () => {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            // Проверка на корректность email
-            if (!validateEmail(username)) {
-                alert("Пожалуйста, введите корректный email.");
-                return;
-            }
-
-            createUserWithEmailAndPassword(auth, username, password)
-                .then(() => {
-                    alert("Регистрация прошла успешно!");
-                })
-                .catch(error => {
-                    alert(error.message);
-                });
-        });
-
         loginButton.addEventListener('click', () => {
             const username = usernameInput.value;
-            const password = passwordInput.value;
 
-            // Проверка на корректность email
-            if (!validateEmail(username)) {
-                alert("Пожалуйста, введите корректный email.");
+            if (!username) {
+                alert("Введите имя пользователя.");
                 return;
             }
 
-            signInWithEmailAndPassword(auth, username, password)
-                .catch(error => {
-                    alert(error.message);
-                });
+            // Проверьте, что пользователь с таким именем существует в базе данных
+            const userRef = ref(database, `users/${username}`);
+            onValue(userRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    currentUserId = username;
+                    currentUserElement.textContent = `Привет, ${currentUserId}`;
+                    logoutButton.style.display = 'block';
+                    updateLeaderboard();
+                } else {
+                    alert("Пользователь не найден.");
+                }
+            });
         });
 
         logoutButton.addEventListener('click', () => {
-            signOut(auth).then(() => {
-                alert("Вы вышли из системы!");
-            });
+            currentUserId = null;
+            currentUserElement.textContent = '';
+            logoutButton.style.display = 'none';
+            updateLeaderboard();
         });
 
         clickButton.addEventListener('click', () => {
@@ -278,12 +265,6 @@
                 }
             });
         }
-
-        // Функция для проверки корректности email
-        function validateEmail(email) {
-            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return regex.test(email);
-        }
     </script>
 </head>
 <body>
@@ -291,9 +272,8 @@
     <div id="auth">
         <button id="login-button">Войти</button>
         <div id="login-dropdown">
-            <input type="text" id="username" placeholder="Имя пользователя (email)" />
-            <input type="password" id="password" placeholder="Пароль" />
-            <button id="register-button">Зарегистрироваться</button>
+            <input type="text" id="username" placeholder="Имя пользователя" />
+            <input type="password" id="password" placeholder="Пароль" style="display:none;" /> <!-- Поле для пароля, если нужно в дальнейшем -->
             <button id="logout-button" style="display:none;">Выйти</button>
         </div>
     </div>
