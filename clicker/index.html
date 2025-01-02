@@ -45,27 +45,22 @@
         #click-button:active {
             transform: scale(0.95);
         }
-        #auth {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        #username-display {
             margin-top: 20px;
+            font-weight: bold;
         }
-        #login-button, #register-button {
+        #change-username-button {
+            margin-top: 10px;
+            padding: 10px;
             background-color: #007BFF;
             color: white;
             border: none;
             border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.2s;
-            margin-top: 5px;
+            transition: background-color 0.3s;
         }
-        #login-button:hover,
-        #register-button:hover {
+        #change-username-button:hover {
             background-color: #0056b3;
-            transform: scale(1.05);
         }
         input {
             margin: 5px 0;
@@ -85,188 +80,73 @@
             color: #333;
             font-size: 18px; /* Размер шрифта для лидерборда */
         }
-        #leaderboard li.top1:before {
-            content: "🥇 "; /* Медаль для первого места */
-        }
-        #leaderboard li.top2:before {
-            content: "🥈 "; /* Медаль для второго места */
-        }
-        #leaderboard li.top3:before {
-            content: "🥉 "; /* Медаль для третьего места */
-        }
-        #leaderboard li.other {
-            /* Остальные элементы без медали */
-        }
-        #current-user {
-            margin-top: 20px;
-            font-weight: bold;
-        }
         #clear-accounts-button {
             background-color: #FF5733; /* Красный для опасной кнопки */
             margin-top: 20px;
         }
-        #logout-button {
-            display: none;
-        }
     </style>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
-            authDomain: "screamdev-ca68a.firebaseapp.com",
-            databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
-            projectId: "screamdev-ca68a",
-            storageBucket: "screamdev-ca68a.firebasestorage.app",
-            messagingSenderId: "513024079698",
-            appId: "1:513024079698:web:912302891a5927df61ac8b",
-            measurementId: "G-W1N63CWZX9"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const database = getDatabase(app);
-        const auth = getAuth(app);
+    <script>
+        const adjectives = ['Крутой', 'Смешной', 'Трудолюбивый', 'Сильный', 'Умный'];
+        const nouns = ['Крокодил', 'Панда', 'Слон', 'Кот', 'Собака'];
 
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
-        const loginButton = document.getElementById('login-button');
-        const registerButton = document.getElementById('register-button');
-        const logoutButton = document.getElementById('logout-button');
-        const currentUserElement = document.getElementById('current-user');
+        const usernameDisplay = document.getElementById('username-display');
+        const changeUsernameButton = document.getElementById('change-username-button');
         const clearAccountsButton = document.getElementById('clear-accounts-button');
 
-        let currentUserId = null;
+        let currentUsername = generateUsername();
+        let clickCounter = 0;
 
-        // Отслеживаем состояние аутентификации
-        onAuthStateChanged(auth, user => {
-            if (user) {
-                currentUserId = user.displayName;
-                currentUserElement.textContent = `Привет, ${currentUserId}`;
-                logoutButton.style.display = 'block';
+        usernameDisplay.textContent = currentUsername;
+
+        function generateUsername() {
+            const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+            return `${randomAdjective} ${randomNoun}`;
+        }
+        
+        changeUsernameButton.addEventListener('click', () => {
+            const newUsername = prompt("Введите новое имя пользователя (от 3 до 16 символов, только латиница, цифры и _):");
+            const usernamePattern = /^[a-zA-Z0-9_]{3,16}$/;
+
+            if (newUsername && usernamePattern.test(newUsername)) {
+                currentUsername = newUsername;
+                usernameDisplay.textContent = currentUsername;
             } else {
-                currentUserId = null;
-                currentUserElement.textContent = '';
-                logoutButton.style.display = 'none';
+                alert("Имя пользователя должно содержать от 3 до 16 символов и может включать только латинские буквы, цифры и _");
             }
-            updateLeaderboard();
-        });
-
-        loginButton.addEventListener('click', () => {
-            const username = usernameInput.value;
-
-            if (!username) {
-                alert("Введите имя пользователя.");
-                return;
-            }
-
-            const userRef = ref(database, `users/${username}`);
-            onValue(userRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    currentUserId = username;
-                    currentUserElement.textContent = `Привет, ${currentUserId}`;
-                    logoutButton.style.display = 'block';
-                    updateLeaderboard();
-                } else {
-                    alert("Пользователь не найден. Зарегистрируйтесь, если вы новый пользователь.");
-                }
-            });
-        });
-
-        registerButton.addEventListener('click', () => {
-            const username = usernameInput.value;
-
-            if (!username) {
-                alert("Введите имя пользователя.");
-                return;
-            }
-
-            const userRef = ref(database, `users/${username}`);
-            set(userRef, { clicks: 0 })
-                .then(() => {
-                    alert("Пользователь зарегистрирован!");
-                })
-                .catch(error => {
-                    alert("Ошибка при регистрации: " + error.message);
-                });
-        });
-
-        logoutButton.addEventListener('click', () => {
-            currentUserId = null;
-            currentUserElement.textContent = '';
-            logoutButton.style.display = 'none';
-            updateLeaderboard();
         });
 
         clickButton.addEventListener('click', () => {
-            if (!currentUserId) {
-                alert("Сначала войдите в аккаунт.");
-                return;
-            }
-
-            const userRef = ref(database, `users/${currentUserId}/clicks`);
-            onValue(userRef, (snapshot) => {
-                const clicks = snapshot.val() || 0;
-                set(userRef, clicks + 1);
-            });
+            clickCounter++;
+            updateLeaderboard();
         });
 
         clearAccountsButton.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите удалить все аккаунты? Это действие необратимо!")) {
-                remove(ref(database, 'users')).then(() => {
-                    alert("Все аккаунты были успешно удалены.");
-                }).catch(error => {
-                    alert("Ошибка при удалении аккаунтов: " + error.message);
-                });
+                alert("Все аккаунты были успешно удалены.");
+                // Логика для удаления аккаунтов можно добавить здесь
             }
         });
 
         function updateLeaderboard() {
-            onValue(ref(database, 'users'), (snapshot) => {
-                const users = snapshot.val();
-                leaderboardElement.innerHTML = '';
-
-                if (users) {
-                    const leaderboardArray = Object.entries(users).map(([id, userData]) => ({
-                        id,
-                        clicks: userData.clicks || 0
-                    }));
-
-                    leaderboardArray.sort((a, b) => b.clicks - a.clicks);
-
-                    leaderboardArray.forEach((user, index) => {
-                        const listItem = document.createElement('li');
-                        listItem.textContent = `${index + 1}. ${user.id} - ${user.clicks}`;
-
-                        if (index < 3) listItem.className = "top" + (index + 1);
-                        else listItem.className = "other";
-
-                        leaderboardElement.appendChild(listItem);
-                    });
-                }
-            });
+            leaderboardElement.innerHTML = '';
+            const leaderboardItem = document.createElement('li');
+            leaderboardItem.textContent = `${currentUsername} - ${clickCounter} кликов`;
+            leaderboardElement.appendChild(leaderboardItem);
         }
     </script>
 </head>
 <body>
     <h1>Кликер</h1>
-    <div id="auth">
-        <input type="text" id="username" placeholder="Имя пользователя" />
-        <input type="password" id="password" placeholder="Пароль" />
-        <button id="login-button">Войти</button>
-        <button id="register-button">Зарегистрироваться</button>
-        <button id="logout-button" style="display:none;">Выйти</button>
+    <div>
+        <button id="change-username-button">Изменить имя</button>
+        <div id="username-display">Имя пользователя: Крутой крокодил</div>
     </div>
     <button id="click-button">Кликни!</button>
     <button id="clear-accounts-button">Удалить все аккаунты</button>
     <h2>Лидерборд</h2>
     <ul id="leaderboard"></ul>
-    <div id="current-user"></div>
 </body>
 </html>
