@@ -46,7 +46,6 @@
             transform: scale(0.95);
         }
         #auth {
-            position: relative; /* Позиционирование для drop-down */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -61,27 +60,12 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s;
-            margin: 5px 0;
+            margin-top: 5px;
         }
         #login-button:hover,
         #register-button:hover {
             background-color: #0056b3;
             transform: scale(1.05);
-        }
-        #login-dropdown {
-            display: none; /* Изначально скрыто */
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            border-radius: 5px;
-            z-index: 1;
-            padding: 10px;
-        }
-        #login-button:focus + #login-dropdown,
-        #login-dropdown:hover {
-            display: block; /* Показывать при наведении или фокусе на кнопке */
         }
         input {
             margin: 5px 0;
@@ -89,24 +73,6 @@
             width: 180px;
             border: 1px solid #ccc;
             border-radius: 5px;
-        }
-        button {
-            background-color: #007BFF; /* Синий */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background-color 0.3s, transform 0.2s;
-        }
-        button:hover {
-            background-color: #0056b3; /* Темнее синий */
-            transform: scale(1.05);
-        }
-        button:active {
-            transform: scale(0.95);
         }
         #leaderboard {
             margin-top: 20px;
@@ -138,6 +104,9 @@
         #clear-accounts-button {
             background-color: #FF5733; /* Красный для опасной кнопки */
             margin-top: 20px;
+        }
+        #logout-button {
+            display: none;
         }
     </style>
     <script type="module">
@@ -178,7 +147,7 @@
         // Отслеживаем состояние аутентификации
         onAuthStateChanged(auth, user => {
             if (user) {
-                currentUserId = user.displayName; // Используем имя пользователя как уникальный идентификатор
+                currentUserId = user.displayName;
                 currentUserElement.textContent = `Привет, ${currentUserId}`;
                 logoutButton.style.display = 'block';
             } else {
@@ -288,13 +257,11 @@
 <body>
     <h1>Кликер</h1>
     <div id="auth">
+        <input type="text" id="username" placeholder="Имя пользователя" />
+        <input type="password" id="password" placeholder="Пароль" />
         <button id="login-button">Войти</button>
-        <div id="login-dropdown">
-            <input type="text" id="username" placeholder="Имя пользователя" />
-            <input type="password" id="password" placeholder="Пароль" style="display:none;" />
-            <button id="register-button">Зарегистрироваться</button>
-            <button id="logout-button" style="display:none;">Выйти</button>
-        </div>
+        <button id="register-button">Зарегистрироваться</button>
+        <button id="logout-button" style="display:none;">Выйти</button>
     </div>
     <button id="click-button">Кликни!</button>
     <button id="clear-accounts-button">Удалить все аккаунты</button>
