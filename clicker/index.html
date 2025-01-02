@@ -35,17 +35,41 @@
 
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
+        const userId = Date.now(); // Уникальный идентификатор пользователя (можно заменить)
 
-        // Пример обработки клика и работы с базой данных
+        // Инициализация кликов для нового пользователя
+        set(ref(database, `users/${userId}/clicks`), 0);
+
+        // Обработка клика
         clickButton.addEventListener('click', () => {
-            const clickCountRef = ref(database, 'clicks/total');
-            set(clickCountRef, (prevValue || 0) + 1); // Увеличиваем счетчик
+            const userClicksRef = ref(database, `users/${userId}/clicks`);
+            onValue(userClicksRef, (snapshot) => {
+                const clicks = snapshot.val() || 0;
+                set(userClicksRef, clicks + 1); // Увеличиваем количество кликов для текущего пользователя
+            });
         });
 
-        // Подписка на изменения в базе данных и обновление лидерборда
-        onValue(ref(database, 'clicks/total'), (snapshot) => {
-            const totalClicks = snapshot.val();
-            leaderboardElement.innerHTML = `Всего кликов: ${totalClicks || 0}`;
+        // Подписка на обновления лидерборда
+        onValue(ref(database, 'users'), (snapshot) => {
+            const users = snapshot.val();
+            leaderboardElement.innerHTML = ''; // Очищаем предыдущий лидерборд
+
+            if (users) {
+                const leaderboardArray = Object.entries(users).map(([id, userData]) => ({
+                    id,
+                    clicks: userData.clicks || 0
+                }));
+
+                // Сортируем пользователей по количеству кликов
+                leaderboardArray.sort((a, b) => b.clicks - a.clicks);
+
+                // Отображаем лидерборд
+                leaderboardArray.forEach(user => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Пользователь ${user.id}: ${user.clicks} кликов`;
+                    leaderboardElement.appendChild(listItem);
+                });
+            }
         });
     </script>
 </head>
