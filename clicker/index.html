@@ -62,18 +62,12 @@
         #change-username-button:hover {
             background-color: #0056b3;
         }
-        input {
-            margin: 5px 0;
-            padding: 10px;
-            width: 180px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
         #leaderboard {
             margin-top: 20px;
             max-width: 400px;
             list-style-type: none;
             padding: 0;
+            text-align: left; /* Выравнивание текста влево */
         }
         #leaderboard li {
             padding: 10px;
@@ -84,11 +78,12 @@
             background-color: #FF5733; /* Красный для опасной кнопки */
             margin-top: 20px;
         }
+        .medal { font-size: 24px; } /* Размер иконки медали */
     </style>
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
 
         // Ваши настройки Firebase
         const firebaseConfig = {
@@ -112,7 +107,7 @@
         const changeUsernameButton = document.getElementById('change-username-button');
         const clearAccountsButton = document.getElementById('clear-accounts-button');
 
-        let currentUsername = '';
+        let currentUsername = localStorage.getItem('username') || '';
         let clickCounter = 0;
         const usedUsernames = new Set();
 
@@ -132,9 +127,13 @@
             return newUsername;
         }
 
-        // Инициализация имени пользователя и количества кликов из базы данных
-        function initializeUser() {
-            currentUsername = generateUniqueUsername();
+        // Инициализация пользователя
+        async function initializeUser() {
+            if (!currentUsername) {
+                currentUsername = generateUniqueUsername();
+                localStorage.setItem('username', currentUsername);
+                await saveUser(currentUsername, clickCounter);
+            }
             usernameDisplay.textContent = currentUsername;
 
             const userRef = ref(database, `users/${currentUsername}`);
@@ -147,15 +146,18 @@
             });
         }
 
+        async function saveUser(username, clicks) {
+            await set(ref(database, `users/${username}`), { clicks });
+        }
+
         // Изменение имени пользователя
-        changeUsernameButton.addEventListener('click', () => {
+        changeUsernameButton.addEventListener('click', async () => {
             const newUsername = prompt("Введите новое имя пользователя (от 3 до 16 символов, только латиница, цифры и _):");
             const usernamePattern = /^[a-zA-Z0-9_]{3,16}$/;
 
             if (newUsername && usernamePattern.test(newUsername) && !usedUsernames.has(newUsername)) {
-                // Обновление имени пользователя в Firebase
-                const userRef = ref(database, `users/${currentUsername}`);
-                set(userRef, { clicks: clickCounter }); // Сохранение старых данных
+                // Сохранение нового пользователя в Firebase
+                await saveUser(currentUsername, clickCounter); // Сохранение старых данных
                 usedUsernames.delete(currentUsername); // Удаление старого имени из набора
                 currentUsername = newUsername;
                 usernameDisplay.textContent = currentUsername;
@@ -166,10 +168,9 @@
         });
 
         // Обработчик кликов
-        clickButton.addEventListener('click', () => {
+        clickButton.addEventListener('click', async () => {
             clickCounter++;
-            const userRef = ref(database, `users/${currentUsername}`);
-            set(userRef, { clicks: clickCounter });
+            await saveUser(currentUsername, clickCounter);
             updateLeaderboard();
         });
 
@@ -183,11 +184,26 @@
         });
 
         // Обновление лидерборда
-        function updateLeaderboard() {
+        async function updateLeaderboard() {
             leaderboardElement.innerHTML = '';
-            const leaderboardItem = document.createElement('li');
-            leaderboardItem.textContent = `${currentUsername} - ${clickCounter} кликов`;
-            leaderboardElement.appendChild(leaderboardItem);
+            const usersRef = ref(database, 'users');
+            const snapshot = await get(usersRef);
+            const usersData = snapshot.val();
+
+            const leaderboardArray = [];
+            for (const [username, data] of Object.entries(usersData)) {
+                leaderboardArray.push({ username, clicks: data.clicks });
+            }
+
+            leaderboardArray.sort((a, b) => b.clicks - a.clicks); // Сортировка по кликам
+
+            leaderboardArray.forEach((user, index) => {
+                const place = index < 3 ? `<span class="medal">${index + 1}🏅</span>` : `${index + 1}.`;
+                const points = user.clicks ? user.clicks + "🧂" : "0🧂"; // Количество очков с соответствующей иконкой
+                const leaderboardItem = document.createElement('li');
+                leaderboardItem.innerHTML = `${place} ${user.username} - ${points}`;
+                leaderboardElement.appendChild(leaderboardItem);
+            });
         }
 
         // Инициализация пользователя при загрузке страницы
@@ -198,7 +214,7 @@
     <h1>Кликер</h1>
     <div>
         <button id="change-username-button">Изменить имя</button>
-        <div id="username-display">Имя пользователя: КрутойКрокодил</div>
+        <div id="username-display">Имя пользователя: CoolBear</div>
     </div>
     <button id="click-button">Кликни!</button>
     <button id="clear-accounts-button">Удалить все аккаунты</button>
