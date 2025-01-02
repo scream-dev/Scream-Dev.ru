@@ -85,9 +85,26 @@
             margin-top: 20px;
         }
     </style>
-    <script>
-        const adjectives = ['Крутой', 'Смешной', 'Трудолюбивый', 'Сильный', 'Умный'];
-        const nouns = ['Крокодил', 'Панда', 'Слон', 'Кот', 'Собака'];
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+
+        // Ваши настройки Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
+            authDomain: "screamdev-ca68a.firebaseapp.com",
+            databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
+            projectId: "screamdev-ca68a",
+            storageBucket: "screamdev-ca68a.firebasestorage.app",
+            messagingSenderId: "513024079698",
+            appId: "1:513024079698:web:912302891a5927df61ac8b",
+            measurementId: "G-W1N63CWZX9"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
 
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
@@ -95,54 +112,93 @@
         const changeUsernameButton = document.getElementById('change-username-button');
         const clearAccountsButton = document.getElementById('clear-accounts-button');
 
-        let currentUsername = generateUsername();
+        let currentUsername = '';
         let clickCounter = 0;
+        const usedUsernames = new Set();
 
-        usernameDisplay.textContent = currentUsername;
+        // Прилагательные и существительные
+        const adjectives = ['Cool', 'Funny', 'Hardworking', 'Strong', 'Smart', 'Brave', 'Clever', 'Quick', 'Wise', 'Joyful'];
+        const nouns = ['Crocodile', 'Panda', 'Elephant', 'Cat', 'Dog', 'Tiger', 'Bear', 'Wolf', 'Fox', 'Lion'];
 
-        function generateUsername() {
-            const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
-            return `${randomAdjective} ${randomNoun}`;
+        // Генерация уникального имени пользователя
+        function generateUniqueUsername() {
+            let newUsername;
+            do {
+                const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+                const randomNoun = nouns[Math.floor(Math.random() * nouns.length)];
+                newUsername = randomAdjective + randomNoun; // Объединение без пробела
+            } while (usedUsernames.has(newUsername)); // Проверка уникальности
+            usedUsernames.add(newUsername); // Добавить в набор использованных
+            return newUsername;
         }
-        
+
+        // Инициализация имени пользователя и количества кликов из базы данных
+        function initializeUser() {
+            currentUsername = generateUniqueUsername();
+            usernameDisplay.textContent = currentUsername;
+
+            const userRef = ref(database, `users/${currentUsername}`);
+            onValue(userRef, (snapshot) => {
+                const userData = snapshot.val();
+                if (userData) {
+                    clickCounter = userData.clicks;
+                }
+                updateLeaderboard();
+            });
+        }
+
+        // Изменение имени пользователя
         changeUsernameButton.addEventListener('click', () => {
             const newUsername = prompt("Введите новое имя пользователя (от 3 до 16 символов, только латиница, цифры и _):");
             const usernamePattern = /^[a-zA-Z0-9_]{3,16}$/;
 
-            if (newUsername && usernamePattern.test(newUsername)) {
+            if (newUsername && usernamePattern.test(newUsername) && !usedUsernames.has(newUsername)) {
+                // Обновление имени пользователя в Firebase
+                const userRef = ref(database, `users/${currentUsername}`);
+                set(userRef, { clicks: clickCounter }); // Сохранение старых данных
+                usedUsernames.delete(currentUsername); // Удаление старого имени из набора
                 currentUsername = newUsername;
                 usernameDisplay.textContent = currentUsername;
+                usedUsernames.add(currentUsername);
             } else {
                 alert("Имя пользователя должно содержать от 3 до 16 символов и может включать только латинские буквы, цифры и _");
             }
         });
 
+        // Обработчик кликов
         clickButton.addEventListener('click', () => {
             clickCounter++;
+            const userRef = ref(database, `users/${currentUsername}`);
+            set(userRef, { clicks: clickCounter });
             updateLeaderboard();
         });
 
+        // Очистка аккаунтов (требует подтверждения)
         clearAccountsButton.addEventListener('click', () => {
             if (confirm("Вы уверены, что хотите удалить все аккаунты? Это действие необратимо!")) {
-                alert("Все аккаунты были успешно удалены.");
-                // Логика для удаления аккаунтов можно добавить здесь
+                remove(ref(database, 'users')).then(() => {
+                    alert("Все аккаунты были успешно удалены.");
+                });
             }
         });
 
+        // Обновление лидерборда
         function updateLeaderboard() {
             leaderboardElement.innerHTML = '';
             const leaderboardItem = document.createElement('li');
             leaderboardItem.textContent = `${currentUsername} - ${clickCounter} кликов`;
             leaderboardElement.appendChild(leaderboardItem);
         }
+
+        // Инициализация пользователя при загрузке страницы
+        initializeUser();
     </script>
 </head>
 <body>
     <h1>Кликер</h1>
     <div>
         <button id="change-username-button">Изменить имя</button>
-        <div id="username-display">Имя пользователя: Крутой крокодил</div>
+        <div id="username-display">Имя пользователя: КрутойКрокодил</div>
     </div>
     <button id="click-button">Кликни!</button>
     <button id="clear-accounts-button">Удалить все аккаунты</button>
