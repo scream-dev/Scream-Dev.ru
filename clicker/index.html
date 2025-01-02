@@ -50,12 +50,16 @@
             border-bottom: 1px solid #ddd;
             color: #333;
         }
+        #auth {
+            margin-top: 20px;
+        }
     </style>
     <!-- Подключение Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-analytics.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
@@ -71,16 +75,88 @@
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const database = getDatabase(app);
+        const auth = getAuth(app);
 
         const clickButton = document.getElementById('click-button');
         const leaderboardElement = document.getElementById('leaderboard');
-        const userId = Date.now();
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const registerButton = document.getElementById('register-button');
+        const loginButton = document.getElementById('login-button');
+        const logoutButton = document.getElementById('logout-button');
+        const clearBoardButton = document.getElementById('clear-board-button');
+        const currentUserElement = document.getElementById('current-user');
 
-        set(ref(database, `users/${userId}/clicks`), 0);
+        let currentUserId = null;
+
+        // Установка обработчиков аутентификации
+        registerButton.addEventListener('click', () => {
+            const email = usernameInput.value;
+            const password = passwordInput.value;
+
+            createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    currentUserId = userCredential.user.uid;
+                    document.cookie = `username=${email}; path=/`;
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        });
+
+        loginButton.addEventListener('click', () => {
+            const email = usernameInput.value;
+            const password = passwordInput.value;
+
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    currentUserId = userCredential.user.uid;
+                    document.cookie = `username=${email}; path=/`;
+                })
+                .catch(error => {
+                    alert(error.message);
+                });
+        });
+
+        logoutButton.addEventListener('click', () => {
+            signOut(auth).then(() => {
+                currentUserId = null;
+                document.cookie = `username=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`; // Удаление куки
+            });
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                currentUserElement.textContent = `Текущий пользователь: ${user.email}`;
+            } else {
+                currentUserId = null;
+                currentUserElement.textContent = 'Пожалуйста, войдите или зарегистрируйтесь.';
+            }
+        });
 
         clickButton.addEventListener('click', () => {
-            const userClicksRef = ref(database, `users/${userId}/clicks`);
-            set(userClicksRef, (clicks) => (clicks || 0) + 1); // Увеличиваем количество кликов для текущего пользователя
+            if (!currentUserId) {
+                alert("Сначала войдите в аккаунт.");
+                return;
+            }
+
+            const userClicksRef = ref(database, `users/${currentUserId}/clicks`);
+            set(userClicksRef, (clicks) => (clicks || 0) + 1);
+        });
+
+        // Функция очищения лидерборда
+        clearBoardButton.addEventListener('click', () => {
+            if (currentUserId) {
+                const userRef = ref(database, `users/${currentUserId}`);
+                onValue(userRef, (snapshot) => {
+                    if (snapshot.exists() && usernameInput.value === "ScreamDev") {
+                        remove(ref(database, `users`));
+                    } else {
+                        alert("У вас нет прав для этой операции.");
+                    }
+                });
+            }
         });
 
         onValue(ref(database, 'users'), (snapshot) => {
@@ -109,5 +185,15 @@
     <button id="click-button">Кликни меня!</button>
     <h2>Лидерборд</h2>
     <ul id="leaderboard"></ul>
+
+    <div id="auth">
+        <input type="text" id="username" placeholder="Электронная почта" />
+        <input type="password" id="password" placeholder="Пароль" />
+        <button id="register-button">Зарегистрироваться</button>
+        <button id="login-button">Войти</button>
+        <button id="logout-button">Выйти</button>
+        <button id="clear-board-button">Очистить лидерборд (ScreamDev)</button>
+    </div>
+    <div id="current-user"></div>
 </body>
 </html>
