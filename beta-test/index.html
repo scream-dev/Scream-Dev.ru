@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовый сайт с кнопкой регистрации</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .container {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Регистрация через Mail.ru</h1>
+        <div class="mailru-login-button" data-ui="login_as userpic" data-type="login" style="width: 300px; height: 48px;"></div>
+    </div>
+
+    <script src="https://oauth.mail.ru/sdk/v0.18.0/oauth.js"></script>
+    <script>
+        MR.init({
+            clientId: '31074291b6df4e11bb51053555211da7',
+            onlogin: function (state) {
+                if (state.user) {
+                    console.info('MR.login:', state);
+                    alert('Вы успешно вошли как: ' + state.user.name);
+                }
+            },
+            onlogout: function () {
+                console.info('MR.logout');
+                alert('Вы вышли из системы.');
+            }
+        });
+    </script>
+</body>
+</html>
