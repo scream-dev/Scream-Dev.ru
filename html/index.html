@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic HTML Host</title>
+    <title>Загрузка кода</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
             display: flex;
@@ -12,77 +12,123 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: #f0f0f0;
-            color: #333;
-            font-family: Arial, sans-serif;
-            transition: background 0.6s;
+            background-color: #282c34;
+            color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            animation: fadeIn 1s ease-in-out;
         }
 
-        .content {
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        .container {
             text-align: center;
+            background: rgba(50, 50, 50, 0.8);
             padding: 20px;
-            border: 2px solid #333;
             border-radius: 10px;
-            background: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
         }
 
-        @keyframes animate {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0); }
+        .container:hover {
+            transform: scale(1.02);
         }
 
-        .animated {
-            display: inline-block;
-            animation: animate 1s infinite;
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            margin-bottom: 20px;
         }
 
-        .dark-theme {
-            background: #333;
-            color: #fff;
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #45a049;
+            transform: scale(1.05);
+        }
+
+        #authContainer {
+            margin-bottom: 20px;
         }
     </style>
 </head>
-
 <body>
-    <div class="content">
-        <h1 id="title">HTML Host</h1>
-        <div id="dynamic-content"></div>
-        <p>To download the code, change the code local storage cookie.</p>
+    <div class="container">
+        <h1>Загрузка кода для страницы</h1>
+        <div id="authContainer"></div>
+        <input type="text" id="pageUrl" placeholder="Введите URL страницы" />
+        <textarea id="codeInput" placeholder="Введите код для страницы" rows="10" cols="30"></textarea>
+        <button id="uploadButton" style="display:none;">Загрузить код</button>
     </div>
 
-    <script>
-        // Проверка темы пользователя
-        const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
-        if (prefersDarkScheme.matches) {
-            document.body.classList.add('dark-theme');
+    <script async src="https://telegram.org/js/telegram-widget.js?22"
+        data-telegram-login="ScreamDevBot"
+        data-size="medium"
+        data-onauth="onTelegramAuth(user)"
+        data-request-access="write"></script>
+
+    <script type="text/javascript">
+        function onTelegramAuth(user) {
+            // Сохранение информации о пользователе в куки
+            document.cookie = `userId=${user.id}; path=/`;
+            document.cookie = `firstName=${user.first_name}; path=/`;
+            document.cookie = `lastName=${user.last_name}; path=/`;
+            
+            // Убираем кнопку аутентификации и показываем кнопку загрузки
+            document.getElementById('authContainer').innerHTML = '<p>Вы вошли как ' + user.first_name + '</p>';
+            document.getElementById('uploadButton').style.display = 'inline';
         }
 
-        // Функция для получения/установки значения в локальном хранилище
-        function getOrCreateCode() {
-            let code = localStorage.getItem('code');
-            if (code === null) {
-                code = '0'; // Установить значение по умолчанию
-                localStorage.setItem('code', code);
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            const pageUrl = document.getElementById('pageUrl').value;
+            const codeInput = document.getElementById('codeInput').value;
+            
+            if (!pageUrl || !codeInput) {
+                alert('Пожалуйста, заполните все поля.');
+                return;
             }
-            return code;
-        }
 
-        // Получаем код из локального хранилища
-        const code = getOrCreateCode();
+            // Сохранение кода в локальное хранилище (или отправка на сервер)
+            localStorage.setItem(`page_${pageUrl}`, codeInput);
+            alert('Код успешно загружен!');
+            document.getElementById('pageUrl').value = '';
+            document.getElementById('codeInput').value = '';
+        });
 
-        // Обновление содержимого страницы в зависимости от кода
-        const dynamicContent = document.getElementById('dynamic-content');
-        if (code === '0') {
-            dynamicContent.innerHTML = '<p class="animated">HTML Host</p>';
-            document.title = "HTML Host - Default Page";
-        } else {
-            // Создание элемента на основе пользовательского кода (HTML-код должен быть безопасным!)
-            dynamicContent.innerHTML = code; // Здесь код должен быть проверен на безопасность!
-            document.title = "Custom Code Page";
-        }
+        // Проверка наличия куки при загрузке страницы
+        window.onload = function() {
+            if (document.cookie.includes('userId')) {
+                const userData = document.cookie.split('; ').reduce((acc, current) => {
+                    const [key, value] = current.split('=');
+                    acc[key] = value;
+                    return acc;
+                }, {});
+                document.getElementById('authContainer').innerHTML =
+                    '<p>Вы вошли как ' + userData.firstName + '</p>';
+                document.getElementById('uploadButton').style.display = 'inline';
+            }
+        };
     </script>
 </body>
-
 </html>
