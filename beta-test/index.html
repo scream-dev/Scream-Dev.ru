@@ -3,42 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тестовый сайт с кнопкой регистрации</title>
+    <title>404 - Страница не найдена</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: #f2f2f2;
-        }
-        .container {
-            text-align: center;
-        }
+        /* Ваши стили остаются без изменений */
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Регистрация через Mail.ru</h1>
-        <div class="mailru-login-button" data-ui="login_as userpic" data-type="login" style="width: 300px; height: 48px;"></div>
+
+    <div class="container" id="messageContainer">
+        <div class="explosion" id="explosion"></div>
+        <h1>404</h1>
+        <div class="message" id="message">Эта страница не найдена</div>
+        <a href="/" class="back-link">Вернуться на главную</a>
     </div>
 
-    <script src="https://oauth.mail.ru/sdk/v0.18.0/oauth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     <script>
-        MR.init({
-            clientId: '31074291b6df4e11bb51053555211da7',
-            onlogin: function (state) {
-                if (state.user) {
-                    console.info('MR.login:', state);
-                    alert('Вы успешно вошли как: ' + state.user.name);
+        // Ваши ключи для Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
+            authDomain: "screamdev-ca68a.firebaseapp.com",
+            databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
+            projectId: "screamdev-ca68a",
+            storageBucket: "screamdev-ca68a.firebasestorage.app",
+            messagingSenderId: "513024079698",
+            appId: "1:513024079698:web:912302891a5927df61ac8b",
+            measurementId: "G-W1N63CWZX9"
+        };
+
+        // Инициализация Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Получение текущего URL
+        const currentPage = window.location.pathname;
+
+        // Проверка существования страницы в Firebase
+        database.ref('/pages' + currentPage).once('value')
+            .then((snapshot) => {
+                if (snapshot.exists()) {
+                    const pageData = snapshot.val();
+                    // Здесь вы можете отобразить данные страницы
+                    // Например, перенаправление на код страницы
+                    window.location.href = pageData.url;
+                } else {
+                    // Если страница не существует, показываем 404
+                    display404();
                 }
-            },
-            onlogout: function () {
-                console.info('MR.logout');
-                alert('Вы вышли из системы.');
-            }
-        });
+            })
+            .catch((error) => {
+                console.error("Ошибка получения данных: ", error);
+                display404(); // Показать 404 в случае ошибки
+            });
+
+        // Функция для отображения 404 страницы
+        function display404() {
+            const explosion = document.getElementById('explosion');
+            explosion.style.animationDelay = '0.5s';
+            explosion.style.opacity = '1';
+            explosion.style.animation = 'explode 1s forwards';
+
+            document.getElementById('message').innerText = 'Эта страница не найдена';
+        }
+
+        // Анимация взрыва при загрузке страницы
+        window.onload = function() {
+            display404();
+        };
     </script>
+
 </body>
 </html>
