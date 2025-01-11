@@ -3,111 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>404 - Страница не найдена</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            color: #333;
-            font-family: 'Arial', sans-serif;
-            position: relative;
-            overflow: hidden;
-            transition: background-color 0.5s, color 0.5s;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            body {
-                background-color: #1e1e1e;
-                color: #f0f0f0;
-            }
-        }
-
-        .container {
-            text-align: center;
-            position: relative;
-        }
-
-        h1 {
-            font-size: 80px;
-            font-family: 'Press Start 2P', cursive;
-            opacity: 0;
-            transform: scale(0);
-            animation: scaleIn 1.5s forwards;
-            margin: 0;
-        }
-
-        .message {
-            font-size: 24px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 1.5s forwards;
-            animation-delay: 1.5s;
-        }
-
-        @keyframes scaleIn {
-            0% { opacity: 0; transform: scale(0); }
-            50% { opacity: 1; transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .explosion {
-            position: absolute;
-            left: 50%;
-            bottom: 30%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle, #ff6347, rgba(255, 99, 71, 0));
-            border-radius: 50%;
-            animation: explode 1s forwards;
-            opacity: 0;
-        }
-
-        @keyframes explode {
-            0% { transform: translateX(-50%) scale(0); opacity: 1; }
-            50% { transform: translateX(-50%) scale(1.5); opacity: 0.5; }
-            100% { transform: translateX(-50%) scale(1.5); opacity: 0; }
-        }
-
-        .back-link {
-            font-size: 18px;
-            margin-top: 20px;
-            display: inline-block;
-            animation: fadeIn 1s forwards;
-            animation-delay: 3s;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-    </style>
+    <title>Redirect</title>
 </head>
 <body>
 
-    <div class="container">
-        <div class="explosion"></div>
-        <h1>404</h1>
-        <div class="message">Эта страница не найдена</div>
-        <a href="/" class="back-link">Вернуться на главную</a>
-    </div>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
+<script>
+    // Ваши настройки Firebase
+    const firebaseConfig = {
+        apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
+        authDomain: "screamdev-ca68a.firebaseapp.com",
+        databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
+        projectId: "screamdev-ca68a",
+        storageBucket: "screamdev-ca68a.appspot.com",
+        messagingSenderId: "513024079698",
+        appId: "1:513024079698:web:912302891a5927df61ac8b",
+        measurementId: "G-W1N63CWZX9"
+    };
 
-    <script>
-        // Анимация взрыва при загрузке страницы
-        window.onload = function() {
-            const explosion = document.querySelector('.explosion');
-            explosion.style.animationDelay = '0.5s'; // Задержка перед анимацией взрыва
-            explosion.style.opacity = '1'; // Показать взрыв
-            explosion.style.animation = 'explode 1s forwards'; // Запустить анимацию
-        };
-    </script>
+    // Инициализация Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const database = firebase.database(app);
+
+    // Получаем короткий URL из адресной строки
+    const shortUrl = window.location.pathname.split('/').pop();
+
+    database.ref('links/' + shortUrl).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+            const longUrl = snapshot.val().longUrl;
+            // Редирект на длинную ссылку
+            window.location.replace(longUrl);
+        } else {
+            // Если ссылки нет, загружаем страницу 404 из Firebase Storage
+            window.location.replace("https://firebasestorage.googleapis.com/v0/b/screamdev-ca68a.appspot.com/o/404main.html?alt=media");
+        }
+    });
+</script>
 
 </body>
 </html>
