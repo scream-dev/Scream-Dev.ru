@@ -10,6 +10,7 @@ To obtain permission to use the code freely or not completely freely for your ow
 ### [✈️Telegram](https://t.me/ScreamDev)
 ### [🥽Discord](https://scream-dev.ru/links/discord)
 ### [🐈GitHub](https://github.com/scream-dev/Scream-Dev.ru/pulls)
+### [👌Blog](https://t.me/+kotqKn3SoroxN2Iy)
 > There is no guarantee that you will get permission.
 ## Punishment
 For copyright infringement, there is a penalty, which is the court and the demolition of your repository as soon as possible. If you find my code in someone else's work, please let me know in Issues.
