@@ -35,9 +35,13 @@
             // Редирект на длинную ссылку
             window.location.replace(longUrl);
         } else {
-            // Если ссылки нет, загружаем страницу 404 из Firebase Storage
+            // Если ссылки нет, переходим на страницу 404 из Firebase Storage
             window.location.replace("https://firebasestorage.googleapis.com/v0/b/screamdev-ca68a.appspot.com/o/404main.html?alt=media");
         }
+    }).catch((error) => {
+        console.error('Ошибка при получении ссылки: ', error);
+        // Если произошла ошибка, используем страницу 404
+        window.location.replace("https://firebasestorage.googleapis.com/v0/b/screamdev-ca68a.appspot.com/o/404main.html?alt=media");
     });
 </script>
 
