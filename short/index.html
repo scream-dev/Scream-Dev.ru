@@ -9,25 +9,6 @@
 </head>
 <body>
 
-<div class="mailru-login-button" data-ui="login_as userpic" data-type="login" style="width: 300px; height: 48px;"></div>
-<script src="https://oauth.mail.ru/sdk/v0.18.0/oauth.js"></script>
-<script>
-    MR.init({
-        clientId: '31074291b6df4e11bb51053555211da7',
-        onlogin: function (state) {
-            if (state.user) {
-                console.info('MR.login:', state);
-                // Выводим имя пользователя для дальнейшей работы
-                window.username = state.user.name; // Учитываем имя для записи в базу
-            }
-        },
-        onlogout: function () {
-            console.info('MR.logout');
-            window.username = null; // Сбрасываем имя при выходе
-        }
-    });
-</script>
-
 <h1>Создать короткую ссылку</h1>
 <input type="text" id="longUrl" placeholder="Введите длинную ссылку" />
 <input type="text" id="shortUrl" placeholder="Введите короткий адрес (или оставьте пустым)" />
@@ -49,7 +30,7 @@
     // Инициализация Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const database = firebase.database(app);
-  
+
     function createLink() {
         const longUrl = document.getElementById("longUrl").value;
         let shortUrl = document.getElementById("shortUrl").value;
@@ -58,7 +39,6 @@
             shortUrl = Math.random().toString(36).substr(2, 5); // Генерируем случайный короткий URL
         }
 
-        const userId = window.username ? window.username : 'guest';
         const linkRef = database.ref('links/' + shortUrl);
 
         linkRef.once('value', (snapshot) => {
@@ -66,12 +46,15 @@
                 alert('Такой короткий адрес уже существует.');
             } else {
                 linkRef.set({
-                    longUrl: longUrl,
-                    createdBy: userId
+                    longUrl: longUrl
                 }).then(() => {
                     alert('Ссылка создана: short.url/' + shortUrl);
+                }).catch((error) => {
+                    console.error('Ошибка записи: ', error);
                 });
             }
+        }).catch((error) => {
+            console.error('Ошибка проверки: ', error);
         });
     }
 </script>
