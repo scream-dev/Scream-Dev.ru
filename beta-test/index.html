@@ -99,58 +99,13 @@
         <a href="/" class="back-link">Вернуться на главную</a>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
     <script>
-        // Ваши ключи для Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
-            authDomain: "screamdev-ca68a.firebaseapp.com",
-            databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
-            projectId: "screamdev-ca68a",
-            storageBucket: "screamdev-ca68a.firebasestorage.app",
-            messagingSenderId: "513024079698",
-            appId: "1:513024079698:web:912302891a5927df61ac8b",
-            measurementId: "G-W1N63CWZX9"
-        };
-
-        // Инициализация Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        // Получение текущего URL
-        const currentPage = window.location.pathname;
-
-        // Проверка существования страницы в Firebase
-        function checkPageExists() {
-            database.ref('/pages' + currentPage).once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        // Если код страницы существует, можно перенаправить или загрузить контент
-                        const pageData = snapshot.val();
-                        window.location.href = pageData.url; // Замените на необходимое действие
-                    } else {
-                        // Если страница не существует, показываем 404
-                        display404();
-                    }
-                })
-                .catch((error) => {
-                    console.error("Ошибка получения данных: ", error);
-                    display404(); // Показать 404 в случае ошибки
-                });
-        }
-
-        // Функция для отображения 404 страницы
-        function display404() {
+        // Анимация взрыва при загрузке страницы
+        window.onload = function() {
             const explosion = document.querySelector('.explosion');
             explosion.style.animationDelay = '0.5s'; // Задержка перед анимацией взрыва
             explosion.style.opacity = '1'; // Показать взрыв
             explosion.style.animation = 'explode 1s forwards'; // Запустить анимацию
-        }
-
-        // Анимация взрыва при загрузке страницы
-        window.onload = function() {
-            checkPageExists(); // Проверяем существование страницы при загрузке
         };
     </script>
 
