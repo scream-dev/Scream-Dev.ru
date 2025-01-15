@@ -1,1 +1,77 @@
-матвей негр чёрный
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Русская история в стихах и песнях</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reveal.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/theme/black.css" id="theme">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f9f9f9;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .download-btn {
+            display: block;
+            max-width: 200px;
+            margin: 20px auto;
+            padding: 10px;
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 600px) {
+            .download-btn {
+                width: 90%; /* Адаптация кнопки для мобильных устройств */
+            }
+            h1 {
+                font-size: 20px; /* Уменьшение размера заголовка для мобильных устройств */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Русская история в стихах и песнях</h1>
+    <div class="reveal">
+        <div class="slides">
+            <section>
+                <h2>Слайд 1</h2>
+                <p>Содержимое вашего первого слайда.</p>
+            </section>
+            <section>
+                <h2>Слайд 2</h2>
+                <p>Содержимое вашего второго слайда.</p>
+            </section>
+            <!-- Добавьте столько слайдов, сколько нужно -->
+        </div>
+    </div>
+    
+    <a class="download-btn" href="Русская история в стихах и песнях.pptx" download>Скачать презентацию</a>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.1.0/reveal.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            controls: true,
+            progress: true,
+            history: true,
+            center: true,
+            transition: 'slide', // none/fade/slide/convex/concave/zoom
+            width: "100%",  // Адаптация ширины
+            height: "100%"  // Адаптация высоты
+        });
+    </script>
+</body>
+</html>
