@@ -196,18 +196,6 @@
 <header>
     <h1><a href="/" style="color: white; text-decoration: none;">Scream [dev]</a></h1>
     <nav>
-            <script>
-        fetch('https://ipapi.co/json/')
-            .then(response => response.json())
-            .then(data => {
-                if (data.country === 'BG') {
-                    document.body.innerHTML = '<h1>Доступ к этому сайту из Болгарии запрещён.</h1>';
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-            });
-            </script>
         <script>
             let buttonsVisible = false; // Установите true для отображения кнопок, false для скрытия
         </script>
