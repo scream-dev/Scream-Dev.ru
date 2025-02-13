@@ -3,16 +3,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnNo = document.querySelector(".no-button");
 
     const prompts = [
-        "Are you sure?",
-        "Really sure??",
-        "Are you positive?",
-        "Pookie please...",
-        "Just think about it!",
-        "If you say no, I will be really sad...",
-        "I will be very sad...",
-        "I will be very very very sad...",
-        "Ok fine, I will stop asking...",
-        "Just kidding, say yes please! ❤️"
+        "Ты уверена?",
+        "Точно??",
+        "Точно хочешь?",
+        "Ну пожалуйста...",
+        "Просто подумай!",
+        "Но я же расстроюсь...",
+        "Я расстроен...",
+        "Я очень расстроен...",
+        "Ну, давай ещё один вопрос...",
+        "Шутка! Нажми уже да!❤️"
     ];
 
     let promptIndex = 0;
