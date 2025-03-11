@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Доступ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1s;
+        }
+        .input-field {
+            margin: 10px 0;
+            padding: 10px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .submit-btn {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <p id="message">Загрузка...</p>
+    </div>
+
+    <script type="module">
+        // Импорт Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+        // Конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
+            authDomain: "screamdev-ca68a.firebaseapp.com",
+            databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
+            projectId: "screamdev-ca68a",
+            storageBucket: "screamdev-ca68a.firebasestorage.app",
+            messagingSenderId: "513024079698",
+            appId: "1:513024079698:web:912302891a5927df61ac8b",
+            measurementId: "G-W1N63CWZX9"
+        };
+
+        // Инициализация Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // Ссылка на данные в Firebase
+        const alchRef = ref(database, 'alch');
+        const loginsRef = ref(database, 'logins');
+
+        // Отслеживание изменения значения alch
+        onValue(alchRef, (snapshot) => {
+            const alch = snapshot.val();
+            const container = document.getElementById('container');
+            const message = document.getElementById('message');
+
+            if (alch) {
+                container.innerHTML = `
+                    <input type="text" id="login" class="input-field" placeholder="Логин" maxlength="4" pattern="[a-z]{4}" required>
+                    <input type="number" id="number" class="input-field" placeholder="Число" maxlength="3" pattern="\d{3}" required>
+                    <button class="submit-btn" onclick="submitForm()">Отправить</button>
+                `;
+            } else {
+                message.innerText = "Сейчас доступ не разрешён";
+            }
+        });
+
+        // Функция для отправки данных
+        window.submitForm = function() {
+            const login = document.getElementById('login').value;
+            const number = document.getElementById('number').value;
+
+            if (login && number) {
+                set(ref(database, `logins/${login}`), number)
+                    .then(() => {
+                        alert('Данные успешно отправлены!');
+                    })
+                    .catch((error) => {
+                        alert('Ошибка при отправке данных: ' + error.message);
+                    });
+            } else {
+                alert('Пожалуйста, заполните все поля корректно.');
+            }
+        };
+    </script>
+</body>
+</html>
