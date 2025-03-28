@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Rotator</title>
+    <script>
+        function fetchLinks() {
+            return fetch('links.txt')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load links.txt');
+                    return response.text();
+                })
+                .then(text => {
+                    return text.split('\n')
+                        .map(line => line.trim())
+                        .filter(line => line.length > 0 && !line.startsWith('//'));
+                });
+        }
+
+        function redirectToNextLink() {
+            fetchLinks()
+                .then(links => {
+                    if (links.length === 0) {
+                        document.body.innerHTML = "<h1>No valid links found in links.txt</h1>";
+                        return;
+                    }
+
+                    let currentIndex = getCookie("linkag");
+                    if (currentIndex === "") {
+                        currentIndex = 0;
+                    } else {
+                        currentIndex = parseInt(currentIndex);
+                        currentIndex = (currentIndex + 1) % links.length;
+                    }
+
+                    setCookie("linkag", currentIndex, 30);
+                    window.location.href = links[currentIndex];
+                })
+                .catch(error => {
+                    document.body.innerHTML = `<h1>Error: ${error.message}</h1>`;
+                    console.error(error);
+                });
+        }
+
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/";
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return "";
+        }
+
+        window.onload = redirectToNextLink;
+    </script>
+</head>
+<body>
+    <p>Redirecting to the next link...</p>
+</body>
+</html>
