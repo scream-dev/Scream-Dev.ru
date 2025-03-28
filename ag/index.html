@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Rotator</title>
+    <title>AnarxGrif</title>
     <script>
         function fetchLinks() {
             return fetch('links.txt')
@@ -22,7 +22,7 @@
             fetchLinks()
                 .then(links => {
                     if (links.length === 0) {
-                        document.body.innerHTML = "<h1>No valid links found in links.txt</h1>";
+                        document.body.innerHTML = "<h1>Активных ссылок на сервере не найдено!</h1>";
                         return;
                     }
 
@@ -68,6 +68,6 @@
     </script>
 </head>
 <body>
-    <p>Redirecting to the next link...</p>
+    <p>Ищем для вас ссылку...</p>
 </body>
 </html>
