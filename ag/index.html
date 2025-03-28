@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AnarxGrif</title> # ючи гей
+    <title>AnarxGrif</title>
     <script>
         function fetchLinks() {
             return fetch('links.txt')
@@ -28,13 +28,16 @@
 
                     let currentIndex = getCookie("linkag");
                     if (currentIndex === "") {
+                        // Если куки нет, устанавливаем 1 (первая ссылка)
                         currentIndex = 0;
+                        setCookie("linkag", currentIndex, 30);
                     } else {
                         currentIndex = parseInt(currentIndex);
+                        // Увеличиваем индекс с зацикливанием
                         currentIndex = (currentIndex + 1) % links.length;
+                        setCookie("linkag", currentIndex, 30);
                     }
 
-                    setCookie("linkag", currentIndex, 30);
                     window.location.href = links[currentIndex];
                 })
                 .catch(error => {
