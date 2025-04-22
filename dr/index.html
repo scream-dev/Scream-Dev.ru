@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чтение dr.txt</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        pre {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Содержимое dr.txt</h1>
+    <button onclick="loadFile()">Обновить</button>
+    <pre id="output">Нажмите "Обновить" для загрузки данных...</pre>
+
+    <script>
+        async function loadFile() {
+            const output = document.getElementById('output');
+            output.textContent = "Загрузка...";
+            
+            try {
+                // GET-запрос к файлу
+                const response = await fetch('http://138.124.127.169:8000/ds/dr.txt', {
+                    method: 'GET',
+                    mode: 'cors', // Пробуем обойти CORS (но сервер должен разрешать!)
+                    headers: { 'Accept': 'text/plain' }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Ошибка HTTP: ${response.status}`);
+                }
+
+                const text = await response.text();
+                output.textContent = text;
+            } catch (error) {
+                output.textContent = `Ошибка: ${error.message}`;
+                console.error("Ошибка запроса:", error);
+            }
+        }
+    </script>
+</body>
+</html>
