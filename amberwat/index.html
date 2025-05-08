@@ -9,21 +9,19 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAztsNLVs9nElrvQtCZQA2ZF-jCUuPasZc",
             authDomain: "screamdev-ca68a.firebaseapp.com",
             databaseURL: "https://screamdev-ca68a-default-rtdb.firebaseio.com",
             projectId: "screamdev-ca68a",
-            storageBucket: "screamdev-ca68a.firebasestorage.app",
+            storageBucket: "screamdev-ca68a.appspot.com",
             messagingSenderId: "513024079698",
             appId: "1:513024079698:web:912302891a5927df61ac8b",
             measurementId: "G-W1N63CWZX9"
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const database = getDatabase(app);
         const counterRef = ref(database, 'commandCounter');
 
@@ -95,9 +93,10 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
             opacity: 0;
             animation: fadeIn 0.5s forwards;
+            position: relative;
+            padding-bottom: 60px;
         }
 
         @keyframes fadeIn {
@@ -116,18 +115,11 @@
             margin: 0 auto;
             transform: scale(0.98);
             transition: transform 0.2s;
+            flex-grow: 1;
         }
 
         .container:hover {
             transform: scale(1);
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
         }
 
         h1 {
@@ -135,23 +127,7 @@
             text-align: center;
             text-shadow: 2px 2px 0 var(--border-color);
             animation: pulse 2s infinite;
-            margin: 0;
-            flex-grow: 1;
-        }
-
-        .counter {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 1.2em;
-            margin-left: 15px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+            margin: 0 0 20px 0;
         }
 
         @keyframes pulse {
@@ -335,44 +311,24 @@
             to { width: 100% }
         }
 
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: #333;
-            color: #fff;
+        .footer-counter {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             text-align: center;
-            border-radius: 6px;
-            padding: 8px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.9em;
+            padding: 15px;
+            background-color: rgba(0,0,0,0.7);
+            font-size: 1.5em;
+            z-index: 100;
         }
 
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
+        .footer-counter span {
+            color: var(--accent-color);
+            font-weight: bold;
         }
 
         @media (max-width: 600px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .counter {
-                margin: 10px 0 0 0;
-            }
-            
             button {
                 width: 100%;
                 max-width: 220px;
@@ -387,12 +343,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>ГЕНЕРАТОР ЦЕНТРИРОВАННОГО ТЕКСТА</h1>
-            <div class="counter">
-                Создано команд: <span id="counter">0</span>
-            </div>
-        </div>
+        <h1>ГЕНЕРАТОР ЦЕНТРИРОВАННОГО ТЕКСТА</h1>
         
         <div class="input-group">
             <label>ВЕРХНЯЯ СТРОКА (центр):</label>
@@ -405,10 +356,7 @@
         </div>
         
         <button id="generate">
-            <span class="tooltip">
-                СОЗДАТЬ КОМАНДУ
-                <span class="tooltiptext">Нажмите, чтобы сгенерировать команду</span>
-            </span>
+            СОЗДАТЬ КОМАНДУ
         </button>
         
         <div id="preview">
@@ -420,12 +368,13 @@
             <p style="margin-bottom: 15px; font-size: 1.1em;">КОМАНДА ДЛЯ MINECRAFT:</p>
             <code id="command"></code>
             <button class="copy-btn">
-                <span class="tooltip">
-                    КОПИРОВАТЬ
-                    <span class="tooltiptext">Нажмите, чтобы скопировать команду</span>
-                </span>
+                КОПИРОВАТЬ
             </button>
         </div>
+    </div>
+
+    <div class="footer-counter">
+        Всего создано команд: <span id="counter">0</span>
     </div>
 
     <script>
@@ -467,14 +416,14 @@
             const text2Width = text2.length * 6;
             const bossbarWidth = 182;
             
-            // Первая строка - строго по центру
-            const space1 = Math.round((bossbarWidth - text1Width) / 2);
+            // Первая строка - строго по центру без пробелов
+            const space1 = 0;
             
             // Вторая строка - сдвиг влево (фиксированный отступ 30px от левого края)
             const space2 = Math.round(bossbarWidth - text2Width - 30);
             
             // Генерируем команду
-            const command = `/bossbar set minecraft:test name ["",{"translate":"space.${space1}"},{"text":"${text1}"},{"translate":"space.-${space1 + space2}"},{"text":"${text2}","font":"minecraft:line_3"}]`;
+            const command = `/bossbar set minecraft:test name [{"text":"${text1}"},{"translate":"space.-${space2}"},{"text":"${text2}","font":"minecraft:line_3"}]`;
             
             // Показываем команду с анимацией
             document.getElementById('command').textContent = '';
@@ -507,7 +456,7 @@
             const alert = document.createElement('div');
             alert.textContent = message;
             alert.style.position = 'fixed';
-            alert.style.bottom = '20px';
+            alert.style.bottom = '60px';
             alert.style.left = '50%';
             alert.style.transform = 'translateX(-50%)';
             alert.style.backgroundColor = 'var(--primary-color)';
