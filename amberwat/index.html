@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор центрированного текста для Minecraft</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2d3748;
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 4px;
+            border-left: 4px solid #4CAF50;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .copy-btn {
+            background-color: #2196F3;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #0b7dda;
+        }
+        .info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Генератор центрированного текста для Minecraft</h1>
+        
+        <div class="input-group">
+            <label for="text1">Первая строка текста:</label>
+            <input type="text" id="text1" placeholder="Введите текст (например: Привет, AnGrTea!)">
+        </div>
+        
+        <div class="input-group">
+            <label for="text2">Вторая строка текста:</label>
+            <input type="text" id="text2" placeholder="Введите текст (например: Хороший день, AnGrTea!)">
+        </div>
+        
+        <div class="input-group">
+            <label for="font1">Шрифт первой строки:</label>
+            <select id="font1">
+                <option value="minecraft:default">Стандартный</option>
+                <option value="minecraft:uniform">Uniform</option>
+                <option value="minecraft:alt">Alt</option>
+            </select>
+        </div>
+        
+        <div class="input-group">
+            <label for="font2">Шрифт второй строки:</label>
+            <select id="font2">
+                <option value="minecraft:line_3">Line 3 (высота 3px)</option>
+                <option value="minecraft:default">Стандартный</option>
+                <option value="minecraft:uniform">Uniform</option>
+            </select>
+        </div>
+        
+        <button id="generate">Сгенерировать команду</button>
+        
+        <div id="output" style="display: none;">
+            <p>Скопируйте эту команду:</p>
+            <code id="command"></code>
+            <button class="copy-btn" onclick="copyToClipboard()">Копировать команду</button>
+            <p class="info">* Для работы команды требуется установленный ресурс-пак Negative Space Font</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('generate').addEventListener('click', function() {
+            const text1 = document.getElementById('text1').value.trim();
+            const text2 = document.getElementById('text2').value.trim();
+            const font1 = document.getElementById('font1').value;
+            const font2 = document.getElementById('font2').value;
+            
+            if (!text1 || !text2) {
+                alert("Пожалуйста, введите обе строки текста!");
+                return;
+            }
+            
+            // Рассчитываем примерную ширину текста (очень приблизительно)
+            // В Minecraft ширина символов разная, но для простоты будем считать 6px на символ
+            const text1Width = text1.length * 6;
+            const text2Width = text2.length * 6;
+            
+            // Рассчитываем отступы для центрирования
+            // Боссбар имеет ширину примерно 182 пикселя
+            const bossbarWidth = 182;
+            
+            const space1 = Math.round((bossbarWidth - text1Width) / 2);
+            const space2 = Math.round((bossbarWidth - text2Width) / 2);
+            
+            // Создаем JSON-компоненты
+            const components = [
+                '["",',
+                `{"translate":"space.${space1}"},`,
+                `{"text":"${text1}","font":"${font1}"},`,
+                `{"translate":"space.-${space1 + space2}"},`,
+                `{"text":"${text2}","font":"${font2}"}`,
+                ']'
+            ].join('');
+            
+            const command = `/bossbar set minecraft:test name ${components}`;
+            
+            document.getElementById('command').textContent = command;
+            document.getElementById('output').style.display = 'block';
+        });
+        
+        function copyToClipboard() {
+            const commandText = document.getElementById('command').textContent;
+            navigator.clipboard.writeText(commandText).then(function() {
+                alert("Команда скопирована в буфер обмена!");
+            }, function() {
+                alert("Не удалось скопировать команду. Попробуйте выделить и скопировать вручную.");
+            });
+        }
+    </script>
+</body>
+</html>
