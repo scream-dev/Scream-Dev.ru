@@ -13,6 +13,7 @@
             --user-msg: #4a6b3a;
             --bot-msg: #3a4a6b;
             --text: #e0e0e0;
+            --code-bg: #252525;
         }
 
         * {
@@ -100,11 +101,35 @@
         }
 
         .message pre {
-            background-color: rgba(0, 0, 0, 0.3);
+            background-color: var(--code-bg);
             padding: 0.5rem;
             border-radius: 4px;
             overflow-x: auto;
             white-space: pre-wrap;
+            position: relative;
+            margin: 0.5rem 0;
+        }
+
+        .code-block {
+            position: relative;
+        }
+
+        .copy-code-button {
+            position: absolute;
+            right: 0.5rem;
+            top: 0.5rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s;
+        }
+
+        .copy-code-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         .input-container {
@@ -192,23 +217,6 @@
                 width: 100%;
             }
         }
-
-        .copy-button {
-            background-color: rgba(255, 255, 255, 0.1);
-            border: none;
-            color: white;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin-top: 0.5rem;
-            float: right;
-            transition: background-color 0.2s;
-        }
-
-        .copy-button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
     </style>
 </head>
 <body>
@@ -249,7 +257,7 @@
             } catch (error) {
                 console.error('Error loading mega prompt:', error);
                 // Стандартный промт на случай ошибки загрузки
-                megaPrompt = `哭哭Ты эксперт по Minecraft, специализирующийся на создании команд. Твоя задача - помогать пользователям генерировать точные и эффективные команды для Minecraft. Всегда предоставляй готовые к использованию команды с пояснениями. Если пользователь просит что-то не связанное с Minecraft, вежливо откажи, объяснив, что ты специализируешься только на командах Minecraft.哭哭`;
+                megaPrompt = `哭哭Ты эксперт по Minecraft, специализирующийся на создании команд. Твоя задача - помогать пользователям генерировать точные и эффективные команды для Minecraft. Всегда предоставляй готовые к использованию команды с пояснениями. Форматируй команды в блоки кода с помощью тройных обратных кавычек (```). Если пользователь просит что-то не связанное с Minecraft, вежливо откажи, объяснив, что ты специализируешься только на командах Minecraft.哭哭`;
             }
         }
         
@@ -353,15 +361,15 @@
                 // Обработка форматирования (код, переносы строк)
                 let formattedContent = content;
                 
-                // Заменяем ``` на блоки кода
-                formattedContent = formattedContent.replace(/```([\s\S]*?)```/g, '<pre>$1</pre>');
+                // Заменяем ```код``` на блоки кода с кнопкой копирования
+                formattedContent = formattedContent.replace(/```([\s\S]*?)```/g, 
+                    '<div class="code-block"><pre>$1</pre><button class="copy-code-button" onclick="copyCodeToClipboard(this)">Копировать</button></div>');
                 
                 // Заменяем переносы строк на <br>
                 formattedContent = formattedContent.replace(/\n/g, '<br>');
                 
                 messageElement.innerHTML = `
                     <div class="message-content">${formattedContent}</div>
-                    ${role === 'assistant' ? '<button class="copy-button" onclick="copyToClipboard(this)">Копировать</button>' : ''}
                 `;
                 
                 chatContainer.appendChild(messageElement);
@@ -369,10 +377,10 @@
             }
         });
         
-        // Функция копирования текста в буфер обмена
-        window.copyToClipboard = function(button) {
-            const messageContent = button.parentElement.querySelector('.message-content');
-            const textToCopy = messageContent.textContent;
+        // Функция копирования кода в буфер обмена
+        window.copyCodeToClipboard = function(button) {
+            const codeBlock = button.parentElement.querySelector('pre');
+            const textToCopy = codeBlock.textContent;
             
             // Создаем временный textarea для копирования
             const textarea = document.createElement('textarea');
@@ -383,9 +391,10 @@
             document.body.removeChild(textarea);
             
             // Меняем текст кнопки на короткое время
+            const originalText = button.textContent;
             button.textContent = 'Скопировано!';
             setTimeout(() => {
-                button.textContent = 'Копировать';
+                button.textContent = originalText;
             }, 2000);
         };
     </script>
