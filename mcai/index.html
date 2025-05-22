@@ -171,6 +171,11 @@
             background-color: var(--secondary);
         }
 
+        #send-button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+
         .typing-indicator {
             display: none;
             padding: 0.8rem 1rem;
@@ -246,25 +251,10 @@
     <script>
         // Глобальные переменные
         let chatHistory = [];
-        let megaPrompt = '';
-        
-        // Загрузка мегапромта из файла
-        async function loadMegaPrompt() {
-            try {
-                const response = await fetch('prompt.txt');
-                if (!response.ok) throw new Error('Failed to load prompt');
-                megaPrompt = await response.text();
-            } catch (error) {
-                console.error('Error loading mega prompt:', error);
-                // Стандартный промт на случай ошибки загрузки
-                megaPrompt = `哭哭Ты эксперт по Minecraft, специализирующийся на создании команд. Твоя задача - помогать пользователям генерировать точные и эффективные команды для Minecraft. Всегда предоставляй готовые к использованию команды с пояснениями. Форматируй команды в блоки кода с помощью тройных обратных кавычек (```). Если пользователь просит что-то не связанное с Minecraft, вежливо откажи, объяснив, что ты специализируешься только на командах Minecraft.哭哭`;
-            }
-        }
+        const megaPrompt = `哭哭Ты эксперт по Minecraft, специализирующийся на создании команд. Твоя задача - помогать пользователям генерировать точные и эффективные команды для Minecraft. Всегда предоставляй готовые к использованию команды с пояснениями. Форматируй команды в блоки кода с помощью тройных обратных кавычек (\`\`\`). Если пользователь просит что-то не связанное с Minecraft, вежливо откажи, объяснив, что ты специализируешься только на командах Minecraft.哭哭`;
         
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', () => {
-            loadMegaPrompt();
-            
             const userInput = document.getElementById('user-input');
             const sendButton = document.getElementById('send-button');
             const chatContainer = document.getElementById('chat-container');
@@ -275,7 +265,7 @@
             
             // Отправка сообщения по нажатию Enter
             userInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !sendButton.disabled) {
                     sendMessage();
                 }
             });
@@ -287,6 +277,11 @@
             async function sendMessage() {
                 const message = userInput.value.trim();
                 if (!message) return;
+                
+                // Блокируем кнопку отправки и поле ввода
+                sendButton.disabled = true;
+                userInput.disabled = true;
+                sendButton.textContent = 'Отправка...';
                 
                 // Добавляем сообщение пользователя в чат
                 addMessageToChat('user', message);
@@ -313,26 +308,8 @@
                 });
                 
                 try {
-                    // Отправляем запрос к API
-                    const response = await fetch('https://api.onlysq.ru/ai/v2', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            model: 'gpt-4o-mini',
-                            request: {
-                                messages: chatHistory
-                            }
-                        })
-                    });
-                    
-                    if (!response.ok) throw new Error('API request failed');
-                    
-                    const data = await response.json();
-                    
-                    // Получаем ответ от бота
-                    const botResponse = data.choices[0].message.content;
+                    // Эмуляция API для демонстрации (замените на реальный вызов API)
+                    const botResponse = await emulateAPIRequest(prompt);
                     
                     // Добавляем ответ в историю
                     chatHistory.push({
@@ -349,6 +326,29 @@
                     // Скрываем индикатор набора
                     typingIndicator.style.display = 'none';
                     chatContainer.scrollTop = chatContainer.scrollHeight;
+                    
+                    // Разблокируем кнопку отправки и поле ввода
+                    sendButton.disabled = false;
+                    userInput.disabled = false;
+                    sendButton.textContent = 'Отправить';
+                    userInput.focus();
+                }
+            }
+            
+            // Функция эмуляции API (замените на реальный вызов API)
+            async function emulateAPIRequest(prompt) {
+                // Имитация задержки сети
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Пример ответа для разных запросов
+                if (prompt.toLowerCase().includes('телепорт')) {
+                    return `Для телепортации игрока используйте эту команду:\n\n\`\`\`\n/tp @p x y z\n\`\`\`\nГде:\n- @p - выбор ближайшего игрока\n- x, y, z - координаты назначения\n\nПример:\n\`\`\`\n/tp @p 100 64 -200\n\`\`\``;
+                } else if (prompt.toLowerCase().includes('предмет')) {
+                    return `Чтобы выдать предмет игроку:\n\n\`\`\`\n/give @p minecraft:item_id amount\n\`\`\`\nПример (выдать 5 алмазов):\n\`\`\`\n/give @p minecraft:diamond 5\n\`\`\``;
+                } else if (prompt.toLowerCase().includes('погода')) {
+                    return `Команды управления погодой:\n\n\`\`\`\n/weather clear - ясная погода\n/weather rain - дождь\n/weather thunder - гроза\n\`\`\`\nДлительность (в секундах, необязательно):\n\`\`\`\n/weather clear 60\n\`\`\``;
+                } else {
+                    return `Вот команда, которая может вам помочь:\n\n\`\`\`\n/say Ваш текст здесь\n\`\`\`\nЭта команда выводит сообщение в чат для всех игроков. Вы можете заменить "Ваш текст здесь" на нужное сообщение.`;
                 }
             }
             
