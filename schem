@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Красивые кнопки с изображениями</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --text-color: #333;
+            --button-bg: #fff;
+            --button-shadow: rgba(0, 0, 0, 0.1);
+            --hover-effect: brightness(0.95);
+            --max-button-size: 250px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #1a1a1a;
+                --text-color: #f0f0f0;
+                --button-bg: #2d2d2d;
+                --button-shadow: rgba(0, 0, 0, 0.3);
+                --hover-effect: brightness(1.2);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .buttons-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, var(--max-button-size)));
+            gap: 30px;
+            width: 100%;
+            max-width: calc(4 * var(--max-button-size) + 3 * 30px);
+            margin-bottom: 40px;
+        }
+
+        .button-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .button-title {
+            font-weight: 500;
+            text-align: center;
+            max-width: var(--max-button-size);
+            opacity: 0.9;
+        }
+
+        .button {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1/1;
+            max-width: var(--max-button-size);
+            background-color: var(--button-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 20px var(--button-shadow);
+            overflow: hidden;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+            padding: 0;
+        }
+
+        .button:hover {
+            transform: translateY(-5px);
+            filter: var(--hover-effect);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .button:hover::after {
+            opacity: 1;
+        }
+
+        .counter {
+            margin-top: 40px;
+            opacity: 0.7;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .buttons-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .button-title {
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .buttons-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            :root {
+                --max-button-size: 200px;
+            }
+        }
+
+        /* Анимация загрузки */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="buttons-container">
+        <!-- Кнопка 1 -->
+        <div class="button-wrapper">
+            <a href="https://example.com/link1" class="button" target="_blank">
+                <img src="image1.jpg" alt="Описание изображения 1">
+            </a>
+            <div class="button-title">Название 1</div>
+        </div>
+        
+        <!-- Кнопка 2 -->
+        <div class="button-wrapper">
+            <a href="https://example.com/link2" class="button" target="_blank">
+                <img src="image2.jpg" alt="Описание изображения 2">
+            </a>
+            <div class="button-title">Название 2</div>
+        </div>
+        
+        <!-- Кнопка 3 -->
+        <div class="button-wrapper">
+            <a href="https://example.com/link3" class="button" target="_blank">
+                <img src="image3.jpg" alt="Описание изображения 3">
+            </a>
+            <div class="button-title">Название 3</div>
+        </div>
+        
+        <!-- Кнопка 4 -->
+        <div class="button-wrapper">
+            <a href="https://example.com/link4" class="button" target="_blank">
+                <img src="image4.jpg" alt="Описание изображения 4">
+            </a>
+            <div class="button-title">Название 4</div>
+        </div>
+    </div>
+
+    <!-- Счётчик просмотров -->
+    <div class="counter">
+        <img src="https://count.getloli.com/@Просмотры?name=%D0%9F%D1%80%D0%BE%D1%81%D0%BC%D0%BE%D1%82%D1%80%D1%8B&theme=random&padding=1&offset=0&align=top&scale=1&pixelated=1&darkmode=auto" alt="Просмотры">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Анимация появления элементов
+            const elements = document.querySelectorAll('.button-wrapper, .counter');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    el.classList.add('animate');
+                }, 100 * index);
+            });
+            
+            // Динамическое изменение размера кнопок для очень больших экранов
+            function adjustButtonSize() {
+                const container = document.querySelector('.buttons-container');
+                const containerWidth = container.offsetWidth;
+                const maxButtonSize = Math.min(250, containerWidth / 4 - 30);
+                document.documentElement.style.setProperty('--max-button-size', `${maxButtonSize}px`);
+            }
+            
+            window.addEventListener('resize', adjustButtonSize);
+            adjustButtonSize();
+        });
+    </script>
+</body>
+</html>
