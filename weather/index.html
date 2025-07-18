@@ -5,58 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Погода в Нижнекамске</title>
     <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --widget-bg: #fff;
+            --text-color: #333;
+            --secondary-text: #555;
+            --button-bg: #007BFF;
+            --button-hover: #0056b3;
+            --forecast-bg: #f9f9f9;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212;
+                --widget-bg: #1e1e1e;
+                --text-color: #f0f0f0;
+                --secondary-text: #aaaaaa;
+                --button-bg: #1a73e8;
+                --button-hover: #0d5bba;
+                --forecast-bg: #2d2d2d;
+            }
+        }
+
         body {
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            margin: 0; 
-            padding: 20px; 
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
             text-align: center;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         #weather-widget {
-            margin-top: 20px; 
-            padding: 20px; 
-            background: #fff; 
-            border-radius: 10px; 
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            transition: all 0.5s ease; 
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            background: var(--widget-bg);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.3s ease;
             animation: fadeIn 0.5s;
         }
 
         @keyframes fadeIn {
             from {
-                opacity: 0; 
+                opacity: 0;
                 transform: translateY(-20px);
             }
             to {
-                opacity: 1; 
+                opacity: 1;
                 transform: translateY(0);
             }
         }
 
         @keyframes fadeOut {
             from {
-                opacity: 1; 
+                opacity: 1;
             }
             to {
-                opacity: 0; 
+                opacity: 0;
             }
         }
 
         .temperature {
-            font-size: 80px; 
-            color: #333; 
+            font-size: clamp(50px, 10vw, 80px);
+            color: var(--text-color);
             margin: 20px 0;
             transition: all 0.3s ease;
         }
 
         .weather-icon {
-            width: 120px; 
-            height: auto; 
-            margin: 20px 0; 
+            width: clamp(80px, 20vw, 120px);
+            height: auto;
+            margin: 20px 0;
             animation: bounce 0.5s;
         }
 
@@ -73,129 +98,99 @@
         }
 
         .weather-description {
-            font-size: 24px; 
-            color: #555;
+            font-size: clamp(18px, 4vw, 24px);
+            color: var(--secondary-text);
         }
 
         .forecast {
-            display: flex; 
-            justify-content: center; 
-            margin-top: 20px; 
-            gap: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px auto;
+            gap: 10px;
+            max-width: 600px;
         }
 
         .forecast-item {
-            background: #f9f9f9; 
-            border-radius: 10px; 
-            padding: 15px; 
-            text-align: center; 
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
-            flex: 1; 
-            transition: all 0.3s ease; 
+            background: var(--forecast-bg);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex: 1 1 120px;
+            min-width: 120px;
+            transition: all 0.3s ease;
             cursor: pointer;
         }
 
         .forecast-item:hover {
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); 
-            transform: scale(1.05); 
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            transform: scale(1.05);
         }
 
         .morning, .evening, .tomorrow {
-            font-size: 18px; 
-            color: #555;
+            font-size: clamp(14px, 3vw, 18px);
+            color: var(--secondary-text);
         }
 
         .back-today {
-            display: none; 
-            margin-top: 20px;
+            display: none;
+            margin: 20px auto;
             padding: 10px 20px;
             border: none;
-            border-radius: 10px; 
-            background-color: #fff; 
-            color: #333; 
-            font-size: 18px; 
+            border-radius: 10px;
+            background-color: var(--button-bg);
+            color: white;
+            font-size: clamp(14px, 3vw, 18px);
             cursor: pointer;
-            transition: background-color 0.3s, box-shadow 0.3s;
+            transition: background-color 0.3s;
+            max-width: 200px;
         }
 
         .back-today:hover {
-            background-color: #f0f0f0; 
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            background-color: var(--button-hover);
         }
 
-        .back-arrow {
-            display: none;
-            font-size: 24px;
-            margin-right: 10px;
-            cursor: pointer;
-            color: #333;
-            transition: transform 0.3s;
-        }
-
-        .back-arrow:hover {
-            transform: translateX(-5px);
-        }
-
-        /* Центрируем кнопку */
         .button-container {
             display: flex;
             justify-content: center;
         }
 
         .city-buttons {
-            margin-top: 30px;
+            margin: 30px auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 600px;
         }
 
         .city-button {
-            margin: 0 10px;
             padding: 10px 15px;
             border: none;
             border-radius: 5px;
-            background-color: #007BFF;
+            background-color: var(--button-bg);
             color: white;
-            font-size: 16px;
+            font-size: clamp(12px, 3vw, 16px);
             cursor: pointer;
             transition: background-color 0.3s;
+            flex: 1 1 120px;
+            min-width: 120px;
         }
 
         .city-button:hover {
-            background-color: #0056b3;
+            background-color: var(--button-hover);
         }
 
-        .title-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        @media (max-width: 600px) {
-            .temperature {
-                font-size: 60px;
-            }
-
-            .weather-icon {
-                width: 80px;
-            }
-
-            .weather-description {
-                font-size: 20px;
-            }
-
-            .forecast-item {
-                flex-basis: 40%;
-            }
-
-            .city-button {
-                font-size: 14px;
-            }
+        h1 {
+            font-size: clamp(20px, 5vw, 28px);
+            margin: 0 auto;
+            max-width: 600px;
         }
     </style>
 </head>
 <body>
-    <div class="title-container">
-        <span id="back-arrow" class="back-arrow">←</span>
-        <h1 id="weather-title">Прогноз погоды в Нижнекамске</h1>
-    </div>
+    <h1 id="weather-title">Прогноз погоды в Нижнекамске</h1>
     <div id="weather-widget">
         <div class="weather-description" id="weather-description"></div>
         <div class="temperature" id="temperature"></div>
@@ -221,7 +216,7 @@
     <div class="city-buttons">
         <button id="nch-button" class="city-button">Набережные Челны</button>
         <button id="kazan-button" class="city-button">Казань</button>
-        <button id="nizhnekamsk-button" class="city-button">Нижнекамск</button> 
+        <button id="nizhnekamsk-button" class="city-button">Нижнекамск</button>
     </div>
 
     <script>
@@ -236,7 +231,8 @@
         let weatherData = {
             morning: {temperature: 0, conditionCode: 1},
             evening: {temperature: 0, conditionCode: 1},
-            tomorrow: {temperature: 0, conditionCode: 1}
+            tomorrow: {temperature: 0, conditionCode: 1},
+            current: {temperature: 0, conditionCode: 1}
         };
 
         // Функция для работы с куками
@@ -299,20 +295,25 @@
                 try {
                     const temperature = await fetchTemperature();
                     currentWeather = { temperature };
-                    displayCurrentWeather(temperature);
+                    
+                    const openMeteoData = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cityCoordinates[currentCity].latitude}&longitude=${cityCoordinates[currentCity].longitude}&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Moscow`);
+                    const weather = await openMeteoData.json();
 
-                    const tomorrowWeatherData = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${cityCoordinates[currentCity].latitude}&longitude=${cityCoordinates[currentCity].longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Moscow`);
-                    const tomorrowWeather = await tomorrowWeatherData.json();
+                    // Обновляем данные текущей погоды
+                    weatherData.current.temperature = temperature;
+                    weatherData.current.conditionCode = weather.current_weather.weathercode;
 
-                    weatherData.tomorrow.temperature = tomorrowWeather.daily.temperature_2m_max[1];
-                    weatherData.tomorrow.conditionCode = tomorrowWeather.daily.weathercode[1];
+                    // Обновляем прогнозные данные
+                    weatherData.tomorrow.temperature = weather.daily.temperature_2m_max[1];
+                    weatherData.tomorrow.conditionCode = weather.daily.weathercode[1];
 
-                    weatherData.morning.temperature = tomorrowWeather.daily.temperature_2m_min[1];
-                    weatherData.evening.temperature = tomorrowWeather.daily.temperature_2m_max[0];
+                    weatherData.morning.temperature = weather.daily.temperature_2m_min[1];
+                    weatherData.evening.temperature = weather.daily.temperature_2m_max[0];
 
-                    weatherData.morning.conditionCode = tomorrowWeather.daily.weathercode[1];
-                    weatherData.evening.conditionCode = tomorrowWeather.daily.weathercode[0];
+                    weatherData.morning.conditionCode = weather.daily.weathercode[1];
+                    weatherData.evening.conditionCode = weather.daily.weathercode[0];
 
+                    displayCurrentWeather();
                     updateForecastUI();
 
                     // Сохраняем данные в куки
@@ -337,16 +338,15 @@
             currentWeather = cachedData.currentWeather;
             weatherData = cachedData.weatherData;
             
-            displayCurrentWeather(currentWeather.temperature);
+            displayCurrentWeather();
             updateForecastUI();
         }
 
-        function displayCurrentWeather(temperature) {
-            document.getElementById('temperature').textContent = `${temperature}°C`;
-            document.getElementById('weather-description').textContent = 'Облачно';
-            updateWeatherIcon(1);
+        function displayCurrentWeather() {
+            document.getElementById('temperature').textContent = `${weatherData.current.temperature}°C`;
+            document.getElementById('weather-description').textContent = getWeatherDescription(weatherData.current.conditionCode);
+            updateWeatherIcon(weatherData.current.conditionCode);
             document.getElementById('back-today').style.display = 'none';
-            document.getElementById('back-arrow').style.display = 'none';
             document.getElementById('weather-title').textContent = `Прогноз погоды в ${currentCity}`;
         }
 
@@ -360,7 +360,7 @@
         function updateForecastUI() {
             document.getElementById('tomorrow-forecast').innerHTML = `<div class="tomorrow" onclick="showWeatherDetails('Завтра')">Завтра: ${weatherData.tomorrow.temperature}°C</div>`;
             document.getElementById('morning-weather').innerHTML = `Утро: ${weatherData.morning.temperature}°C`;
-            document.getElementById('evening-weather').innerHTML = `Вечер: ${weatherData.evening.temperature}°C`;    
+            document.getElementById('evening-weather').innerHTML = `Вечер: ${weatherData.evening.temperature}°C`;
         }
 
         function showWeatherDetails(timeOfDay) {
@@ -391,27 +391,24 @@
 
             document.getElementById('temperature').style.opacity = 0;
             document.getElementById('weather-description').style.opacity = 0;
+            document.getElementById('weather-icon').style.opacity = 0;
+            
             setTimeout(() => {
                 document.getElementById('temperature').textContent = `${temp}°C`;
                 document.getElementById('weather-description').textContent = description || 'Облачно';
-
                 updateWeatherIcon(conditionCode);
 
                 document.getElementById('temperature').style.opacity = 1;
                 document.getElementById('weather-description').style.opacity = 1;
+                document.getElementById('weather-icon').style.opacity = 1;
                 
-                // Показываем кнопку "назад" и стрелку
+                // Показываем кнопку "назад"
                 document.getElementById('back-today').style.display = 'inline-block';
-                document.getElementById('back-arrow').style.display = 'inline-block';
             }, 300);
         }
 
         document.getElementById('back-today').onclick = function() {
-            displayCurrentWeather(currentWeather.temperature);
-        }
-
-        document.getElementById('back-arrow').onclick = function() {
-            displayCurrentWeather(currentWeather.temperature);
+            displayCurrentWeather();
         }
 
         document.getElementById('nch-button').onclick = function() {
@@ -433,24 +430,44 @@
         }
 
         function getWeatherIcon(code) {
+            // Коды погоды согласно API Open-Meteo
             switch (code) {
-                case 0:
-                    return 'https://img.icons8.com/ios/452/sun.png'; // Ясно
-                case 1:
-                case 2:
-                case 3:
-                    return 'https://img.icons8.com/ios/452/cloud.png'; // Облачно
-                case 61:
-                case 63:
-                    return 'https://img.icons8.com/ios/452/rain.png'; // Дождь
-                case 71:
-                case 73:
-                    return 'https://img.icons8.com/ios/452/snow.png'; // Снег
-                case 45:
-                case 48:
-                    return 'https://img.icons8.com/ios/452/fog.png'; // Туман
+                case 0: // Ясно
+                    return 'https://img.icons8.com/ios/452/sun.png';
+                case 1: // Преимущественно ясно
+                case 2: // Переменная облачность
+                case 3: // Пасмурно
+                    return 'https://img.icons8.com/ios/452/cloud.png';
+                case 45: // Туман
+                case 48: // Иней
+                    return 'https://img.icons8.com/ios/452/fog.png';
+                case 51: // Легкая морось
+                case 53: // Умеренная морось
+                case 55: // Сильная морось
+                case 56: // Ледяная морось
+                case 57: // Сильная ледяная морось
+                case 61: // Небольшой дождь
+                case 63: // Умеренный дождь
+                case 65: // Сильный дождь
+                case 66: // Ледяной дождь
+                case 67: // Сильный ледяной дождь
+                case 80: // Небольшие ливни
+                case 81: // Умеренные ливни
+                case 82: // Сильные ливни
+                    return 'https://img.icons8.com/ios/452/rain.png';
+                case 71: // Небольшой снег
+                case 73: // Умеренный снег
+                case 75: // Сильный снег
+                case 77: // Снежные зерна
+                case 85: // Небольшие снегопады
+                case 86: // Сильные снегопады
+                    return 'https://img.icons8.com/ios/452/snow.png';
+                case 95: // Гроза
+                case 96: // Гроза с небольшим градом
+                case 99: // Гроза с сильным градом
+                    return 'https://img.icons8.com/ios/452/storm.png';
                 default:
-                    return 'https://img.icons8.com/ios/452/weather.png'; // По умолчанию
+                    return 'https://img.icons8.com/ios/452/weather.png';
             }
         }
 
@@ -459,18 +476,44 @@
                 case 0:
                     return 'Ясно';
                 case 1:
+                    return 'Преимущественно ясно';
                 case 2:
+                    return 'Переменная облачность';
                 case 3:
-                    return 'Облачно';
+                    return 'Пасмурно';
                 case 45:
                 case 48:
                     return 'Туман';
+                case 51:
+                case 53:
+                case 55:
+                    return 'Морось';
+                case 56:
+                case 57:
+                    return 'Ледяная морось';
                 case 61:
                 case 63:
+                case 65:
                     return 'Дождь';
+                case 66:
+                case 67:
+                    return 'Ледяной дождь';
                 case 71:
                 case 73:
+                case 75:
+                case 77:
                     return 'Снег';
+                case 80:
+                case 81:
+                case 82:
+                    return 'Ливни';
+                case 85:
+                case 86:
+                    return 'Снегопад';
+                case 95:
+                case 96:
+                case 99:
+                    return 'Гроза';
                 default:
                     return '';
             }
@@ -479,8 +522,8 @@
         // Первоначальное получение погоды
         fetchWeather();
 
-        // Устанавливаем интервал обновления каждые 30 секунд
-        setInterval(fetchWeather, 30000);
+        // Устанавливаем интервал обновления каждые 10 минут
+        setInterval(fetchWeather, 600000);
     </script>
 </body>
 </html>
