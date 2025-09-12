@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 8 Ball с нейросетью</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .eight-ball {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #333, #000);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8), inset 0 0 50px rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.5s;
+        }
+
+        .eight-ball:hover {
+            transform: scale(1.05);
+        }
+
+        .eight-ball-inner {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 70px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+
+        .answer-window {
+            position: absolute;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .answer-visible {
+            opacity: 1;
+        }
+
+        .question-form {
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            background: linear-gradient(45deg, #00b4db, #0083b0);
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #0083b0, #00b4db);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .training-panel {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            width: 100%;
+        }
+
+        .training-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .training-log {
+            height: 200px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 15px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Магический шар восьмёрка с нейросетью</h1>
+        
+        <div class="eight-ball">
+            <div class="eight-ball-inner">8</div>
+            <div class="answer-window" id="answerWindow"></div>
+        </div>
+        
+        <div class="question-form">
+            <input type="text" id="questionInput" placeholder="Задайте свой вопрос...">
+            <button id="askButton">Спросить шар</button>
+        </div>
+        
+        <div class="training-panel" id="trainingPanel">
+            <h2>Панель дообучения нейросети</h2>
+            
+            <div class="training-controls">
+                <div class="slider-container">
+                    <label for="trainingFrequency">Частота дообучения:</label>
+                    <input type="range" id="trainingFrequency" min="1" max="10" value="3">
+                    <span id="frequencyValue">3 запроса/мин</span>
+                </div>
+                
+                <button id="startTraining">Начать дообучение</button>
+                <button id="stopTraining" disabled>Остановить дообучение</button>
+            </div>
+            
+            <h3>Лог дообучения:</h3>
+            <div class="training-log" id="trainingLog"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const questionInput = document.getElementById('questionInput');
+            const askButton = document.getElementById('askButton');
+            const answerWindow = document.getElementById('answerWindow');
+            const trainingPanel = document.getElementById('trainingPanel');
+            const trainingFrequency = document.getElementById('trainingFrequency');
+            const frequencyValue = document.getElementById('frequencyValue');
+            const startTraining = document.getElementById('startTraining');
+            const stopTraining = document.getElementById('stopTraining');
+            const trainingLog = document.getElementById('trainingLog');
+            
+            let trainingInterval = null;
+            
+            // Обработчик отправки вопроса
+            askButton.addEventListener('click', async function() {
+                const question = questionInput.value.trim();
+                if (!question) return;
+                
+                askButton.disabled = true;
+                answerWindow.classList.remove('answer-visible');
+                
+                try {
+                    const response = await fetch('/api/ask', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ question })
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        answerWindow.textContent = data.answer;
+                        answerWindow.classList.add('answer-visible');
+                    } else {
+                        throw new Error('Ошибка сервера');
+                    }
+                } catch (error) {
+                    answerWindow.textContent = 'Ошибка соединения';
+                    answerWindow.classList.add('answer-visible');
+                    console.error('Ошибка:', error);
+                } finally {
+                    askButton.disabled = false;
+                }
+            });
+            
+            // Обновление значения частоты дообучения
+            trainingFrequency.addEventListener('input', function() {
+                frequencyValue.textContent = `${this.value} запросов/мин`;
+            });
+            
+            // Запуск дообучения
+            startTraining.addEventListener('click', function() {
+                const frequency = parseInt(trainingFrequency.value);
+                const delay = Math.floor(60000 / frequency); // преобразуем в миллисекунды
+                
+                startTraining.disabled = true;
+                stopTraining.disabled = false;
+                
+                addLogEntry('Запуск процесса дообучения...');
+                
+                // Функция для выполнения одного цикла дообучения
+                const trainCycle = async () => {
+                    try {
+                        addLogEntry('Запрос к внешней нейросети...');
+                        
+                        const response = await fetch('/api/train', {
+                            method: 'POST'
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            addLogEntry(`Получено ${data.generated_pairs} пар вопрос-ответ`);
+                            addLogEntry('Дообучение завершено успешно');
+                        } else {
+                            throw new Error('Ошибка сервера при дообучении');
+                        }
+                    } catch (error) {
+                        addLogEntry(`Ошибка: ${error.message}`);
+                    }
+                };
+                
+                // Запускаем первый цикл сразу
+                trainCycle();
+                
+                // Устанавливаем интервал для последующих циклов
+                trainingInterval = setInterval(trainCycle, delay);
+            });
+            
+            // Остановка дообучения
+            stopTraining.addEventListener('click', function() {
+                clearInterval(trainingInterval);
+                startTraining.disabled = false;
+                stopTraining.disabled = true;
+                addLogEntry('Процесс дообучения остановлен');
+            });
+            
+            // Добавление записи в лог
+            function addLogEntry(message) {
+                const now = new Date();
+                const timestamp = now.toLocaleTimeString();
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.textContent = `[${timestamp}] ${message}`;
+                trainingLog.appendChild(entry);
+                trainingLog.scrollTop = trainingLog.scrollHeight;
+            }
+            
+            // Секретная команда для разработчика
+            const secretCode = 'cucumber';
+            let inputBuffer = '';
+            
+            document.addEventListener('keydown', function(e) {
+                // Проверяем, открыта ли консоль разработчика (F12)
+                if (e.key === 'F12') {
+                    e.preventDefault();
+                    trainingPanel.style.display = trainingPanel.style.display === 'none' ? 'block' : 'none';
+                }
+                
+                // Проверяем ввод секретного кода
+                inputBuffer += e.key.toLowerCase();
+                if (inputBuffer.length > secretCode.length) {
+                    inputBuffer = inputBuffer.substring(1);
+                }
+                
+                if (inputBuffer === secretCode) {
+                    trainingPanel.style.display = 'block';
+                    inputBuffer = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
