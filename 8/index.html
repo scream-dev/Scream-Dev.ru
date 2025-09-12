@@ -29,6 +29,32 @@
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
         }
 
+        .server-config {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .server-config input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+
+        .server-config input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
         .eight-ball {
             position: relative;
             width: 300px;
@@ -169,6 +195,11 @@
     <div class="container">
         <h1>Магический шар восьмёрка с нейросетью</h1>
         
+        <div class="server-config">
+            <label for="serverIp">IP-адрес сервера:</label>
+            <input type="text" id="serverIp" placeholder="Введите IP-адрес сервера (например: 192.168.1.100:5000)">
+        </div>
+        
         <div class="eight-ball">
             <div class="eight-ball-inner">8</div>
             <div class="answer-window" id="answerWindow"></div>
@@ -200,6 +231,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const serverIpInput = document.getElementById('serverIp');
             const questionInput = document.getElementById('questionInput');
             const askButton = document.getElementById('askButton');
             const answerWindow = document.getElementById('answerWindow');
@@ -212,16 +244,35 @@
             
             let trainingInterval = null;
             
+            // Функция для получения базового URL API
+            function getApiBaseUrl() {
+                let serverIp = serverIpInput.value.trim();
+                if (!serverIp) {
+                    alert('Пожалуйста, введите IP-адрес сервера');
+                    return null;
+                }
+                
+                // Добавляем протокол если отсутствует
+                if (!serverIp.startsWith('http://') && !serverIp.startsWith('https://')) {
+                    serverIp = 'http://' + serverIp;
+                }
+                
+                return serverIp;
+            }
+            
             // Обработчик отправки вопроса
             askButton.addEventListener('click', async function() {
                 const question = questionInput.value.trim();
                 if (!question) return;
                 
+                const baseUrl = getApiBaseUrl();
+                if (!baseUrl) return;
+                
                 askButton.disabled = true;
                 answerWindow.classList.remove('answer-visible');
                 
                 try {
-                    const response = await fetch('/api/ask', {
+                    const response = await fetch(`${baseUrl}/api/ask`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -252,6 +303,9 @@
             
             // Запуск дообучения
             startTraining.addEventListener('click', function() {
+                const baseUrl = getApiBaseUrl();
+                if (!baseUrl) return;
+                
                 const frequency = parseInt(trainingFrequency.value);
                 const delay = Math.floor(60000 / frequency); // преобразуем в миллисекунды
                 
@@ -265,7 +319,7 @@
                     try {
                         addLogEntry('Запрос к внешней нейросети...');
                         
-                        const response = await fetch('/api/train', {
+                        const response = await fetch(`${baseUrl}/api/train`, {
                             method: 'POST'
                         });
                         
