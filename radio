@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Синхронизированное Радио</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .radio-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #e0e0e0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 1.1em;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .visualizer {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 30px;
+            position: relative;
+        }
+
+        .visualizer-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, 
+                #ff6b6b, #ffa500, #ffe66d, #51cf66, 
+                #339af0, #845ef7, #ff6b6b);
+            position: relative;
+            animation: rotate 10s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .visualizer-inner {
+            width: 80%;
+            height: 80%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+        }
+
+        .visualizer-bars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bar {
+            position: absolute;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 2px;
+            transform-origin: bottom center;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .track-info {
+            margin-bottom: 20px;
+        }
+
+        .track-name {
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            min-height: 1.4em;
+        }
+
+        .track-time {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .status {
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 20px;
+            font-size: 0.9em;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .loading {
+            animation: fade 1.5s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scaleY(0.3); opacity: 0.5; }
+            50% { transform: scaleY(1); opacity: 1; }
+        }
+
+        @keyframes fade {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .offline {
+            color: #ff6b6b;
+        }
+
+        .online {
+            color: #51cf66;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="radio-container">
+        <div class="logo">AG Radio</div>
+        <div class="tagline">Радио с музыкой участников AnarxGrif</div>
+        
+        <div class="visualizer">
+            <div class="visualizer-circle">
+                <div class="visualizer-inner">
+                    🎵
+                </div>
+            </div>
+            <div class="visualizer-bars" id="visualizerBars"></div>
+        </div>
+        
+        <div class="track-info">
+            <div class="track-name" id="trackName">Подключение...</div>
+            <div class="track-time" id="trackTime">--:-- / --:--</div>
+        </div>
+        
+        <div class="status" id="status">
+            <span class="loading">Подключение к серверу...</span>
+        </div>
+
+        <!-- Скрытый аудиоплеер для реального воспроизведения -->
+        <audio id="audioPlayer" class="hidden" crossorigin="anonymous" preload="auto"></audio>
+    </div>
+
+    <script>
+        // КОНФИГУРАЦИЯ СЕРВЕРА - ЗАМЕНИТЕ НА ВАШ URL
+        const SERVER_CONFIG = {
+            url: "http://10.8.1.4:5000"  // денис макака
+        };
+
+        class RadioPlayer {
+            constructor() {
+                this.audioContext = null;
+                this.analyser = null;
+                this.currentTrack = null;
+                this.isPlaying = false;
+                this.lastUpdate = 0;
+                this.updateInterval = null;
+                this.serverUrl = SERVER_CONFIG.url.replace(/\/$/, ''); // Убираем trailing slash
+                this.barsContainer = document.getElementById('visualizerBars');
+                this.trackNameElement = document.getElementById('trackName');
+                this.trackTimeElement = document.getElementById('trackTime');
+                this.statusElement = document.getElementById('status');
+                this.audioPlayer = document.getElementById('audioPlayer');
+                this.currentAudioSource = null;
+                this.lastTrackName = null;
+                this.isUserInteracted = false;
+                this.retryCount = 0;
+                this.maxRetries = 3;
+                
+                this.createVisualizerBars();
+                this.initAudioContext();
+                this.setupAudioPlayer();
+                this.startUpdating();
+            }
+
+            createVisualizerBars() {
+                // Создаем 24 бара для визуализатора
+                for (let i = 0; i < 24; i++) {
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.style.left = '50%';
+                    bar.style.bottom = '50%';
+                    bar.style.height = '40px';
+                    bar.style.transform = `rotate(${i * 15}deg) translateX(-50%)`;
+                    bar.style.animationDelay = `${i * 0.06}s`;
+                    this.barsContainer.appendChild(bar);
+                }
+            }
+
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.analyser.fftSize = 256;
+                } catch (e) {
+                    console.log('Web Audio API не поддерживается');
+                }
+            }
+
+            setupAudioPlayer() {
+                // Настраиваем обработчики для аудиоплеера
+                this.audioPlayer.addEventListener('loadeddata', () => {
+                    console.log('Аудио данные загружены');
+                });
+
+                this.audioPlayer.addEventListener('canplay', () => {
+                    console.log('Аудио готово к воспроизведению');
+                });
+
+                this.audioPlayer.addEventListener('canplaythrough', () => {
+                    console.log('Аудио можно воспроизводить до конца без прерываний');
+                });
+
+                this.audioPlayer.addEventListener('waiting', () => {
+                    console.log('Аудио буферизуется...');
+                    this.updateStatus('offline', 'Буферизация...');
+                });
+
+                this.audioPlayer.addEventListener('playing', () => {
+                    console.log('Воспроизведение началось');
+                    this.updateStatus('online', 'В эфире');
+                    this.isPlaying = true;
+                    this.retryCount = 0; // Сбрасываем счетчик попыток при успешном воспроизведении
+                });
+
+                this.audioPlayer.addEventListener('pause', () => {
+                    console.log('Воспроизведение приостановлено');
+                    this.isPlaying = false;
+                });
+
+                this.audioPlayer.addEventListener('ended', () => {
+                    console.log('Трек завершился');
+                    this.isPlaying = false;
+                });
+
+                this.audioPlayer.addEventListener('error', (e) => {
+                    console.error('Ошибка аудио:', e);
+                    console.error('Код ошибки:', this.audioPlayer.error);
+                    this.updateStatus('offline', 'Ошибка воспроизведения');
+                    this.isPlaying = false;
+                });
+
+                this.audioPlayer.addEventListener('stalled', () => {
+                    console.log('Воспроизведение остановилось из-за нехватки данных');
+                    this.retryPlayback();
+                });
+
+                this.audioPlayer.addEventListener('suspend', () => {
+                    console.log('Загрузка аудио приостановлена');
+                });
+            }
+
+            removeFileExtension(filename) {
+                // Удаляем расширение файла из названия
+                if (!filename) return filename;
+                
+                // Список распространенных аудио расширений
+                const audioExtensions = ['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac', '.wma'];
+                
+                let cleanedName = filename;
+                for (const ext of audioExtensions) {
+                    if (filename.toLowerCase().endsWith(ext)) {
+                        cleanedName = filename.slice(0, -ext.length);
+                        break;
+                    }
+                }
+                
+                // Также удаляем точку в конце на всякий случай
+                if (cleanedName.endsWith('.')) {
+                    cleanedName = cleanedName.slice(0, -1);
+                }
+                
+                return cleanedName || filename;
+            }
+
+            async playTrack(trackName, startPosition = 0) {
+                if (trackName === this.lastTrackName && this.isPlaying) {
+                    // Трек уже играет, только синхронизируем позицию если нужно
+                    if (Math.abs(this.audioPlayer.currentTime - startPosition) > 5) {
+                        this.audioPlayer.currentTime = startPosition;
+                    }
+                    return;
+                }
+
+                try {
+                    console.log('Запуск трека:', trackName, 'позиция:', startPosition);
+
+                    // Останавливаем текущее воспроизведение
+                    this.audioPlayer.pause();
+                    
+                    // Формируем URL к треку
+                    const trackUrl = `${this.serverUrl}/music/${encodeURIComponent(trackName)}`;
+                    console.log('URL трека:', trackUrl);
+
+                    // Если трек изменился, меняем источник
+                    if (trackName !== this.lastTrackName) {
+                        this.audioPlayer.src = trackUrl;
+                        this.lastTrackName = trackName;
+                        this.currentTrack = trackName;
+                        
+                        // Ждем загрузки метаданных
+                        await new Promise((resolve, reject) => {
+                            const onLoaded = () => {
+                                this.audioPlayer.removeEventListener('loadedmetadata', onLoaded);
+                                this.audioPlayer.removeEventListener('error', onError);
+                                resolve();
+                            };
+                            
+                            const onError = (e) => {
+                                this.audioPlayer.removeEventListener('loadedmetadata', onLoaded);
+                                this.audioPlayer.removeEventListener('error', onError);
+                                reject(e);
+                            };
+                            
+                            this.audioPlayer.addEventListener('loadedmetadata', onLoaded);
+                            this.audioPlayer.addEventListener('error', onError);
+                            
+                            // Таймаут на загрузку
+                            setTimeout(() => {
+                                this.audioPlayer.removeEventListener('loadedmetadata', onLoaded);
+                                this.audioPlayer.removeEventListener('error', onError);
+                                resolve(); // Продолжаем даже если метаданные не загрузились
+                            }, 3000);
+                        });
+                    }
+
+                    // Устанавливаем позицию
+                    this.audioPlayer.currentTime = startPosition;
+                    
+                    // Пытаемся воспроизвести только если пользователь уже взаимодействовал с страницей
+                    if (this.isUserInteracted) {
+                        await this.attemptPlay();
+                    } else {
+                        this.updateStatus('offline', 'Нажмите для запуска радио');
+                    }
+
+                } catch (error) {
+                    console.error('Ошибка при запуске трека:', error);
+                    this.retryPlayback();
+                }
+            }
+
+            async attemptPlay() {
+                try {
+                    const playPromise = this.audioPlayer.play();
+                    
+                    if (playPromise !== undefined) {
+                        await playPromise;
+                        console.log('Воспроизведение успешно запущено');
+                    }
+                } catch (error) {
+                    console.log('Ошибка воспроизведения:', error);
+                    this.retryPlayback();
+                }
+            }
+
+            retryPlayback() {
+                if (this.retryCount < this.maxRetries) {
+                    this.retryCount++;
+                    console.log(`Попытка перезапуска ${this.retryCount}/${this.maxRetries}`);
+                    
+                    setTimeout(() => {
+                        if (this.currentTrack && this.isUserInteracted) {
+                            this.attemptPlay();
+                        }
+                    }, 1000 * this.retryCount);
+                } else {
+                    console.log('Достигнут лимит попыток воспроизведения');
+                    this.updateStatus('offline', 'Ошибка воспроизведения');
+                }
+            }
+
+            async fetchPlaybackInfo() {
+                try {
+                    const response = await fetch(`${this.serverUrl}/api/now-playing`);
+                    if (!response.ok) throw new Error('Network error');
+                    
+                    const data = await response.json();
+                    this.lastUpdate = Date.now();
+                    await this.updateDisplay(data);
+                    
+                } catch (error) {
+                    console.error('Ошибка получения данных:', error);
+                    this.handleOfflineMode('Нет соединения с сервером');
+                }
+            }
+
+            async updateDisplay(data) {
+                // Обновляем название трека (убираем расширение файла)
+                const displayTrackName = this.removeFileExtension(data.track);
+                this.trackNameElement.textContent = displayTrackName;
+                
+                // Обновляем время
+                const currentTime = this.formatTime(data.position);
+                const totalTime = this.formatTime(data.duration);
+                this.trackTimeElement.textContent = `${currentTime} / ${totalTime}`;
+                
+                // Обновляем визуализатор
+                this.updateVisualizer(data.position, data.duration);
+
+                // Запускаем воспроизведение если трек изменился или это первый запуск
+                if (data.track && data.track !== 'Плейлист пуст' && data.track !== 'Ошибка сервера') {
+                    await this.playTrack(data.track, data.position);
+                }
+            }
+
+            formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            updateVisualizer(position, duration) {
+                const progress = position / duration;
+                const bars = this.barsContainer.getElementsByClassName('bar');
+                
+                // Анимируем бары в зависимости от прогресса трека
+                for (let i = 0; i < bars.length; i++) {
+                    const bar = bars[i];
+                    const phase = (i / bars.length + progress) % 1;
+                    const scale = 0.3 + Math.sin(phase * Math.PI * 2) * 0.7;
+                    const opacity = 0.5 + scale * 0.5;
+                    
+                    bar.style.transform = `rotate(${i * 15}deg) translateX(-50%) scaleY(${scale})`;
+                    bar.style.opacity = opacity;
+                }
+            }
+
+            handleOfflineMode(message) {
+                this.trackNameElement.textContent = 'Оффлайн';
+                this.trackTimeElement.textContent = '--:-- / --:--';
+                this.updateStatus('offline', message);
+                
+                // Анимация визуализатора в оффлайн режиме
+                this.updateVisualizerOffline();
+            }
+
+            updateVisualizerOffline() {
+                const time = Date.now() / 1000;
+                const bars = this.barsContainer.getElementsByClassName('bar');
+                
+                for (let i = 0; i < bars.length; i++) {
+                    const bar = bars[i];
+                    const scale = 0.2 + Math.sin(time * 2 + i * 0.3) * 0.3;
+                    bar.style.transform = `rotate(${i * 15}deg) translateX(-50%) scaleY(${scale})`;
+                }
+            }
+
+            updateStatus(type, message) {
+                this.statusElement.innerHTML = type === 'online' 
+                    ? `<span class="online">${message}</span>`
+                    : `<span class="offline">${message}</span>`;
+            }
+
+            startUpdating() {
+                // Первый запрос сразу
+                this.fetchPlaybackInfo();
+                
+                // Затем каждые 2 секунды (реже для стабильности)
+                this.updateInterval = setInterval(() => {
+                    this.fetchPlaybackInfo();
+                }, 2000);
+            }
+
+            destroy() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                }
+                if (this.audioContext) {
+                    this.audioContext.close();
+                }
+                if (this.audioPlayer) {
+                    this.audioPlayer.pause();
+                    this.audioPlayer.src = '';
+                }
+            }
+        }
+
+        // Инициализация плеера когда страница загружена
+        document.addEventListener('DOMContentLoaded', () => {
+            window.radioPlayer = new RadioPlayer();
+            
+            // Обработчик первого клика пользователя для разблокировки автовоспроизведения
+            const handleFirstInteraction = async () => {
+                if (!window.radioPlayer.isUserInteracted) {
+                    window.radioPlayer.isUserInteracted = true;
+                    window.radioPlayer.updateStatus('online', 'Запуск радио...');
+                    
+                    // Пытаемся запустить воспроизведение
+                    if (window.radioPlayer.currentTrack) {
+                        await window.radioPlayer.attemptPlay();
+                    }
+                    
+                    // Убираем обработчики после первого взаимодействия
+                    document.body.removeEventListener('click', handleFirstInteraction);
+                    document.body.removeEventListener('touchstart', handleFirstInteraction);
+                    document.body.removeEventListener('keydown', handleFirstInteraction);
+                }
+            };
+            
+            // Добавляем обработчики для первого взаимодействия
+            document.body.addEventListener('click', handleFirstInteraction);
+            document.body.addEventListener('touchstart', handleFirstInteraction);
+            document.body.addEventListener('keydown', handleFirstInteraction);
+        });
+
+        // Очистка при закрытии страницы
+        window.addEventListener('beforeunload', () => {
+            if (window.radioPlayer) {
+                window.radioPlayer.destroy();
+            }
+        });
+    </script>
+</body>
+</html>
