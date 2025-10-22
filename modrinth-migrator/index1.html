@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modrinth Mod Pack Migrator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --primary: #1bd96a;
+            --primary-dark: #16b357;
+            --secondary: #2d3748;
+            --background: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --error: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .textarea-container {
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(27, 217, 106, 0.2);
+        }
+
+        .textarea-placeholder {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            right: 1rem;
+            color: #718096;
+            pointer-events: none;
+            z-index: 1;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .format-selector {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .format-selector label {
+            font-weight: 600;
+        }
+
+        .format-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .format-btn {
+            padding: 0.5rem 1rem;
+            background-color: #4a5568;
+            border: none;
+            border-radius: 6px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .format-btn.active {
+            background-color: var(--primary);
+        }
+
+        .format-btn:hover:not(.active) {
+            background-color: #2d3748;
+        }
+
+        .version-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .version-input label {
+            font-weight: 600;
+        }
+
+        .version-input input {
+            padding: 0.75rem 1rem;
+            background-color: #2d3748;
+            border: 1px solid #4a5568;
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 1rem;
+            width: 150px;
+            transition: all 0.3s ease;
+        }
+
+        .version-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(27, 217, 106, 0.2);
+        }
+
+        .version-input .error {
+            color: var(--error);
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background-color: #4a5568;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        button.secondary {
+            background-color: #4a5568;
+        }
+
+        button.secondary:hover {
+            background-color: #2d3748;
+        }
+
+        .progress-section {
+            display: none;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            height: 10px;
+            background-color: #2d3748;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .mod-list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .mod-list-header:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .mod-list-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .mod-list-header.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .mod-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .mod-list.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+
+        .mod-card {
+            background-color: #2d3748;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .mod-card.pending {
+            border-left-color: #6b7280;
+        }
+
+        .mod-card.downloading {
+            border-left-color: var(--primary);
+            animation: pulse 1.5s infinite;
+        }
+
+        .mod-card.success {
+            border-left-color: var(--success);
+        }
+
+        .mod-card.error {
+            border-left-color: var(--error);
+        }
+
+        .mod-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .mod-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .mod-status {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .status-downloading {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .status-success {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .status-error {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .mod-details {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .mod-version {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .mod-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .mod-actions button {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .download-all {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(27, 217, 106, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(27, 217, 106, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(27, 217, 106, 0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mod-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group button {
+                width: 100%;
+            }
+            
+            .progress-stats {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .instructions {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(27, 217, 106, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .instructions h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .instructions ol {
+            margin-left: 1.5rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Modrinth Mod Pack Migrator</h1>
+            <p class="subtitle">Easily migrate your mod packs to different Minecraft versions</p>
+        </header>
+
+        <div class="card input-section">
+            <h2>Input Mod List</h2>
+            
+            <div class="format-selector">
+                <label>Input Format:</label>
+                <div class="format-buttons">
+                    <button class="format-btn active" data-format="json">JSON</button>
+                    <button class="format-btn" data-format="txt">TXT</button>
+                </div>
+            </div>
+            
+            <div class="textarea-container">
+                <textarea id="modListInput" placeholder=" "></textarea>
+                <div class="textarea-placeholder json-placeholder">[
+    {
+        "name": "Accurate Block Placement",
+        "url": "https://modrinth.com/mod/kzwxhsjp"
+    },
+    {
+        "name": "Axiom",
+        "url": "https://modrinth.com/mod/N6n5dqoA"
+    },
+    {
+        "name": "BetterGrassify",
+        "url": "https://modrinth.com/mod/m5T5xmUy"
+    }
+]</div>
+                <div class="textarea-placeholder txt-placeholder" style="display: none;">Accurate Block Placement (https://modrinth.com/mod/kzwxhsjp)
+Axiom (https://modrinth.com/mod/N6n5dqoA)
+BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
+            </div>
+            
+            <div class="version-input">
+                <label for="targetVersion">Target Minecraft Version:</label>
+                <input type="text" id="targetVersion" placeholder="e.g., 1.21.1">
+                <div class="error" id="versionError">Version must start with "1.21" followed by .1 to .10 or nothing</div>
+            </div>
+            
+            <div class="button-group">
+                <button id="startMigration">
+                    <span>Start Migration</span>
+                </button>
+                <button id="clearInput" class="secondary">
+                    <span>Clear Input</span>
+                </button>
+            </div>
+
+            <div class="instructions">
+                <h3>How to use:</h3>
+                <ol>
+                    <li>Select input format (JSON or TXT)</li>
+                    <li>Paste your mod list in the selected format</li>
+                    <li>Enter the target Minecraft version (e.g., 1.21, 1.21.1, 1.21.4)</li>
+                    <li>Click "Start Migration" to begin downloading mods</li>
+                    <li>Download individual mods or all at once when complete</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card progress-section" id="progressSection">
+            <div class="progress-header">
+                <h2>Migration Progress</h2>
+                <div class="progress-stats">
+                    <span id="processedCount">Processed: 0/0</span>
+                    <span id="successCount">Success: 0</span>
+                    <span id="errorCount">Errors: 0</span>
+                </div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            
+            <div class="mod-list-header" id="modListHeader">
+                <h3>
+                    <svg class="toggle-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M12 5.5L8 9.5L4 5.5H12Z"/>
+                    </svg>
+                    Migrated Mods
+                </h3>
+                <span id="modCount">0 mods</span>
+            </div>
+            
+            <div class="mod-list" id="modListContainer">
+                <!-- Mod cards will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <div class="card results-section" id="resultsSection">
+            <h2>Migration Complete</h2>
+            <p>Your mod migration to <span id="resultVersion" class="version-display"></span> is complete!</p>
+            <div class="download-all">
+                <button id="downloadAll">
+                    <span>Download All Mods as ZIP</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modListInput = document.getElementById('modListInput');
+            const targetVersion = document.getElementById('targetVersion');
+            const versionError = document.getElementById('versionError');
+            const startMigrationBtn = document.getElementById('startMigration');
+            const clearInputBtn = document.getElementById('clearInput');
+            const progressSection = document.getElementById('progressSection');
+            const modListContainer = document.getElementById('modListContainer');
+            const modListHeader = document.getElementById('modListHeader');
+            const modCount = document.getElementById('modCount');
+            const progressFill = document.getElementById('progressFill');
+            const processedCount = document.getElementById('processedCount');
+            const successCount = document.getElementById('successCount');
+            const errorCount = document.getElementById('errorCount');
+            const resultsSection = document.getElementById('resultsSection');
+            const resultVersion = document.getElementById('resultVersion');
+            const downloadAllBtn = document.getElementById('downloadAll');
+            const formatButtons = document.querySelectorAll('.format-btn');
+            const jsonPlaceholder = document.querySelector('.json-placeholder');
+            const txtPlaceholder = document.querySelector('.txt-placeholder');
+
+            let modsData = [];
+            let migrationResults = [];
+            let totalMods = 0;
+            let processedMods = 0;
+            let successfulMods = 0;
+            let errorMods = 0;
+            let isModListCollapsed = false;
+            let currentFormat = 'json';
+
+            // Format selector
+            formatButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    formatButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFormat = this.dataset.format;
+                    
+                    if (currentFormat === 'json') {
+                        jsonPlaceholder.style.display = 'block';
+                        txtPlaceholder.style.display = 'none';
+                    } else {
+                        jsonPlaceholder.style.display = 'none';
+                        txtPlaceholder.style.display = 'block';
+                    }
+                    
+                    // Update placeholder visibility
+                    if (!modListInput.value) {
+                        document.querySelector('.textarea-placeholder').style.opacity = '1';
+                    }
+                });
+            });
+
+            // Toggle mod list collapse
+            modListHeader.addEventListener('click', function() {
+                isModListCollapsed = !isModListCollapsed;
+                if (isModListCollapsed) {
+                    modListHeader.classList.add('collapsed');
+                    modListContainer.classList.add('collapsed');
+                } else {
+                    modListHeader.classList.remove('collapsed');
+                    modListContainer.classList.remove('collapsed');
+                }
+            });
+
+            // Hide placeholder when user focuses on textarea
+            modListInput.addEventListener('focus', function() {
+                document.querySelector('.textarea-placeholder').style.opacity = '0.3';
+            });
+
+            modListInput.addEventListener('blur', function() {
+                if (!modListInput.value) {
+                    document.querySelector('.textarea-placeholder').style.opacity = '1';
+                }
+            });
+
+            // Validate version input
+            targetVersion.addEventListener('input', function() {
+                validateVersion();
+            });
+
+            function validateVersion() {
+                const version = targetVersion.value.trim();
+                const versionRegex = /^1\.21(\.([1-9]|10))?$/;
+                
+                if (versionRegex.test(version)) {
+                    versionError.style.display = 'none';
+                    return true;
+                } else {
+                    versionError.style.display = 'block';
+                    return false;
+                }
+            }
+
+            // Clear input
+            clearInputBtn.addEventListener('click', function() {
+                modListInput.value = '';
+                targetVersion.value = '';
+                versionError.style.display = 'none';
+                document.querySelector('.textarea-placeholder').style.opacity = '1';
+            });
+
+            // Parse input based on format
+            function parseInput(input) {
+                if (currentFormat === 'json') {
+                    return JSON.parse(input);
+                } else {
+                    // Parse TXT format
+                    const lines = input.split('\n').filter(line => line.trim());
+                    const mods = [];
+                    
+                    for (const line of lines) {
+                        const match = line.match(/(.+?)\s*\(https:\/\/modrinth\.com\/mod\/([^)]+)\)/);
+                        if (match) {
+                            mods.push({
+                                name: match[1].trim(),
+                                url: `https://modrinth.com/mod/${match[2]}`
+                            });
+                        }
+                    }
+                    
+                    return mods;
+                }
+            }
+
+            // Start migration
+            startMigrationBtn.addEventListener('click', function() {
+                if (!validateVersion()) {
+                    return;
+                }
+
+                try {
+                    modsData = parseInput(modListInput.value);
+                    if (!Array.isArray(modsData) || modsData.length === 0) {
+                        throw new Error('Input must be a non-empty array of mods');
+                    }
+                    
+                    totalMods = modsData.length;
+                    processedMods = 0;
+                    successfulMods = 0;
+                    errorMods = 0;
+                    migrationResults = [];
+                    
+                    // Reset UI
+                    modListContainer.innerHTML = '';
+                    progressFill.style.width = '0%';
+                    processedCount.textContent = `Processed: 0/${totalMods}`;
+                    successCount.textContent = `Success: 0`;
+                    errorCount.textContent = `Errors: 0`;
+                    modCount.textContent = `${totalMods} mods`;
+                    
+                    // Reset collapse state
+                    isModListCollapsed = false;
+                    modListHeader.classList.remove('collapsed');
+                    modListContainer.classList.remove('collapsed');
+                    
+                    // Show progress section
+                    progressSection.style.display = 'block';
+                    resultsSection.style.display = 'none';
+                    
+                    // Create mod cards
+                    modsData.forEach(mod => {
+                        const modCard = document.createElement('div');
+                        modCard.className = 'mod-card pending';
+                        modCard.id = `mod-${mod.name.replace(/\s+/g, '-')}`;
+                        
+                        modCard.innerHTML = `
+                            <div class="mod-header">
+                                <div class="mod-name">${mod.name}</div>
+                                <div class="mod-status status-pending">Pending</div>
+                            </div>
+                            <div class="mod-details">
+                                <div class="mod-version">Version: <span class="version-info">Checking...</span></div>
+                            </div>
+                            <div class="mod-actions">
+                                <button class="download-single" disabled>Download</button>
+                            </div>
+                        `;
+                        
+                        modListContainer.appendChild(modCard);
+                    });
+                    
+                    // Start processing mods
+                    processMods();
+                    
+                } catch (error) {
+                    alert('Invalid input format: ' + error.message);
+                }
+            });
+
+            async function processMods() {
+                for (const mod of modsData) {
+                    await processMod(mod);
+                }
+                
+                // Migration complete
+                resultVersion.textContent = targetVersion.value;
+                resultsSection.style.display = 'block';
+            }
+
+            async function processMod(mod) {
+                const modCard = document.getElementById(`mod-${mod.name.replace(/\s+/g, '-')}`);
+                const statusElement = modCard.querySelector('.mod-status');
+                const versionInfo = modCard.querySelector('.version-info');
+                const downloadBtn = modCard.querySelector('.download-single');
+                
+                // Extract mod ID from URL
+                const modId = mod.url.split('/').pop();
+                
+                // Update UI to downloading state
+                modCard.className = 'mod-card downloading';
+                statusElement.className = 'mod-status status-downloading';
+                statusElement.textContent = 'Downloading';
+                
+                try {
+                    // Get mod information from Modrinth API
+                    const projectResponse = await fetch(`https://api.modrinth.com/v2/project/${modId}`);
+                    
+                    if (!projectResponse.ok) {
+                        throw new Error(`Failed to fetch mod: ${projectResponse.status}`);
+                    }
+                    
+                    const projectData = await projectResponse.json();
+                    
+                    // Get versions for this mod
+                    const versionsResponse = await fetch(`https://api.modrinth.com/v2/project/${modId}/version`);
+                    
+                    if (!versionsResponse.ok) {
+                        throw new Error(`Failed to fetch versions: ${versionsResponse.status}`);
+                    }
+                    
+                    const versionsData = await versionsResponse.json();
+                    
+                    // Find a version compatible with the target Minecraft version
+                    const targetVersionValue = targetVersion.value;
+                    const compatibleVersion = versionsData.find(version => 
+                        version.game_versions.includes(targetVersionValue)
+                    );
+                    
+                    if (!compatibleVersion) {
+                        throw new Error(`No version found for ${targetVersionValue}`);
+                    }
+                    
+                    // Get the primary file
+                    const primaryFile = compatibleVersion.files.find(file => file.primary) || compatibleVersion.files[0];
+                    
+                    if (!primaryFile) {
+                        throw new Error('No downloadable file found');
+                    }
+                    
+                    versionInfo.textContent = compatibleVersion.version_number;
+                    
+                    // Update UI to success state
+                    modCard.className = 'mod-card success';
+                    statusElement.className = 'mod-status status-success';
+                    statusElement.textContent = 'Success';
+                    
+                    // Enable download button
+                    downloadBtn.disabled = false;
+                    downloadBtn.addEventListener('click', () => {
+                        downloadFile(primaryFile.url, primaryFile.filename);
+                    });
+                    
+                    // Store result
+                    migrationResults.push({
+                        name: mod.name,
+                        version: compatibleVersion.version_number,
+                        fileUrl: primaryFile.url,
+                        fileName: primaryFile.filename,
+                        fileData: null, // Will be populated when downloading
+                        status: 'success'
+                    });
+                    
+                    successfulMods++;
+                    
+                } catch (error) {
+                    // Update UI to error state
+                    modCard.className = 'mod-card error';
+                    statusElement.className = 'mod-status status-error';
+                    statusElement.textContent = 'Error';
+                    versionInfo.textContent = error.message;
+                    
+                    migrationResults.push({
+                        name: mod.name,
+                        error: error.message,
+                        status: 'error'
+                    });
+                    
+                    errorMods++;
+                }
+                
+                // Update progress
+                processedMods++;
+                const progressPercent = (processedMods / totalMods) * 100;
+                progressFill.style.width = `${progressPercent}%`;
+                
+                processedCount.textContent = `Processed: ${processedMods}/${totalMods}`;
+                successCount.textContent = `Success: ${successfulMods}`;
+                errorCount.textContent = `Errors: ${errorMods}`;
+            }
+
+            function downloadFile(url, filename) {
+                // Create a temporary link to trigger download
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // Download all mods as ZIP
+            downloadAllBtn.addEventListener('click', async function() {
+                downloadAllBtn.innerHTML = '<div class="spinner"></div><span>Preparing ZIP...</span>';
+                downloadAllBtn.disabled = true;
+                
+                try {
+                    const zip = new JSZip();
+                    const successfulMods = migrationResults.filter(mod => mod.status === 'success');
+                    
+                    // Download each mod file and add to ZIP
+                    for (const mod of successfulMods) {
+                        try {
+                            const response = await fetch(mod.fileUrl);
+                            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                            const blob = await response.blob();
+                            zip.file(mod.fileName, blob);
+                        } catch (error) {
+                            console.error(`Failed to download ${mod.name}:`, error);
+                        }
+                    }
+                    
+                    // Generate ZIP file
+                    const zipBlob = await zip.generateAsync({type: 'blob'});
+                    
+                    // Generate random 3-digit number
+                    const randomNum = Math.floor(100 + Math.random() * 900);
+                    const zipName = `mods${randomNum}.zip`;
+                    
+                    // Download the ZIP
+                    saveAs(zipBlob, zipName);
+                    
+                    downloadAllBtn.innerHTML = '<span>Download All Mods as ZIP</span>';
+                    downloadAllBtn.disabled = false;
+                    
+                } catch (error) {
+                    alert('Error creating ZIP file: ' + error.message);
+                    downloadAllBtn.innerHTML = '<span>Download All Mods as ZIP</span>';
+                    downloadAllBtn.disabled = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
