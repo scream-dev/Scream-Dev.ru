@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>План достижения 50к кубков в Brawl Stars</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #ff9f00;
+            --secondary: #1a237e;
+            --accent: #00e5ff;
+            --light: #f8f9fa;
+            --dark: #0d1b2a;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --brawl-blue: #4a86e8;
+            --brawl-yellow: #ffd700;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--dark) 100%);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%231a237e"/><path d="M0 0L100 100M100 0L0 100" stroke="%23000" stroke-opacity="0.1" stroke-width="2"/></svg>');
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(13, 27, 42, 0.85);
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--primary);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--brawl-yellow), var(--accent));
+        }
+        
+        h1 {
+            color: var(--brawl-yellow);
+            margin-bottom: 15px;
+            font-size: 2.8rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .goal-progress {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .progress-bar {
+            flex-grow: 1;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin: 0 25px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--brawl-yellow));
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(255, 159, 0, 0.5);
+        }
+        
+        .calendar-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .calendar-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .goal-progress {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .progress-bar {
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+        
+        .month {
+            background: rgba(13, 27, 42, 0.85);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--brawl-blue);
+        }
+        
+        .month-header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+        
+        .day-header {
+            text-align: center;
+            padding: 12px 0;
+            font-weight: bold;
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        
+        .day {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .day:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .day.empty {
+            background: transparent;
+            cursor: default;
+            border: none;
+        }
+        
+        .day.empty:hover {
+            background: transparent;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .day-number {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            color: var(--light);
+        }
+        
+        .day-trophies {
+            font-size: 0.85rem;
+            color: var(--brawl-yellow);
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 3px 6px;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+        
+        .stats-container {
+            background: rgba(13, 27, 42, 0.85);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--primary);
+            margin-bottom: 30px;
+        }
+        
+        .stats-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--accent);
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 25px 15px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: var(--brawl-yellow);
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .stat-label {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+        
+        .input-section {
+            background: rgba(13, 27, 42, 0.85);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            border: 2px solid var(--brawl-blue);
+            text-align: center;
+        }
+        
+        .input-title {
+            margin-bottom: 20px;
+            color: var(--accent);
+            font-size: 1.6rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+        }
+        
+        .input-group {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        
+        input {
+            padding: 12px 18px;
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1.1rem;
+            width: 140px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--brawl-yellow));
+            color: var(--dark);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(135deg, var(--brawl-yellow), var(--primary));
+        }
+        
+        .today {
+            border: 3px solid var(--accent);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.7);
+        }
+        
+        .completed {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: rgba(46, 204, 113, 0.5);
+        }
+        
+        .selected {
+            border: 3px solid var(--brawl-yellow);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 25px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .brawl-icon {
+            color: var(--primary);
+            margin: 0 5px;
+        }
+        
+        .date-display {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-trophy brawl-icon"></i> План достижения 50,000 кубков <i class="fas fa-trophy brawl-icon"></i></h1>
+            <div class="goal-progress">
+                <div class="current-trophies">
+                    <div class="stat-label">Текущие кубки</div>
+                    <div class="stat-value" id="current-trophies">47,227</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="target-trophies">
+                    <div class="stat-label">Цель</div>
+                    <div class="stat-value">50,000</div>
+                </div>
+            </div>
+        </header>
+        
+        <div class="calendar-container">
+            <div class="month">
+                <div class="month-header">Ноябрь 2025</div>
+                <div class="calendar" id="november-calendar">
+                    <!-- Ноябрь будет заполнен JavaScript -->
+                </div>
+            </div>
+            
+            <div class="month">
+                <div class="month-header">Декабрь 2025</div>
+                <div class="calendar" id="december-calendar">
+                    <!-- Декабрь будет заполнен JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <h2 class="stats-title"><i class="fas fa-chart-line"></i> Статистика</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-bullseye"></i></div>
+                    <div class="stat-value" id="remaining-today">0</div>
+                    <div class="stat-label">Осталось сегодня</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                    <div class="stat-value" id="daily-plan">0</div>
+                    <div class="stat-label">План на день</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-calculator"></i></div>
+                    <div class="stat-value" id="average-daily">0</div>
+                    <div class="stat-label">Среднее в день</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-value" id="days-remaining">0</div>
+                    <div class="stat-label">Дней осталось</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <h2 class="input-title"><i class="fas fa-edit"></i> Введите количество кубков</h2>
+            <div class="input-group">
+                <input type="number" id="trophies-input" min="0" max="1000" value="0">
+                <button id="save-button"><i class="fas fa-save"></i> Сохранить</button>
+            </div>
+            <div class="date-display" id="selected-date-display">Выбранная дата: сегодня</div>
+            <p style="color: rgba(255, 255, 255, 0.7); font-size: 1rem; margin-top: 15px;">
+                Нажмите на день в календаре, чтобы выбрать дату для ввода кубков
+            </p>
+        </div>
+        
+        <div class="footer">
+            <i class="fas fa-gamepad brawl-icon"></i> Brawl Stars Push Calendar &copy; 2025 <i class="fas fa-gamepad brawl-icon"></i>
+        </div>
+    </div>
+
+    <script>
+        // Начальные данные
+        const startTrophies = 47227;
+        const targetTrophies = 50000;
+        const startDate = new Date('2025-11-01');
+        const endDate = new Date('2025-12-31');
+        
+        // Получаем элементы DOM
+        const novemberCalendar = document.getElementById('november-calendar');
+        const decemberCalendar = document.getElementById('december-calendar');
+        const currentTrophiesEl = document.getElementById('current-trophies');
+        const progressFillEl = document.getElementById('progress-fill');
+        const remainingTodayEl = document.getElementById('remaining-today');
+        const dailyPlanEl = document.getElementById('daily-plan');
+        const averageDailyEl = document.getElementById('average-daily');
+        const daysRemainingEl = document.getElementById('days-remaining');
+        const trophiesInput = document.getElementById('trophies-input');
+        const saveButton = document.getElementById('save-button');
+        const selectedDateDisplay = document.getElementById('selected-date-display');
+        
+        // Инициализация данных
+        let trophiesData = {};
+        let selectedDate = new Date();
+        
+        // Загрузка данных из куки
+        function loadData() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === 'brawlStarsTrophies') {
+                    trophiesData = JSON.parse(decodeURIComponent(value));
+                    return;
+                }
+            }
+            
+            // Если данных нет, инициализируем пустыми
+            trophiesData = {};
+        }
+        
+        // Сохранение данных в куки
+        function saveData() {
+            const expires = new Date();
+            expires.setFullYear(expires.getFullYear() + 1);
+            document.cookie = `brawlStarsTrophies=${encodeURIComponent(JSON.stringify(trophiesData))}; expires=${expires.toUTCString()}; path=/`;
+        }
+        
+        // Получение текущего количества кубков
+        function getCurrentTrophies() {
+            let total = startTrophies;
+            for (let date in trophiesData) {
+                total += trophiesData[date];
+            }
+            return total;
+        }
+        
+        // Получение количества дней между датами
+        function getDaysBetween(start, end) {
+            const oneDay = 24 * 60 * 60 * 1000;
+            return Math.round(Math.abs((start - end) / oneDay));
+        }
+        
+        // Получение плана на день
+        function getDailyPlan() {
+            const totalDays = getDaysBetween(startDate, endDate) + 1; // +1 чтобы включить оба крайних дня
+            const remainingTrophies = targetTrophies - startTrophies;
+            return Math.ceil(remainingTrophies / totalDays);
+        }
+        
+        // Получение среднего количества кубков в день
+        function getAverageDaily() {
+            const daysWithData = Object.keys(trophiesData).length;
+            if (daysWithData === 0) return 0;
+            
+            let totalTrophies = 0;
+            for (let date in trophiesData) {
+                totalTrophies += trophiesData[date];
+            }
+            
+            return Math.round(totalTrophies / daysWithData);
+        }
+        
+        // Получение оставшихся дней
+        function getDaysRemaining() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const end = new Date(endDate);
+            end.setHours(0, 0, 0, 0);
+            
+            if (today > end) return 0;
+            
+            const daysLeft = getDaysBetween(today, end) + 1; // +1 чтобы включить сегодняшний день
+            return Math.max(0, daysLeft);
+        }
+        
+        // Получение оставшихся кубков на сегодня
+        function getRemainingToday() {
+            const dailyPlan = getDailyPlan();
+            const todayKey = formatDate(selectedDate);
+            const todayTrophies = trophiesData[todayKey] || 0;
+            return Math.max(0, dailyPlan - todayTrophies);
+        }
+        
+        // Форматирование даты в ключ для хранения
+        function formatDate(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+        
+        // Форматирование даты для отображения
+        function formatDateDisplay(date) {
+            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            return date.toLocaleDateString('ru-RU', options);
+        }
+        
+        // Обновление статистики
+        function updateStats() {
+            const currentTrophies = getCurrentTrophies();
+            const progress = ((currentTrophies - startTrophies) / (targetTrophies - startTrophies)) * 100;
+            
+            currentTrophiesEl.textContent = currentTrophies.toLocaleString();
+            progressFillEl.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+            
+            remainingTodayEl.textContent = getRemainingToday();
+            dailyPlanEl.textContent = getDailyPlan();
+            averageDailyEl.textContent = getAverageDaily();
+            daysRemainingEl.textContent = getDaysRemaining();
+            
+            // Обновляем отображение выбранной даты
+            const today = new Date();
+            if (selectedDate.toDateString() === today.toDateString()) {
+                selectedDateDisplay.textContent = 'Выбранная дата: сегодня';
+            } else {
+                selectedDateDisplay.textContent = `Выбранная дата: ${formatDateDisplay(selectedDate)}`;
+            }
+        }
+        
+        // Создание календаря для месяца
+        function createCalendar(month, year, container) {
+            // Очищаем контейнер
+            container.innerHTML = '';
+            
+            // Добавляем заголовки дней недели
+            const daysOfWeek = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'day-header';
+                dayHeader.textContent = day;
+                container.appendChild(dayHeader);
+            });
+            
+            // Получаем первый день месяца и количество дней в месяце
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const daysInMonth = lastDay.getDate();
+            
+            // Добавляем пустые ячейки для дней до первого дня месяца
+            const firstDayOfWeek = (firstDay.getDay() + 6) % 7; // Преобразуем к формату Пн-Вс
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'day empty';
+                container.appendChild(emptyDay);
+            }
+            
+            // Добавляем дни месяца
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'day';
+                
+                const date = new Date(year, month, day);
+                const dateKey = formatDate(date);
+                
+                // Проверяем, является ли день сегодняшним
+                const today = new Date();
+                if (date.toDateString() === today.toDateString()) {
+                    dayElement.classList.add('today');
+                }
+                
+                // Проверяем, является ли день выбранным
+                if (date.toDateString() === selectedDate.toDateString()) {
+                    dayElement.classList.add('selected');
+                }
+                
+                // Проверяем, есть ли данные для этого дня
+                if (trophiesData[dateKey] && trophiesData[dateKey] > 0) {
+                    dayElement.classList.add('completed');
+                }
+                
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                
+                const dayTrophies = document.createElement('div');
+                dayTrophies.className = 'day-trophies';
+                dayTrophies.textContent = trophiesData[dateKey] ? `${trophiesData[dateKey]} кубков` : '';
+                
+                dayElement.appendChild(dayNumber);
+                dayElement.appendChild(dayTrophies);
+                
+                // Добавляем обработчик клика
+                dayElement.addEventListener('click', () => {
+                    selectedDate = date;
+                    updateSelectedDay();
+                    trophiesInput.value = trophiesData[dateKey] || 0;
+                    updateStats();
+                });
+                
+                container.appendChild(dayElement);
+            }
+        }
+        
+        // Обновление выделенного дня
+        function updateSelectedDay() {
+            // Убираем выделение со всех дней
+            document.querySelectorAll('.day').forEach(day => {
+                day.classList.remove('selected');
+            });
+            
+            // Добавляем выделение к выбранному дню
+            const allDays = document.querySelectorAll('.day:not(.empty)');
+            allDays.forEach(day => {
+                const dayNumber = parseInt(day.querySelector('.day-number').textContent);
+                const today = new Date();
+                
+                // Определяем месяц для этого дня
+                let month, year;
+                if (day.closest('#november-calendar')) {
+                    month = 10; // Ноябрь (0-11)
+                    year = 2025;
+                } else if (day.closest('#december-calendar')) {
+                    month = 11; // Декабрь (0-11)
+                    year = 2025;
+                }
+                
+                if (month !== undefined && year !== undefined) {
+                    const date = new Date(year, month, dayNumber);
+                    if (date.toDateString() === selectedDate.toDateString()) {
+                        day.classList.add('selected');
+                    }
+                }
+            });
+        }
+        
+        // Инициализация приложения
+        function init() {
+            loadData();
+            
+            // Создаем календари
+            createCalendar(10, 2025, novemberCalendar); // Ноябрь (месяцы в JS: 0-11)
+            createCalendar(11, 2025, decemberCalendar); // Декабрь
+            
+            // Устанавливаем сегодняшнюю дату
+            selectedDate = new Date();
+            const todayKey = formatDate(selectedDate);
+            trophiesInput.value = trophiesData[todayKey] || 0;
+            
+            // Обновляем статистику
+            updateStats();
+            
+            // Добавляем обработчик для кнопки сохранения
+            saveButton.addEventListener('click', () => {
+                const trophies = parseInt(trophiesInput.value) || 0;
+                const dateKey = formatDate(selectedDate);
+                
+                trophiesData[dateKey] = trophies;
+                saveData();
+                updateStats();
+                
+                // Пересоздаем календари для обновления отображения
+                createCalendar(10, 2025, novemberCalendar);
+                createCalendar(11, 2025, decemberCalendar);
+            });
+        }
+        
+        // Запускаем приложение при загрузке страницы
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
