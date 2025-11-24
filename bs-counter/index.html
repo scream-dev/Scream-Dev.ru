@@ -17,6 +17,11 @@
             --danger: #e74c3c;
             --brawl-blue: #4a86e8;
             --brawl-yellow: #ffd700;
+            --color-red: #e74c3c;
+            --color-light-green: #90ee90;
+            --color-blue: #00e5ff;
+            --color-purple: #9b59b6;
+            --color-yellow: #ffd700;
         }
         
         * {
@@ -167,17 +172,18 @@
         .day {
             background: rgba(255, 255, 255, 0.08);
             border-radius: 10px;
-            padding: 12px 8px;
+            padding: 8px 5px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s;
-            min-height: 90px;
+            min-height: 80px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             border: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             overflow: hidden;
+            aspect-ratio: 1 / 1;
         }
         
         .day:hover {
@@ -234,13 +240,19 @@
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
         }
         
         @media (max-width: 768px) {
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
             }
         }
         
@@ -381,6 +393,27 @@
             color: var(--accent);
             font-weight: 500;
         }
+        
+        /* Цвета для дней в зависимости от количества кубков */
+        .day-color-red {
+            background: rgba(231, 76, 60, 0.3);
+        }
+        
+        .day-color-light-green {
+            background: rgba(144, 238, 144, 0.3);
+        }
+        
+        .day-color-blue {
+            background: rgba(0, 229, 255, 0.3);
+        }
+        
+        .day-color-purple {
+            background: rgba(155, 89, 182, 0.3);
+        }
+        
+        .day-color-yellow {
+            background: rgba(255, 215, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -434,12 +467,6 @@
                 </div>
                 
                 <div class="stat-card">
-                    <div class="stat-icon"><i class="fas fa-calculator"></i></div>
-                    <div class="stat-value" id="average-daily">0</div>
-                    <div class="stat-label">Среднее в день</div>
-                </div>
-                
-                <div class="stat-card">
                     <div class="stat-icon"><i class="fas fa-clock"></i></div>
                     <div class="stat-value" id="days-remaining">0</div>
                     <div class="stat-label">Дней осталось</div>
@@ -479,7 +506,6 @@
         const progressFillEl = document.getElementById('progress-fill');
         const remainingTodayEl = document.getElementById('remaining-today');
         const dailyPlanEl = document.getElementById('daily-plan');
-        const averageDailyEl = document.getElementById('average-daily');
         const daysRemainingEl = document.getElementById('days-remaining');
         const trophiesInput = document.getElementById('trophies-input');
         const saveButton = document.getElementById('save-button');
@@ -578,6 +604,25 @@
             return date.toLocaleDateString('ru-RU', options);
         }
         
+        // Определение цвета дня на основе количества кубков
+        function getDayColor(trophies) {
+            const dailyPlan = getDailyPlan();
+            
+            if (trophies <= 0) {
+                return 'day-color-red';
+            } else if (trophies < dailyPlan - 20) {
+                return 'day-color-light-green';
+            } else if (trophies >= dailyPlan - 20 && trophies <= dailyPlan + 20) {
+                return 'day-color-blue';
+            } else if (trophies > dailyPlan + 20 && trophies < dailyPlan * 2) {
+                return 'day-color-purple';
+            } else if (trophies >= dailyPlan * 2) {
+                return 'day-color-yellow';
+            }
+            
+            return '';
+        }
+        
         // Обновление статистики
         function updateStats() {
             const currentTrophies = getCurrentTrophies();
@@ -589,11 +634,9 @@
             remainingTodayEl.textContent = getRemainingToday();
             
             // Получаем среднее значение и план
-            const averageDaily = getAverageDaily();
             const dailyPlan = getDailyPlan();
             
             dailyPlanEl.textContent = dailyPlan;
-            averageDailyEl.textContent = averageDaily;
             daysRemainingEl.textContent = getDaysRemaining();
             
             // Обновляем отображение выбранной даты
@@ -639,6 +682,10 @@
                 
                 const date = new Date(year, month, day);
                 const dateKey = formatDate(date);
+                const dayTrophies = trophiesData[dateKey] || 0;
+                
+                // Добавляем цвет в зависимости от количества кубков
+                dayElement.classList.add(getDayColor(dayTrophies));
                 
                 // Проверяем, является ли день сегодняшним
                 const today = new Date();
@@ -652,7 +699,7 @@
                 }
                 
                 // Проверяем, есть ли данные для этого дня
-                if (trophiesData[dateKey] && trophiesData[dateKey] > 0) {
+                if (dayTrophies > 0) {
                     dayElement.classList.add('completed');
                 }
                 
@@ -660,18 +707,18 @@
                 dayNumber.className = 'day-number';
                 dayNumber.textContent = day;
                 
-                const dayTrophies = document.createElement('div');
-                dayTrophies.className = 'day-trophies';
-                dayTrophies.textContent = trophiesData[dateKey] ? `${trophiesData[dateKey]} кубков` : '';
+                const dayTrophiesElement = document.createElement('div');
+                dayTrophiesElement.className = 'day-trophies';
+                dayTrophiesElement.textContent = dayTrophies > 0 ? `+${dayTrophies}` : '';
                 
                 dayElement.appendChild(dayNumber);
-                dayElement.appendChild(dayTrophies);
+                dayElement.appendChild(dayTrophiesElement);
                 
                 // Добавляем обработчик клика
                 dayElement.addEventListener('click', () => {
                     selectedDate = date;
                     updateSelectedDay();
-                    trophiesInput.value = trophiesData[dateKey] || 0;
+                    trophiesInput.value = dayTrophies;
                     updateStats();
                 });
                 
