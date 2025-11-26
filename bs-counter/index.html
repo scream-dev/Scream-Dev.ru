@@ -22,6 +22,7 @@
             --color-blue: #00e5ff;
             --color-purple: #9b59b6;
             --color-yellow: #ffd700;
+            --color-gray: #7f8c8d;
         }
         
         * {
@@ -414,6 +415,39 @@
         .day-color-yellow {
             background: rgba(255, 215, 0, 0.3);
         }
+        
+        .day-color-gray {
+            background: rgba(127, 140, 141, 0.2);
+        }
+        
+        .color-legend {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+        
+        .color-sample {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .negative-trophies {
+            color: var(--color-red);
+        }
     </style>
 </head>
 <body>
@@ -477,13 +511,40 @@
         <div class="input-section">
             <h2 class="input-title"><i class="fas fa-edit"></i> Введите количество кубков</h2>
             <div class="input-group">
-                <input type="number" id="trophies-input" min="0" max="1000" value="0">
+                <input type="number" id="trophies-input" min="-100" max="1000" value="0">
                 <button id="save-button"><i class="fas fa-save"></i> Сохранить</button>
             </div>
             <div class="date-display" id="selected-date-display">Выбранная дата: сегодня</div>
             <p style="color: rgba(255, 255, 255, 0.7); font-size: 1rem; margin-top: 15px;">
                 Нажмите на день в календаре, чтобы выбрать дату для ввода кубков
             </p>
+            
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-sample" style="background-color: rgba(127, 140, 141, 0.3);"></div>
+                    <span>Не указано</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background-color: rgba(231, 76, 60, 0.3);"></div>
+                    <span>Меньше 0 кубков</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background-color: rgba(144, 238, 144, 0.3);"></div>
+                    <span>Меньше плана -20</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background-color: rgba(0, 229, 255, 0.3);"></div>
+                    <span>План ±20 кубков</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background-color: rgba(155, 89, 182, 0.3);"></div>
+                    <span>Больше плана +20</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-sample" style="background-color: rgba(255, 215, 0, 0.3);"></div>
+                    <span>В 2+ раза больше плана</span>
+                </div>
+            </div>
         </div>
         
         <div class="footer">
@@ -606,9 +667,14 @@
         
         // Определение цвета дня на основе количества кубков
         function getDayColor(trophies) {
+            // Если кубки не указаны (undefined или null)
+            if (trophies === undefined || trophies === null) {
+                return 'day-color-gray';
+            }
+            
             const dailyPlan = getDailyPlan();
             
-            if (trophies <= 0) {
+            if (trophies < 0) {
                 return 'day-color-red';
             } else if (trophies < dailyPlan - 20) {
                 return 'day-color-light-green';
@@ -620,7 +686,18 @@
                 return 'day-color-yellow';
             }
             
-            return '';
+            return 'day-color-gray';
+        }
+        
+        // Форматирование отображения кубков
+        function formatTrophiesDisplay(trophies) {
+            if (trophies === undefined || trophies === null || trophies === 0) {
+                return '';
+            } else if (trophies > 0) {
+                return `+${trophies}`;
+            } else {
+                return `${trophies}`;
+            }
         }
         
         // Обновление статистики
@@ -682,7 +759,7 @@
                 
                 const date = new Date(year, month, day);
                 const dateKey = formatDate(date);
-                const dayTrophies = trophiesData[dateKey] || 0;
+                const dayTrophies = trophiesData[dateKey];
                 
                 // Добавляем цвет в зависимости от количества кубков
                 dayElement.classList.add(getDayColor(dayTrophies));
@@ -699,7 +776,7 @@
                 }
                 
                 // Проверяем, есть ли данные для этого дня
-                if (dayTrophies > 0) {
+                if (dayTrophies !== undefined && dayTrophies !== null && dayTrophies !== 0) {
                     dayElement.classList.add('completed');
                 }
                 
@@ -709,7 +786,13 @@
                 
                 const dayTrophiesElement = document.createElement('div');
                 dayTrophiesElement.className = 'day-trophies';
-                dayTrophiesElement.textContent = dayTrophies > 0 ? `+${dayTrophies}` : '';
+                
+                // Добавляем класс для отрицательных значений
+                if (dayTrophies < 0) {
+                    dayTrophiesElement.classList.add('negative-trophies');
+                }
+                
+                dayTrophiesElement.textContent = formatTrophiesDisplay(dayTrophies);
                 
                 dayElement.appendChild(dayNumber);
                 dayElement.appendChild(dayTrophiesElement);
@@ -718,7 +801,7 @@
                 dayElement.addEventListener('click', () => {
                     selectedDate = date;
                     updateSelectedDay();
-                    trophiesInput.value = dayTrophies;
+                    trophiesInput.value = dayTrophies || 0;
                     updateStats();
                 });
                 
