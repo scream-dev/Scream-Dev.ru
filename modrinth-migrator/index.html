@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modrinth Mod Pack Migrator</title>
+    <link rel="icon" href="icon.png" type="image/png">
+    <title>ModVault Migrator</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         :root {
             --primary: #1bd96a;
             --primary-dark: #16b357;
+            --primary-light: #4ae88a;
             --secondary: #2d3748;
             --background: #0f172a;
             --card-bg: #1e293b;
@@ -18,6 +20,7 @@
             --error: #ef4444;
             --success: #10b981;
             --warning: #f59e0b;
+            --accent: #8b5cf6;
         }
 
         * {
@@ -33,6 +36,7 @@
             line-height: 1.6;
             padding: 20px;
             min-height: 100vh;
+            background: linear-gradient(135deg, var(--background) 0%, #1e293b 100%);
         }
 
         .container {
@@ -43,41 +47,121 @@
         header {
             text-align: center;
             margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            padding: 2.5rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 50%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(27, 217, 106, 0.2);
             animation: fadeIn 0.8s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none"><path d="M20 50L35 40V70L20 80V50Z" fill="%232d323b"/><path d="M20 50L35 40H65L50 50H20Z" fill="%233c424d"/><path d="M40 35L70 15V45L40 65V35Z" fill="%23108540"/><path d="M55 55L85 35V65L55 85V55Z" fill="%231bd96a"/></svg>');
+            background-size: 80px;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            animation: bounce 2s ease-in-out infinite;
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 0.5rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #fff, #e0f7e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-weight: 300;
         }
 
         .card {
             background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
+            border-radius: 16px;
+            padding: 2rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
             animation: slideUp 0.5s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .input-section {
             display: flex;
             flex-direction: column;
-            gap: 1rem;
+            gap: 1.5rem;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #4a5568;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: rgba(45, 55, 72, 0.5);
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(27, 217, 106, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(27, 217, 106, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .file-input {
+            display: none;
         }
 
         .textarea-container {
             position: relative;
+            display: none;
+        }
+
+        .textarea-container.active {
+            display: block;
         }
 
         textarea {
@@ -130,21 +214,24 @@
         }
 
         .format-btn {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.5rem;
             background-color: #4a5568;
             border: none;
-            border-radius: 6px;
+            border-radius: 10px;
             color: var(--text);
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
 
         .format-btn.active {
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 15px rgba(27, 217, 106, 0.3);
         }
 
         .format-btn:hover:not(.active) {
             background-color: #2d3748;
+            transform: translateY(-2px);
         }
 
         .version-input {
@@ -189,10 +276,10 @@
 
         button {
             padding: 0.75rem 1.5rem;
-            background-color: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
@@ -201,12 +288,12 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(27, 217, 106, 0.3);
         }
 
         button:hover {
-            background-color: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 20px rgba(27, 217, 106, 0.4);
         }
 
         button:active {
@@ -214,18 +301,19 @@
         }
 
         button:disabled {
-            background-color: #4a5568;
+            background: #4a5568;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
         button.secondary {
-            background-color: #4a5568;
+            background: #4a5568;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         button.secondary:hover {
-            background-color: #2d3748;
+            background: #2d3748;
         }
 
         .progress-section {
@@ -247,19 +335,20 @@
         }
 
         .progress-bar {
-            height: 10px;
+            height: 12px;
             background-color: #2d3748;
-            border-radius: 5px;
+            border-radius: 6px;
             overflow: hidden;
             margin-bottom: 1.5rem;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
-            border-radius: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 6px;
             width: 0%;
             transition: width 0.5s ease;
+            box-shadow: 0 2px 8px rgba(27, 217, 106, 0.3);
         }
 
         .mod-list-header {
@@ -308,13 +397,14 @@
 
         .mod-card {
             background-color: #2d3748;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 1rem;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
             transition: all 0.3s ease;
             border-left: 4px solid transparent;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .mod-card.pending {
@@ -451,6 +541,24 @@
             }
         }
 
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
         @media (max-width: 768px) {
             .mod-list {
                 grid-template-columns: 1fr;
@@ -470,7 +578,12 @@
             }
             
             h1 {
-                font-size: 2rem;
+                font-size: 2.2rem;
+            }
+            
+            .logo {
+                width: 60px;
+                height: 60px;
             }
         }
 
@@ -494,27 +607,56 @@
         .instructions li {
             margin-bottom: 0.5rem;
         }
+
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Modrinth Mod Pack Migrator</h1>
-            <p class="subtitle">Easily migrate your mod packs to different Minecraft versions</p>
+            <div class="header-content">
+                <div class="logo-container">
+                    <svg class="logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 50L35 40V70L20 80V50Z" fill="#2d323b"/>
+                        <path d="M20 50L35 40H65L50 50H20Z" fill="#3c424d"/>
+                        <path d="M40 35L70 15V45L40 65V35Z" fill="#108540"/>
+                        <path d="M55 55L85 35V65L55 85V55Z" fill="#1bd96a"/>
+                    </svg>
+                    <h1>ModVault Migrator</h1>
+                </div>
+                <p class="subtitle">Easily migrate your mod packs to different Minecraft versions</p>
+            </div>
         </header>
 
         <div class="card input-section">
-            <h2>Input Mod List</h2>
+            <h2>Input Mod Pack</h2>
             
             <div class="format-selector">
                 <label>Input Format:</label>
                 <div class="format-buttons">
-                    <button class="format-btn active" data-format="json">JSON</button>
+                    <button class="format-btn active" data-format="mrpack">MRPACK</button>
+                    <button class="format-btn" data-format="json">JSON</button>
                     <button class="format-btn" data-format="txt">TXT</button>
                 </div>
             </div>
             
-            <div class="textarea-container">
+            <div class="file-upload-area" id="fileUploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text" id="uploadText">Drag & Drop your .mrpack file here</div>
+                <div class="upload-subtext" id="uploadSubtext">or click to browse files</div>
+                <input type="file" id="fileInput" class="file-input" accept=".mrpack,.json,.txt">
+            </div>
+            
+            <div class="textarea-container" id="textareaContainer">
                 <textarea id="modListInput" placeholder=" "></textarea>
                 <div class="textarea-placeholder json-placeholder">[
     {
@@ -537,8 +679,8 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             
             <div class="version-input">
                 <label for="targetVersion">Target Minecraft Version:</label>
-                <input type="text" id="targetVersion" placeholder="e.g., 1.21.1">
-                <div class="error" id="versionError">Version must start with "1.21" followed by .1 to .10 or nothing</div>
+                <input type="text" id="targetVersion" placeholder="e.g., 1.21.1, 1.20.4, 1.19.2">
+                <div class="error" id="versionError">Version must be between 1.14 and 1.21.10 (including snapshots)</div>
             </div>
             
             <div class="button-group">
@@ -553,9 +695,10 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             <div class="instructions">
                 <h3>How to use:</h3>
                 <ol>
-                    <li>Select input format (JSON or TXT)</li>
-                    <li>Paste your mod list in the selected format</li>
-                    <li>Enter the target Minecraft version (e.g., 1.21, 1.21.1, 1.21.4)</li>
+                    <li>Select input format (MRPACK, JSON or TXT)</li>
+                    <li>For MRPACK: drag & drop .mrpack file or click to browse</li>
+                    <li>For JSON/TXT: paste your mod list in the text area or upload file</li>
+                    <li>Enter the target Minecraft version (1.14 - 1.21.10)</li>
                     <li>Click "Start Migration" to begin downloading mods</li>
                     <li>Download individual mods or all at once when complete</li>
                 </ol>
@@ -587,7 +730,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             </div>
             
             <div class="mod-list" id="modListContainer">
-                <!-- Mod cards will be dynamically inserted here -->
             </div>
         </div>
 
@@ -621,6 +763,11 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             const resultVersion = document.getElementById('resultVersion');
             const downloadAllBtn = document.getElementById('downloadAll');
             const formatButtons = document.querySelectorAll('.format-btn');
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const textareaContainer = document.getElementById('textareaContainer');
+            const uploadText = document.getElementById('uploadText');
+            const uploadSubtext = document.getElementById('uploadSubtext');
             const jsonPlaceholder = document.querySelector('.json-placeholder');
             const txtPlaceholder = document.querySelector('.txt-placeholder');
 
@@ -631,31 +778,92 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             let successfulMods = 0;
             let errorMods = 0;
             let isModListCollapsed = false;
-            let currentFormat = 'json';
+            let currentFormat = 'mrpack';
 
-            // Format selector
-            formatButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    formatButtons.forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFormat = this.dataset.format;
+            function updateUIForFormat(format) {
+                currentFormat = format;
+                
+                if (format === 'mrpack') {
+                    fileUploadArea.style.display = 'block';
+                    textareaContainer.classList.remove('active');
+                    uploadText.textContent = 'Drag & Drop your .mrpack file here';
+                    uploadSubtext.textContent = 'or click to browse files';
+                    fileInput.accept = '.mrpack';
+                } else {
+                    fileUploadArea.style.display = 'block';
+                    textareaContainer.classList.add('active');
+                    uploadText.textContent = `Drag & Drop your ${format.toUpperCase()} file here`;
+                    uploadSubtext.textContent = 'or click to browse files, or paste content below';
+                    fileInput.accept = format === 'json' ? '.json' : '.txt';
                     
-                    if (currentFormat === 'json') {
+                    if (format === 'json') {
                         jsonPlaceholder.style.display = 'block';
                         txtPlaceholder.style.display = 'none';
                     } else {
                         jsonPlaceholder.style.display = 'none';
                         txtPlaceholder.style.display = 'block';
                     }
-                    
-                    // Update placeholder visibility
-                    if (!modListInput.value) {
-                        document.querySelector('.textarea-placeholder').style.opacity = '1';
-                    }
+                }
+                
+                if (!modListInput.value) {
+                    document.querySelector('.textarea-placeholder').style.opacity = '1';
+                }
+            }
+
+            formatButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    formatButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    updateUIForFormat(this.dataset.format);
                 });
             });
 
-            // Toggle mod list collapse
+            fileUploadArea.addEventListener('click', function() {
+                fileInput.click();
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileUpload(e.target.files[0]);
+                }
+            });
+
+            fileUploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+
+            function handleFileUpload(file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    if (currentFormat === 'mrpack') {
+                        processMrpackFile(e.target.result, file.name);
+                    } else {
+                        modListInput.value = e.target.result;
+                        document.querySelector('.textarea-placeholder').style.opacity = '0.3';
+                    }
+                };
+                
+                if (currentFormat === 'mrpack') {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            }
+
             modListHeader.addEventListener('click', function() {
                 isModListCollapsed = !isModListCollapsed;
                 if (isModListCollapsed) {
@@ -667,7 +875,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 }
             });
 
-            // Hide placeholder when user focuses on textarea
             modListInput.addEventListener('focus', function() {
                 document.querySelector('.textarea-placeholder').style.opacity = '0.3';
             });
@@ -678,14 +885,13 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 }
             });
 
-            // Validate version input
             targetVersion.addEventListener('input', function() {
                 validateVersion();
             });
 
             function validateVersion() {
                 const version = targetVersion.value.trim();
-                const versionRegex = /^1\.21(\.([1-9]|10))?$/;
+                const versionRegex = /^1\.(1[4-9]|2[0-1])(\.([0-9]|10))?(-[a-zA-Z0-9.]+)?$/;
                 
                 if (versionRegex.test(version)) {
                     versionError.style.display = 'none';
@@ -696,20 +902,60 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 }
             }
 
-            // Clear input
             clearInputBtn.addEventListener('click', function() {
                 modListInput.value = '';
                 targetVersion.value = '';
+                fileInput.value = '';
                 versionError.style.display = 'none';
                 document.querySelector('.textarea-placeholder').style.opacity = '1';
             });
 
-            // Parse input based on format
+            async function processMrpackFile(arrayBuffer, fileName) {
+                try {
+                    const zip = await JSZip.loadAsync(arrayBuffer);
+                    const modrinthJsonFile = zip.file('modrinth.index.json');
+                    
+                    if (!modrinthJsonFile) {
+                        throw new Error('Not a valid .mrpack file: modrinth.index.json not found');
+                    }
+                    
+                    const modrinthJson = JSON.parse(await modrinthJsonFile.async('text'));
+                    
+                    modsData = modrinthJson.files
+                        .filter(file => file.downloads && file.downloads.length > 0)
+                        .map(file => {
+                            const modrinthUrl = file.downloads.find(url => url.includes('modrinth.com'));
+                            if (modrinthUrl) {
+                                const modId = modrinthUrl.split('/').pop();
+                                return {
+                                    name: file.path.split('/').pop() || `mod-${modId}`,
+                                    url: `https://modrinth.com/mod/${modId}`,
+                                    fileId: modId
+                                };
+                            }
+                            return null;
+                        })
+                        .filter(mod => mod !== null);
+                    
+                    if (modsData.length === 0) {
+                        throw new Error('No Modrinth mods found in the .mrpack file');
+                    }
+                    
+                    uploadText.textContent = `Loaded: ${fileName}`;
+                    uploadSubtext.textContent = `${modsData.length} mods found`;
+                    startMigrationBtn.disabled = false;
+                    
+                } catch (error) {
+                    alert('Error processing .mrpack file: ' + error.message);
+                }
+            }
+
             function parseInput(input) {
-                if (currentFormat === 'json') {
+                if (currentFormat === 'mrpack') {
+                    return modsData;
+                } else if (currentFormat === 'json') {
                     return JSON.parse(input);
                 } else {
-                    // Parse TXT format
                     const lines = input.split('\n').filter(line => line.trim());
                     const mods = [];
                     
@@ -727,25 +973,30 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 }
             }
 
-            // Start migration
             startMigrationBtn.addEventListener('click', function() {
                 if (!validateVersion()) {
                     return;
                 }
 
                 try {
-                    modsData = parseInput(modListInput.value);
-                    if (!Array.isArray(modsData) || modsData.length === 0) {
+                    let inputData;
+                    if (currentFormat === 'mrpack') {
+                        inputData = modsData;
+                    } else {
+                        inputData = parseInput(modListInput.value);
+                    }
+                    
+                    if (!Array.isArray(inputData) || inputData.length === 0) {
                         throw new Error('Input must be a non-empty array of mods');
                     }
                     
+                    modsData = inputData;
                     totalMods = modsData.length;
                     processedMods = 0;
                     successfulMods = 0;
                     errorMods = 0;
                     migrationResults = [];
                     
-                    // Reset UI
                     modListContainer.innerHTML = '';
                     progressFill.style.width = '0%';
                     processedCount.textContent = `Processed: 0/${totalMods}`;
@@ -753,16 +1004,13 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     errorCount.textContent = `Errors: 0`;
                     modCount.textContent = `${totalMods} mods`;
                     
-                    // Reset collapse state
                     isModListCollapsed = false;
                     modListHeader.classList.remove('collapsed');
                     modListContainer.classList.remove('collapsed');
                     
-                    // Show progress section
                     progressSection.style.display = 'block';
                     resultsSection.style.display = 'none';
                     
-                    // Create mod cards
                     modsData.forEach(mod => {
                         const modCard = document.createElement('div');
                         modCard.className = 'mod-card pending';
@@ -784,7 +1032,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                         modListContainer.appendChild(modCard);
                     });
                     
-                    // Start processing mods
                     processMods();
                     
                 } catch (error) {
@@ -797,7 +1044,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     await processMod(mod);
                 }
                 
-                // Migration complete
                 resultVersion.textContent = targetVersion.value;
                 resultsSection.style.display = 'block';
             }
@@ -808,16 +1054,13 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 const versionInfo = modCard.querySelector('.version-info');
                 const downloadBtn = modCard.querySelector('.download-single');
                 
-                // Extract mod ID from URL
-                const modId = mod.url.split('/').pop();
+                const modId = mod.fileId || mod.url.split('/').pop();
                 
-                // Update UI to downloading state
                 modCard.className = 'mod-card downloading';
                 statusElement.className = 'mod-status status-downloading';
                 statusElement.textContent = 'Downloading';
                 
                 try {
-                    // Get mod information from Modrinth API
                     const projectResponse = await fetch(`https://api.modrinth.com/v2/project/${modId}`);
                     
                     if (!projectResponse.ok) {
@@ -826,7 +1069,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     
                     const projectData = await projectResponse.json();
                     
-                    // Get versions for this mod
                     const versionsResponse = await fetch(`https://api.modrinth.com/v2/project/${modId}/version`);
                     
                     if (!versionsResponse.ok) {
@@ -835,7 +1077,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     
                     const versionsData = await versionsResponse.json();
                     
-                    // Find a version compatible with the target Minecraft version
                     const targetVersionValue = targetVersion.value;
                     const compatibleVersion = versionsData.find(version => 
                         version.game_versions.includes(targetVersionValue)
@@ -845,7 +1086,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                         throw new Error(`No version found for ${targetVersionValue}`);
                     }
                     
-                    // Get the primary file
                     const primaryFile = compatibleVersion.files.find(file => file.primary) || compatibleVersion.files[0];
                     
                     if (!primaryFile) {
@@ -854,31 +1094,27 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     
                     versionInfo.textContent = compatibleVersion.version_number;
                     
-                    // Update UI to success state
                     modCard.className = 'mod-card success';
                     statusElement.className = 'mod-status status-success';
                     statusElement.textContent = 'Success';
                     
-                    // Enable download button
                     downloadBtn.disabled = false;
                     downloadBtn.addEventListener('click', () => {
                         downloadFile(primaryFile.url, primaryFile.filename);
                     });
                     
-                    // Store result
                     migrationResults.push({
                         name: mod.name,
                         version: compatibleVersion.version_number,
                         fileUrl: primaryFile.url,
                         fileName: primaryFile.filename,
-                        fileData: null, // Will be populated when downloading
+                        fileData: null,
                         status: 'success'
                     });
                     
                     successfulMods++;
                     
                 } catch (error) {
-                    // Update UI to error state
                     modCard.className = 'mod-card error';
                     statusElement.className = 'mod-status status-error';
                     statusElement.textContent = 'Error';
@@ -893,7 +1129,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     errorMods++;
                 }
                 
-                // Update progress
                 processedMods++;
                 const progressPercent = (processedMods / totalMods) * 100;
                 progressFill.style.width = `${progressPercent}%`;
@@ -904,7 +1139,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             }
 
             function downloadFile(url, filename) {
-                // Create a temporary link to trigger download
                 const link = document.createElement('a');
                 link.href = url;
                 link.download = filename;
@@ -914,7 +1148,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 document.body.removeChild(link);
             }
 
-            // Download all mods as ZIP
             downloadAllBtn.addEventListener('click', async function() {
                 downloadAllBtn.innerHTML = '<div class="spinner"></div><span>Preparing ZIP...</span>';
                 downloadAllBtn.disabled = true;
@@ -923,7 +1156,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     const zip = new JSZip();
                     const successfulMods = migrationResults.filter(mod => mod.status === 'success');
                     
-                    // Download each mod file and add to ZIP
                     for (const mod of successfulMods) {
                         try {
                             const response = await fetch(mod.fileUrl);
@@ -935,14 +1167,11 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                         }
                     }
                     
-                    // Generate ZIP file
                     const zipBlob = await zip.generateAsync({type: 'blob'});
                     
-                    // Generate random 3-digit number
                     const randomNum = Math.floor(100 + Math.random() * 900);
                     const zipName = `mods${randomNum}.zip`;
                     
-                    // Download the ZIP
                     saveAs(zipBlob, zipName);
                     
                     downloadAllBtn.innerHTML = '<span>Download All Mods as ZIP</span>';
@@ -954,6 +1183,8 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     downloadAllBtn.disabled = false;
                 }
             });
+
+            updateUIForFormat('mrpack');
         });
     </script>
 </body>
