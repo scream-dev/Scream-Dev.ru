@@ -268,6 +268,43 @@
             display: none;
         }
 
+        .loader-selector {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .loader-selector label {
+            font-weight: 600;
+        }
+
+        .loader-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .loader-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: #4a5568;
+            border: none;
+            border-radius: 10px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .loader-btn.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 4px 15px rgba(27, 217, 106, 0.3);
+        }
+
+        .loader-btn:hover:not(.active) {
+            background-color: #2d3748;
+            transform: translateY(-2px);
+        }
+
         .button-group {
             display: flex;
             gap: 1rem;
@@ -707,6 +744,16 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 <div class="error" id="versionError">Please enter a valid Minecraft version</div>
             </div>
             
+            <div class="loader-selector">
+                <label>Mod Loader:</label>
+                <div class="loader-buttons">
+                    <button class="loader-btn active" data-loader="fabric">Fabric</button>
+                    <button class="loader-btn" data-loader="quilt">Quilt</button>
+                    <button class="loader-btn" data-loader="forge">Forge</button>
+                    <button class="loader-btn" data-loader="neoforge">Neoforge</button>
+                </div>
+            </div>
+            
             <div class="button-group">
                 <button id="startMigration">
                     <span>Start Migration</span>
@@ -723,6 +770,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     <li>For MRPACK: drag & drop .mrpack file or click to browse</li>
                     <li>For JSON/TXT: paste your mod list in the text area or upload file</li>
                     <li>Enter the target Minecraft version (supports snapshots and pre-releases)</li>
+                    <li>Select mod loader (Fabric, Quilt, Forge, Neoforge)</li>
                     <li>Click "Start Migration" to begin downloading mods</li>
                     <li>Download individual mods or all at once when complete</li>
                 </ol>
@@ -797,6 +845,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             const downloadAllBtn = document.getElementById('downloadAll');
             const downloadMrpackBtn = document.getElementById('downloadMrpack');
             const formatButtons = document.querySelectorAll('.format-btn');
+            const loaderButtons = document.querySelectorAll('.loader-btn');
             const fileUploadArea = document.getElementById('fileUploadArea');
             const fileInput = document.getElementById('fileInput');
             const textareaContainer = document.getElementById('textareaContainer');
@@ -813,6 +862,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             let errorMods = 0;
             let isModListCollapsed = false;
             let currentFormat = 'txt';
+            let currentLoader = 'fabric';
 
             function updateUIForFormat(format) {
                 currentFormat = format;
@@ -849,6 +899,14 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     formatButtons.forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     updateUIForFormat(this.dataset.format);
+                });
+            });
+
+            loaderButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    loaderButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentLoader = this.dataset.loader;
                 });
             });
 
@@ -926,10 +984,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
             function validateVersion() {
                 const version = targetVersion.value.trim();
                 
-                // More flexible version validation that supports:
-                // - Standard versions: 1.14, 1.20.4, 1.21.10
-                // - Snapshots: 24w10a, 23w45a, 1.18-pre1
-                // - Pre-releases: 1.20.4-pre1, 1.21-pre2
                 const versionRegex = /^(\d+\.\d+(\.\d+)?)(-[a-zA-Z0-9]+)?$|^\d{2}w\d+[a-z]$|^[a-zA-Z0-9._-]+$/;
                 
                 if (version && versionRegex.test(version)) {
@@ -1010,6 +1064,27 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     
                     return mods;
                 }
+            }
+
+            function getLoaderLoaders(loader) {
+                if (loader === 'quilt') {
+                    return ['quilt', 'fabric'];
+                }
+                return [loader];
+            }
+
+            function findCompatibleVersion(versions, targetVersionValue, loaders) {
+                for (const loader of loaders) {
+                    const compatibleVersion = versions.find(version => 
+                        version.game_versions.includes(targetVersionValue) &&
+                        version.loaders.includes(loader)
+                    );
+                    
+                    if (compatibleVersion) {
+                        return compatibleVersion;
+                    }
+                }
+                return null;
             }
 
             startMigrationBtn.addEventListener('click', function() {
@@ -1117,12 +1192,11 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     const versionsData = await versionsResponse.json();
                     
                     const targetVersionValue = targetVersion.value;
-                    const compatibleVersion = versionsData.find(version => 
-                        version.game_versions.includes(targetVersionValue)
-                    );
+                    const loaders = getLoaderLoaders(currentLoader);
+                    const compatibleVersion = findCompatibleVersion(versionsData, targetVersionValue, loaders);
                     
                     if (!compatibleVersion) {
-                        throw new Error(`No version found for ${targetVersionValue}`);
+                        throw new Error(`No ${currentLoader} version found for ${targetVersionValue}`);
                     }
                     
                     const primaryFile = compatibleVersion.files.find(file => file.primary) || compatibleVersion.files[0];
@@ -1230,7 +1304,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 try {
                     const successfulMods = migrationResults.filter(mod => mod.status === 'success');
                     
-                    // Create modrinth.index.json structure
                     const modrinthIndex = {
                         formatVersion: 1,
                         game: "minecraft",
@@ -1243,7 +1316,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                         }
                     };
                     
-                    // Download mod files and add to index
                     for (const mod of successfulMods) {
                         try {
                             const response = await fetch(mod.fileUrl);
@@ -1253,8 +1325,8 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                             modrinthIndex.files.push({
                                 path: `mods/${mod.fileName}`,
                                 hashes: {
-                                    sha1: "", // Would need to calculate this
-                                    sha512: "" // Would need to calculate this
+                                    sha1: "",
+                                    sha512: ""
                                 },
                                 downloads: [mod.fileUrl],
                                 fileSize: blob.size
@@ -1264,13 +1336,10 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                         }
                     }
                     
-                    // Create MRPACK zip
                     const zip = new JSZip();
                     
-                    // Add modrinth.index.json
                     zip.file("modrinth.index.json", JSON.stringify(modrinthIndex, null, 2));
                     
-                    // Create .mrpack file
                     const mrpackBlob = await zip.generateAsync({type: 'blob'});
                     
                     const randomNum = Math.floor(100 + Math.random() * 900);
@@ -1288,7 +1357,6 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 }
             });
 
-            // Set TXT as default format
             updateUIForFormat('txt');
         });
     </script>
