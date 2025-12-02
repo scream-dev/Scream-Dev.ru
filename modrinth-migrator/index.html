@@ -1067,28 +1067,31 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 }
             }
 
-            function getLoaderLoaders(loader) {
-                if (loader === 'quilt') {
-                    return ['quilt', 'fabric'];
-                }
-                if (loader === 'quilt_only') {
-                    return ['quilt'];
-                }
-                return [loader];
-            }
-
-            function findCompatibleVersion(versions, targetVersionValue, loaders) {
-                for (const loader of loaders) {
-                    const compatibleVersion = versions.find(version => 
+            function findCompatibleVersion(versions, targetVersionValue, loaderType) {
+                if (loaderType === 'quilt_only') {
+                    return versions.find(version => 
                         version.game_versions.includes(targetVersionValue) &&
-                        version.loaders.includes(loader)
+                        version.loaders.includes('quilt') &&
+                        !version.loaders.includes('fabric')
+                    );
+                } else if (loaderType === 'quilt') {
+                    const quiltVersion = versions.find(version => 
+                        version.game_versions.includes(targetVersionValue) &&
+                        version.loaders.includes('quilt')
                     );
                     
-                    if (compatibleVersion) {
-                        return compatibleVersion;
-                    }
+                    if (quiltVersion) return quiltVersion;
+                    
+                    return versions.find(version => 
+                        version.game_versions.includes(targetVersionValue) &&
+                        version.loaders.includes('fabric')
+                    );
+                } else {
+                    return versions.find(version => 
+                        version.game_versions.includes(targetVersionValue) &&
+                        version.loaders.includes(loaderType)
+                    );
                 }
-                return null;
             }
 
             startMigrationBtn.addEventListener('click', function() {
@@ -1196,8 +1199,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     const versionsData = await versionsResponse.json();
                     
                     const targetVersionValue = targetVersion.value;
-                    const loaders = getLoaderLoaders(currentLoader);
-                    const compatibleVersion = findCompatibleVersion(versionsData, targetVersionValue, loaders);
+                    const compatibleVersion = findCompatibleVersion(versionsData, targetVersionValue, currentLoader);
                     
                     if (!compatibleVersion) {
                         throw new Error(`No ${currentLoader === 'quilt_only' ? 'Only Quilt' : currentLoader} version found for ${targetVersionValue}`);
