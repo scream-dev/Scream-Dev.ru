@@ -749,6 +749,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 <div class="loader-buttons">
                     <button class="loader-btn active" data-loader="fabric">Fabric</button>
                     <button class="loader-btn" data-loader="quilt">Quilt</button>
+                    <button class="loader-btn" data-loader="quilt_only">Only Quilt</button>
                     <button class="loader-btn" data-loader="forge">Forge</button>
                     <button class="loader-btn" data-loader="neoforge">Neoforge</button>
                 </div>
@@ -770,7 +771,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     <li>For MRPACK: drag & drop .mrpack file or click to browse</li>
                     <li>For JSON/TXT: paste your mod list in the text area or upload file</li>
                     <li>Enter the target Minecraft version (supports snapshots and pre-releases)</li>
-                    <li>Select mod loader (Fabric, Quilt, Forge, Neoforge)</li>
+                    <li>Select mod loader (Fabric, Quilt, Only Quilt, Forge, Neoforge)</li>
                     <li>Click "Start Migration" to begin downloading mods</li>
                     <li>Download individual mods or all at once when complete</li>
                 </ol>
@@ -1070,6 +1071,9 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                 if (loader === 'quilt') {
                     return ['quilt', 'fabric'];
                 }
+                if (loader === 'quilt_only') {
+                    return ['quilt'];
+                }
                 return [loader];
             }
 
@@ -1196,7 +1200,7 @@ BetterGrassify (https://modrinth.com/mod/m5T5xmUy)</div>
                     const compatibleVersion = findCompatibleVersion(versionsData, targetVersionValue, loaders);
                     
                     if (!compatibleVersion) {
-                        throw new Error(`No ${currentLoader} version found for ${targetVersionValue}`);
+                        throw new Error(`No ${currentLoader === 'quilt_only' ? 'Only Quilt' : currentLoader} version found for ${targetVersionValue}`);
                     }
                     
                     const primaryFile = compatibleVersion.files.find(file => file.primary) || compatibleVersion.files[0];
