@@ -1,189 +1,707 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>AnarxGrif 2025</title>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
-  color: #F3F4F6;
-}
-
-.container {
-  max-width: 1400px;
-  margin: auto;
-  padding: 40px 20px;
-}
-
-.header {
-  text-align: center;
-  margin-bottom: 50px;
-  padding: 30px;
-  background: rgba(239,68,68,0.1);
-  border-radius: 16px;
-  border: 2px solid rgba(239,68,68,0.3);
-}
-
-.header h1 {
-  font-size: 48px;
-  font-weight: 900;
-  background: linear-gradient(135deg,#EF4444,#3B82F6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin: 0;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(500px,1fr));
-  gap: 30px;
-  margin-bottom: 50px;
-}
-
-.card {
-  background: rgba(31,41,55,0.6);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 30px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-  gap: 20px;
-}
-
-.stat {
-  padding: 20px;
-  border-radius: 12px;
-  border: 2px solid rgba(255,255,255,0.15);
-}
-
-.top-item {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:20px;
-  margin-bottom:15px;
-  border-radius:12px;
-  background: rgba(31,41,55,0.5);
-  border:2px solid rgba(75,85,99,0.3);
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnarxGrif 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #0f0f2d 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Стили для заставки */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out;
+            overflow: hidden;
+        }
+        
+        .splash-logo {
+            font-size: 4.5rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #ff2e2e, #4d7cff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .splash-logo::after {
+            content: '2025';
+            position: absolute;
+            right: -70px;
+            top: -10px;
+            font-size: 2rem;
+            color: #ff2e2e;
+        }
+        
+        .splash-subtitle {
+            font-size: 1.8rem;
+            color: #a0a0c0;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff2e2e, #4d7cff);
+            border-radius: 3px;
+            animation: loading 2.5s ease-in-out forwards;
+        }
+        
+        /* Анимационные элементы для заставки */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(77, 124, 255, 0.1);
+            animation: float 15s infinite linear;
+            z-index: 1;
+        }
+        
+        .floating-element:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            background: rgba(255, 46, 46, 0.1);
+        }
+        
+        .floating-element:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            bottom: 15%;
+            right: 10%;
+            animation-delay: -5s;
+            background: rgba(77, 124, 255, 0.15);
+        }
+        
+        .floating-element:nth-child(3) {
+            width: 80px;
+            height: 80px;
+            top: 50%;
+            left: 80%;
+            animation-delay: -10s;
+            background: rgba(255, 46, 46, 0.1);
+        }
+        
+        .floating-element:nth-child(4) {
+            width: 120px;
+            height: 120px;
+            bottom: 30%;
+            left: 5%;
+            animation-delay: -7s;
+        }
+        
+        .pulse-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 2px solid rgba(77, 124, 255, 0.3);
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+            }
+            100% {
+                transform: translateY(0) rotate(360deg);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.1);
+                opacity: 0.2;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0.8);
+                opacity: 0.5;
+            }
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        
+        /* Стили для основного контента */
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #ff2e2e, #4d7cff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0c0;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #4d7cff;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .top-list {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 50px;
+        }
+        
+        .top-title {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: #ff2e2e;
+            text-align: center;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        
+        .user-item:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        
+        .user-stats {
+            text-align: right;
+        }
+        
+        .messages-2025 {
+            color: #ff2e2e;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        
+        .total-messages {
+            color: #a0a0c0;
+            font-size: 0.9rem;
+        }
+        
+        .percentage {
+            display: block;
+            color: #4d7cff;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        /* Улучшенная статистика */
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #a0a0c0;
+        }
+        
+        .stat-2025 {
+            color: #ff2e2e;
+        }
+        
+        .stat-total {
+            color: #4d7cff;
+        }
+        
+        .stat-average {
+            color: #ffa500;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 30px 0;
+            color: #a0a0c0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+        
+        .highlight-red {
+            color: #ff2e2e;
+            font-weight: 600;
+        }
+        
+        .highlight-blue {
+            color: #4d7cff;
+            font-weight: 600;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-summary {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .splash-logo {
+                font-size: 3rem;
+            }
+            
+            .splash-subtitle {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-<div class="container">
-
-  <div class="header">
-    <h1>📊 Discord Analytics</h1>
-    <p style="color:#9CA3AF;font-size:18px;">Статистика AnarxGrif за 2025</p>
-  </div>
-
-  <div class="grid">
-    <div class="card">
-      <h2 style="text-align:center;color:#EF4444;">🔥 2025 год</h2>
-      <canvas id="chart2025"></canvas>
+    <!-- Заставка с анимацией -->
+    <div id="splash-screen">
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="floating-element"></div>
+        <div class="pulse-circle"></div>
+        
+        <div class="splash-logo">AnarxGrif</div>
+        <div class="splash-subtitle">Статистика сообщений Discord сервера</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
     </div>
 
-    <div class="card">
-      <h2 style="text-align:center;color:#3B82F6;">⏳ Всё время</h2>
-      <canvas id="chartTotal"></canvas>
+    <!-- Основной контент -->
+    <div class="container" id="main-content" style="display: none;">
+        <header>
+            <h1>AnarxGrif 2025</h1>
+            <p class="subtitle">Статистика активности на Discord сервере AnarxGrif. Визуализация сообщений за 2025 год и за всё время. Данные обновлены в реальном времени.</p>
+        </header>
+        
+        <!-- Улучшенная статистика -->
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-value stat-2025" id="total-2025">0</div>
+                <div class="stat-label">Сообщений за 2025</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value stat-total" id="total-all">0</div>
+                <div class="stat-label">Сообщений всего</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value stat-average" id="avg-2025">0</div>
+                <div class="stat-label">Среднее за 2025 на человека</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value stat-average" id="avg-all">0</div>
+                <div class="stat-label">Среднее всего на человека</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value stat-2025" id="active-percent">0%</div>
+                <div class="stat-label">Активность в 2025 году</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="most-active">-</div>
+                <div class="stat-label">Самый активный в 2025</div>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <div class="chart-card">
+                <h2 class="chart-title">Сообщения за 2025 год</h2>
+                <div class="chart-container">
+                    <canvas id="chart2025"></canvas>
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <h2 class="chart-title">Сообщения за всё время</h2>
+                <div class="chart-container">
+                    <canvas id="chartAllTime"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="top-list">
+            <h2 class="top-title">Топ активности за 2025 год</h2>
+            <div class="user-list" id="top-list">
+                <!-- Данные будут добавлены через JavaScript -->
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Статистика была собрана 25 декабря 2025 14:00. Всего участников: <span class="highlight-red">8</span></p>
+            <p>Общее количество сообщений за 2025: <span class="highlight-red">15,846</span> | За всё время: <span class="highlight-blue">64,405</span></p>
+            <p style="margin-top: 10px;">Активность в 2025 году составила <span class="highlight-red">24.6%</span> от общей активности сервера</p>
+        </div>
     </div>
-  </div>
 
-  <div class="card" style="margin-bottom:50px;">
-    <h2 style="text-align:center;color:#8B5CF6;">📈 Детальная статистика</h2>
-    <div class="stats-grid" id="stats"></div>
-  </div>
-
-  <div class="card">
-    <h2 style="text-align:center;color:#EF4444;">🏆 Топ активности 2025</h2>
-    <div id="top"></div>
-  </div>
-
-</div>
-
-<script>
-const data = [
-  { name: 'Тимур', messages2025: 4224, messagesTotal: 14097 },
-  { name: 'Макар', messages2025: 4581, messagesTotal: 17170 },
-  { name: 'Матвей', messages2025: 1995, messagesTotal: 5344 },
-  { name: 'Денис', messages2025: 3166, messagesTotal: 11591 },
-  { name: 'Коля', messages2025: 198, messagesTotal: 688 },
-  { name: 'Шамиль', messages2025: 1211, messagesTotal: 1351 },
-  { name: 'Даниил', messages2025: 6, messagesTotal: 54 },
-  { name: 'Ильсаф', messages2025: 465, messagesTotal: 1110 }
-];
-
-const COLORS = ['#EF4444','#3B82F6','#EC4899','#8B5CF6','#F97316','#06B6D4','#F59E0B','#10B981'];
-
-const total2025 = data.reduce((s,i)=>s+i.messages2025,0);
-const totalAll = data.reduce((s,i)=>s+i.messagesTotal,0);
-const avg2025 = Math.round(total2025/data.length);
-const avgAll = Math.round(totalAll/data.length);
-
-const median2025 = [...data].sort((a,b)=>a.messages2025-b.messages2025)[Math.floor(data.length/2)].messages2025;
-
-const mostActive = [...data].sort((a,b)=>b.messages2025-a.messages2025)[0];
-const mostActiveAll = [...data].sort((a,b)=>b.messagesTotal-a.messagesTotal)[0];
-
-new Chart(chart2025, {
-  type: 'pie',
-  data: {
-    labels: data.map(d=>d.name),
-    datasets: [{
-      data: data.map(d=>d.messages2025),
-      backgroundColor: COLORS
-    }]
-  }
-});
-
-new Chart(chartTotal, {
-  type: 'pie',
-  data: {
-    labels: data.map(d=>d.name),
-    datasets: [{
-      data: data.map(d=>d.messagesTotal),
-      backgroundColor: COLORS
-    }]
-  }
-});
-
-const stats = document.getElementById("stats");
-[
-  ["Всего сообщений 2025", total2025],
-  ["Всего за всё время", totalAll],
-  ["Среднее на человека (2025)", avg2025],
-  ["Среднее на человека (всего)", avgAll],
-  ["Медиана (2025)", median2025],
-  ["Самый активный (2025)", mostActive.name + " — " + mostActive.messages2025],
-  ["Самый активный (всего)", mostActiveAll.name + " — " + mostActiveAll.messagesTotal],
-  ["Активность 2025", ((total2025/totalAll)*100).toFixed(1) + "%"]
-].forEach(s=>{
-  const d=document.createElement("div");
-  d.className="stat";
-  d.innerHTML=`<div style="color:#9CA3AF;font-size:14px;">${s[0]}</div><div style="font-size:28px;font-weight:900;">${s[1]}</div>`;
-  stats.appendChild(d);
-});
-
-const top = document.getElementById("top");
-[...data].sort((a,b)=>b.messages2025-a.messages2025).forEach((i,idx)=>{
-  const d=document.createElement("div");
-  d.className="top-item";
-  d.innerHTML=`
-    <div><strong>${idx+1}. ${i.name}</strong></div>
-    <div>${i.messages2025.toLocaleString()} сообщений</div>
-  `;
-  top.appendChild(d);
-});
-</script>
-
+    <script>
+        // Данные статистики
+        const statsData = [
+            { name: "Тимур", messages2025: 4224, totalMessages: 14097 },
+            { name: "Макар", messages2025: 4581, totalMessages: 17170 },
+            { name: "Матвей", messages2025: 1995, totalMessages: 5344 },
+            { name: "Денис", messages2025: 3166, totalMessages: 11591 },
+            { name: "Коля", messages2025: 198, totalMessages: 688 },
+            { name: "Шамиль", messages2025: 1211, totalMessages: 1351 },
+            { name: "Даниил", messages2025: 6, totalMessages: 54 },
+            { name: "Ильсаф", messages2025: 465, totalMessages: 1110 }
+        ];
+        
+        // Расчет общей статистики
+        const total2025 = statsData.reduce((sum, user) => sum + user.messages2025, 0);
+        const totalAllTime = statsData.reduce((sum, user) => sum + user.totalMessages, 0);
+        const avg2025 = Math.round(total2025 / statsData.length);
+        const avgAllTime = Math.round(totalAllTime / statsData.length);
+        const activityPercent = ((total2025 / totalAllTime) * 100).toFixed(1);
+        
+        // Находим самого активного в 2025
+        const mostActive2025 = statsData.reduce((prev, current) => 
+            (prev.messages2025 > current.messages2025) ? prev : current
+        );
+        
+        // Цвета для диаграмм (красный и синий тема)
+        const chartColors = [
+            '#FF005E', '#00FF87', '#8F00FF', '#FFD700',  
+            '#00BFFF', '#FF4500', '#7CFC00', '#FF1493'
+        ];
+        
+        // Функция для отображения заставки
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                const splashScreen = document.getElementById('splash-screen');
+                const mainContent = document.getElementById('main-content');
+                
+                splashScreen.style.opacity = '0';
+                
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    mainContent.style.display = 'block';
+                    
+                    // Инициализация статистики и диаграмм после отображения контента
+                    initStatsSummary();
+                    initCharts();
+                    renderTopList();
+                }, 800);
+            }, 2800);
+        });
+        
+        // Инициализация улучшенной статистики
+        function initStatsSummary() {
+            document.getElementById('total-2025').textContent = total2025.toLocaleString();
+            document.getElementById('total-all').textContent = totalAllTime.toLocaleString();
+            document.getElementById('avg-2025').textContent = avg2025.toLocaleString();
+            document.getElementById('avg-all').textContent = avgAllTime.toLocaleString();
+            document.getElementById('active-percent').textContent = activityPercent + '%';
+            document.getElementById('most-active').textContent = mostActive2025.name;
+        }
+        
+        // Функция инициализации диаграмм
+        function initCharts() {
+            // Сортируем данные по убыванию для 2025 года
+            const sortedData2025 = [...statsData].sort((a, b) => b.messages2025 - a.messages2025);
+            const labels2025 = sortedData2025.map(user => user.name);
+            const data2025 = sortedData2025.map(user => user.messages2025);
+            
+            // Диаграмма за 2025 год (пончиковая)
+            const ctx2025 = document.getElementById('chart2025').getContext('2d');
+            new Chart(ctx2025, {
+                type: 'doughnut',
+                data: {
+                    labels: labels2025,
+                    datasets: [{
+                        data: data2025,
+                        backgroundColor: chartColors,
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#fff',
+                                padding: 15,
+                                font: {
+                                    size: 13
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const percentage = ((value / total2025) * 100).toFixed(1);
+                                    return `${label}: ${value} сообщений (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    beforeDraw: function(chart) {
+                        const width = chart.width;
+                        const height = chart.height;
+                        const ctx = chart.ctx;
+                        ctx.restore();
+                        
+                        // Добавляем проценты на секторы диаграммы
+                        const meta = chart.getDatasetMeta(0);
+                        meta.data.forEach((element, index) => {
+                            const model = element;
+                            const value = chart.data.datasets[0].data[index];
+                            const percentage = ((value / total2025) * 100).toFixed(1);
+                            
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            
+                            const pos = model.tooltipPosition();
+                            ctx.fillText(percentage + '%', pos.x, pos.y);
+                        });
+                        
+                        ctx.save();
+                    }
+                }]
+            });
+            
+            // Сортируем данные по убыванию за всё время
+            const sortedDataAllTime = [...statsData].sort((a, b) => b.totalMessages - a.totalMessages);
+            const labelsAllTime = sortedDataAllTime.map(user => user.name);
+            const dataAllTime = sortedDataAllTime.map(user => user.totalMessages);
+            
+            // Диаграмма за всё время (круговая)
+            const ctxAllTime = document.getElementById('chartAllTime').getContext('2d');
+            new Chart(ctxAllTime, {
+                type: 'pie',
+                data: {
+                    labels: labelsAllTime,
+                    datasets: [{
+                        data: dataAllTime,
+                        backgroundColor: chartColors,
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#fff',
+                                padding: 15,
+                                font: {
+                                    size: 13
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw;
+                                    const percentage = ((value / totalAllTime) * 100).toFixed(1);
+                                    return `${label}: ${value} сообщений (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                },
+                plugins: [{
+                    beforeDraw: function(chart) {
+                        const width = chart.width;
+                        const height = chart.height;
+                        const ctx = chart.ctx;
+                        ctx.restore();
+                        
+                        // Добавляем проценты на секторы диаграммы
+                        const meta = chart.getDatasetMeta(0);
+                        meta.data.forEach((element, index) => {
+                            const model = element;
+                            const value = chart.data.datasets[0].data[index];
+                            const percentage = ((value / totalAllTime) * 100).toFixed(1);
+                            
+                            ctx.fillStyle = '#fff';
+                            ctx.font = 'bold 12px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            
+                            const pos = model.tooltipPosition();
+                            ctx.fillText(percentage + '%', pos.x, pos.y);
+                        });
+                        
+                        ctx.save();
+                    }
+                }]
+            });
+        }
+        
+        // Функция для отображения топа
+        function renderTopList() {
+            const topListContainer = document.getElementById('top-list');
+            topListContainer.innerHTML = '';
+            
+            // Сортируем по количеству сообщений за 2025 год
+            const sortedStats = [...statsData].sort((a, b) => b.messages2025 - a.messages2025);
+            
+            sortedStats.forEach(user => {
+                const percentage2025 = ((user.messages2025 / user.totalMessages) * 100).toFixed(1);
+                const percentageOfTotal = ((user.messages2025 / total2025) * 100).toFixed(1);
+                
+                const userElement = document.createElement('div');
+                userElement.className = 'user-item';
+                userElement.innerHTML = `
+                    <div class="user-name">${user.name}</div>
+                    <div class="user-stats">
+                        <div class="messages-2025">${user.messages2025.toLocaleString()}</div>
+                        <div class="total-messages">${user.totalMessages.toLocaleString()} всего</div>
+                        <span class="percentage">${percentage2025}% сообщений пришлось на 2025</span>
+                        <span class="percentage">${percentageOfTotal}% от общего объема 2025</span>
+                    </div>
+                `;
+                
+                topListContainer.appendChild(userElement);
+            });
+        }
+    </script>
 </body>
 </html>
