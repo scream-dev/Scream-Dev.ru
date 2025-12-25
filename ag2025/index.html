@@ -1,146 +1,189 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Discord Analytics</title>
+<meta charset="UTF-8">
+<title>AnarxGrif 2025</title>
 
-  <!-- React -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <!-- Babel -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%);
+  color: #F3F4F6;
+}
 
-  <!-- Recharts -->
-  <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+.container {
+  max-width: 1400px;
+  margin: auto;
+  padding: 40px 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 50px;
+  padding: 30px;
+  background: rgba(239,68,68,0.1);
+  border-radius: 16px;
+  border: 2px solid rgba(239,68,68,0.3);
+}
+
+.header h1 {
+  font-size: 48px;
+  font-weight: 900;
+  background: linear-gradient(135deg,#EF4444,#3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(500px,1fr));
+  gap: 30px;
+  margin-bottom: 50px;
+}
+
+.card {
+  background: rgba(31,41,55,0.6);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 30px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+  gap: 20px;
+}
+
+.stat {
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid rgba(255,255,255,0.15);
+}
+
+.top-item {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px;
+  margin-bottom:15px;
+  border-radius:12px;
+  background: rgba(31,41,55,0.5);
+  border:2px solid rgba(75,85,99,0.3);
+}
+</style>
 </head>
 
-<body style="margin:0">
-  <div id="root"></div>
+<body>
 
-  <script type="text/babel">
-    const {
-      PieChart, Pie, Cell,
-      ResponsiveContainer,
-      Legend, Tooltip
-    } = Recharts;
+<div class="container">
 
-    const DiscordStats = () => {
-      const data = [
-        { name: 'Тимур', messages2025: 4224, messagesTotal: 14097 },
-        { name: 'Макар', messages2025: 4581, messagesTotal: 17170 },
-        { name: 'Матвей', messages2025: 1995, messagesTotal: 5344 },
-        { name: 'Денис', messages2025: 3166, messagesTotal: 11591 },
-        { name: 'Коля', messages2025: 198, messagesTotal: 688 },
-        { name: 'Шамиль', messages2025: 1211, messagesTotal: 1351 },
-        { name: 'Даниил', messages2025: 6, messagesTotal: 54 },
-        { name: 'Ильсаф', messages2025: 465, messagesTotal: 1110 }
-      ];
+  <div class="header">
+    <h1>📊 Discord Analytics</h1>
+    <p style="color:#9CA3AF;font-size:18px;">Статистика AnarxGrif за 2025</p>
+  </div>
 
-      const data2025 = data.map(i => ({ name: i.name, value: i.messages2025 }));
-      const dataTotal = data.map(i => ({ name: i.name, value: i.messagesTotal }));
+  <div class="grid">
+    <div class="card">
+      <h2 style="text-align:center;color:#EF4444;">🔥 2025 год</h2>
+      <canvas id="chart2025"></canvas>
+    </div>
 
-      const COLORS = ['#EF4444','#3B82F6','#EC4899','#8B5CF6','#F97316','#06B6D4','#F59E0B','#10B981'];
+    <div class="card">
+      <h2 style="text-align:center;color:#3B82F6;">⏳ Всё время</h2>
+      <canvas id="chartTotal"></canvas>
+    </div>
+  </div>
 
-      const total2025 = data.reduce((s, i) => s + i.messages2025, 0);
-      const totalAll = data.reduce((s, i) => s + i.messagesTotal, 0);
-      const avg2025 = Math.round(total2025 / data.length);
-      const avgAll = Math.round(totalAll / data.length);
+  <div class="card" style="margin-bottom:50px;">
+    <h2 style="text-align:center;color:#8B5CF6;">📈 Детальная статистика</h2>
+    <div class="stats-grid" id="stats"></div>
+  </div>
 
-      const mostActive = [...data].sort((a,b)=>b.messages2025-a.messages2025)[0];
-      const mostActiveAll = [...data].sort((a,b)=>b.messagesTotal-a.messagesTotal)[0];
+  <div class="card">
+    <h2 style="text-align:center;color:#EF4444;">🏆 Топ активности 2025</h2>
+    <div id="top"></div>
+  </div>
 
-      const median2025 =
-        [...data].sort((a,b)=>a.messages2025-b.messages2025)[Math.floor(data.length/2)].messages2025;
+</div>
 
-      const topList = [...data]
-        .sort((a,b)=>b.messages2025-a.messages2025)
-        .map(i => ({ ...i, percentage: ((i.messages2025 / i.messagesTotal) * 100).toFixed(1) }));
+<script>
+const data = [
+  { name: 'Тимур', messages2025: 4224, messagesTotal: 14097 },
+  { name: 'Макар', messages2025: 4581, messagesTotal: 17170 },
+  { name: 'Матвей', messages2025: 1995, messagesTotal: 5344 },
+  { name: 'Денис', messages2025: 3166, messagesTotal: 11591 },
+  { name: 'Коля', messages2025: 198, messagesTotal: 688 },
+  { name: 'Шамиль', messages2025: 1211, messagesTotal: 1351 },
+  { name: 'Даниил', messages2025: 6, messagesTotal: 54 },
+  { name: 'Ильсаф', messages2025: 465, messagesTotal: 1110 }
+];
 
-      const CustomTooltip = ({ active, payload }) => {
-        if (active && payload && payload.length) {
-          const total = payload[0].payload.total;
-          const percent = ((payload[0].value / total) * 100).toFixed(1);
-          return (
-            <div style={{
-              background:'#1F2937',padding:'12px',
-              border:'2px solid #374151',borderRadius:'8px'
-            }}>
-              <p style={{margin:0,fontWeight:'bold',color:'#F3F4F6'}}>
-                {payload[0].name}
-              </p>
-              <p style={{margin:'5px 0 0',color:'#9CA3AF'}}>
-                {payload[0].value.toLocaleString()} сообщений ({percent}%)
-              </p>
-            </div>
-          );
-        }
-        return null;
-      };
+const COLORS = ['#EF4444','#3B82F6','#EC4899','#8B5CF6','#F97316','#06B6D4','#F59E0B','#10B981'];
 
-      const renderLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-        if (percent < 0.03) return null;
-        const r = innerRadius + (outerRadius-innerRadius)*0.5;
-        const x = cx + r * Math.cos(-midAngle * Math.PI / 180);
-        const y = cy + r * Math.sin(-midAngle * Math.PI / 180);
-        return (
-          <text x={x} y={y} fill="white"
-            textAnchor={x > cx ? 'start' : 'end'}
-            dominantBaseline="central"
-            style={{fontSize:'14px',fontWeight:'bold'}}>
-            {(percent*100).toFixed(0)}%
-          </text>
-        );
-      };
+const total2025 = data.reduce((s,i)=>s+i.messages2025,0);
+const totalAll = data.reduce((s,i)=>s+i.messagesTotal,0);
+const avg2025 = Math.round(total2025/data.length);
+const avgAll = Math.round(totalAll/data.length);
 
-      return (
-        <div style={{
-          minHeight:'100vh',
-          background:'linear-gradient(135deg,#1a1a2e,#0f0f1e)',
-          padding:'40px 20px',
-          fontFamily:'Segoe UI, sans-serif'
-        }}>
-          <h1 style={{
-            textAlign:'center',
-            fontSize:'48px',
-            fontWeight:900,
-            color:'#EF4444'
-          }}>
-            📊 Discord Analytics
-          </h1>
+const median2025 = [...data].sort((a,b)=>a.messages2025-b.messages2025)[Math.floor(data.length/2)].messages2025;
 
-          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'30px'}}>
-            {[{title:'🔥 2025 год',data:data2025,total:total2025,color:'#EF4444'},
-              {title:'⏳ Всё время',data:dataTotal,total:totalAll,color:'#3B82F6'}]
-              .map((cfg,idx)=>(
-              <div key={idx} style={{background:'#1F2937',padding:'30px',borderRadius:'16px'}}>
-                <h2 style={{textAlign:'center',color:cfg.color}}>{cfg.title}</h2>
-                <ResponsiveContainer width="100%" height={350}>
-                  <PieChart>
-                    <Pie
-                      data={cfg.data.map(d=>({...d,total:cfg.total}))}
-                      cx="50%" cy="50%"
-                      outerRadius={130}
-                      label={renderLabel}
-                      labelLine={false}
-                      dataKey="value"
-                    >
-                      {cfg.data.map((_,i)=>(
-                        <Cell key={i} fill={COLORS[i%COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip content={<CustomTooltip />} />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
+const mostActive = [...data].sort((a,b)=>b.messages2025-a.messages2025)[0];
+const mostActiveAll = [...data].sort((a,b)=>b.messagesTotal-a.messagesTotal)[0];
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<DiscordStats />);
-  </script>
+new Chart(chart2025, {
+  type: 'pie',
+  data: {
+    labels: data.map(d=>d.name),
+    datasets: [{
+      data: data.map(d=>d.messages2025),
+      backgroundColor: COLORS
+    }]
+  }
+});
+
+new Chart(chartTotal, {
+  type: 'pie',
+  data: {
+    labels: data.map(d=>d.name),
+    datasets: [{
+      data: data.map(d=>d.messagesTotal),
+      backgroundColor: COLORS
+    }]
+  }
+});
+
+const stats = document.getElementById("stats");
+[
+  ["Всего сообщений 2025", total2025],
+  ["Всего за всё время", totalAll],
+  ["Среднее на человека (2025)", avg2025],
+  ["Среднее на человека (всего)", avgAll],
+  ["Медиана (2025)", median2025],
+  ["Самый активный (2025)", mostActive.name + " — " + mostActive.messages2025],
+  ["Самый активный (всего)", mostActiveAll.name + " — " + mostActiveAll.messagesTotal],
+  ["Активность 2025", ((total2025/totalAll)*100).toFixed(1) + "%"]
+].forEach(s=>{
+  const d=document.createElement("div");
+  d.className="stat";
+  d.innerHTML=`<div style="color:#9CA3AF;font-size:14px;">${s[0]}</div><div style="font-size:28px;font-weight:900;">${s[1]}</div>`;
+  stats.appendChild(d);
+});
+
+const top = document.getElementById("top");
+[...data].sort((a,b)=>b.messages2025-a.messages2025).forEach((i,idx)=>{
+  const d=document.createElement("div");
+  d.className="top-item";
+  d.innerHTML=`
+    <div><strong>${idx+1}. ${i.name}</strong></div>
+    <div>${i.messages2025.toLocaleString()} сообщений</div>
+  `;
+  top.appendChild(d);
+});
+</script>
+
 </body>
 </html>
