@@ -2,6 +2,10 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const DiscordStats = () => {
+  React.useEffect(() => {
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
+  }, []);
   const data = [
     { name: 'Тимур', messages2025: 4224, messagesTotal: 14097 },
     { name: 'Макар', messages2025: 4581, messagesTotal: 17170 },
