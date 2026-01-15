@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Токен Переводчик</title>
+    <style>
+        :root {
+            --bg-color: #f5f5f5;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --accent-color: #2563eb;
+            --border-color: #cccccc;
+            --input-bg: #ffffff;
+            --button-bg: #2563eb;
+            --button-hover: #1d4ed8;
+            --button-active: #1e40af;
+            --success-color: #059669;
+            --error-color: #dc2626;
+            --warning-color: #d97706;
+            --table-header-bg: #f8fafc;
+            --table-row-even: #f8fafc;
+            --partial-color: #f59e0b;
+            --secondary-accent: #7c3aed;
+        }
+        
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #262626;
+            --text-color: #e5e5e5;
+            --accent-color: #3b82f6;
+            --border-color: #404040;
+            --input-bg: #333333;
+            --button-bg: #3b82f6;
+            --button-hover: #2563eb;
+            --button-active: #1d4ed8;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --warning-color: #f59e0b;
+            --table-header-bg: #333333;
+            --table-row-even: #333333;
+            --partial-color: #f59e0b;
+            --secondary-accent: #8b5cf6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+        
+        .header {
+            background-color: var(--accent-color);
+            color: white;
+            padding: 24px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        .theme-switch {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        
+        .theme-switch label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            transition: background-color 0.2s;
+        }
+        
+        .theme-switch label:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .input-section, .output-section {
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .input-section {
+            border-right: 1px solid var(--border-color);
+        }
+        
+        @media (max-width: 768px) {
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+        }
+        
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .textarea-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 24px;
+        }
+        
+        .textarea-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+        
+        textarea {
+            width: 100%;
+            flex: 1;
+            min-height: 200px;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            resize: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        
+        .result-text {
+            flex: 1;
+            min-height: 200px;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            overflow-y: auto;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .button {
+            padding: 12px 24px;
+            background-color: var(--button-bg);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .button:hover {
+            background-color: var(--button-hover);
+        }
+        
+        .button:active {
+            background-color: var(--button-active);
+            transform: translateY(1px);
+        }
+        
+        .button.secondary {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 2px solid var(--border-color);
+        }
+        
+        .button.secondary:hover {
+            background-color: var(--border-color);
+        }
+        
+        .partial-token {
+            color: var(--partial-color);
+            background-color: rgba(245, 158, 11, 0.1);
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin: 0 2px;
+        }
+        
+        .logger {
+            margin-top: 32px;
+            padding: 16px;
+            background-color: var(--input-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .logger-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .log-entry {
+            font-size: 13px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-time {
+            color: #6b7280;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        
+        .log-message {
+            flex: 1;
+        }
+        
+        .log-success { color: var(--success-color); }
+        .log-error { color: var(--error-color); }
+        .log-warning { color: var(--warning-color); }
+        .log-info { color: var(--accent-color); }
+        
+        .tokens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 4px;
+            margin-top: 16px;
+        }
+        
+        .token-card {
+            padding: 12px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .token-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        .token-text {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        
+        .token-id {
+            font-size: 11px;
+            color: #6b7280;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .stat-card {
+            padding: 12px;
+            background-color: var(--input-bg);
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .database-indicator {
+            font-size: 11px;
+            color: #6b7280;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .copy-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            animation: slideIn 0.3s ease-out;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .real-time-info {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .real-time-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--success-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .translation-info {
+            margin-top: 16px;
+            padding: 12px;
+            background-color: var(--input-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 8px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .info-item:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            color: #6b7280;
+        }
+        
+        .info-value {
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .database-badges {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .database-badge {
+            padding: 4px 8px;
+            background-color: var(--secondary-accent);
+            color: white;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+        
+        .database-badge.slova {
+            background-color: var(--accent-color);
+        }
+        
+        .database-badge.russian {
+            background-color: var(--success-color);
+        }
+        
+        .database-badge.names {
+            background-color: #ec4899;
+        }
+        
+        .swap-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--container-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 2;
+            transition: all 0.2s;
+        }
+        
+        .swap-button:hover {
+            border-color: var(--accent-color);
+            transform: translate(-50%, -50%) rotate(180deg);
+        }
+        
+        .content-wrapper {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Токен Переводчик (Двусторонний)</h1>
+            <div class="theme-switch">
+                <label>
+                    <span>Тёмная тема</span>
+                    <div class="switch">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider"></span>
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <div class="content-wrapper">
+            <div class="content">
+                <div class="input-section">
+                    <h2 class="section-title">📝 Текст на человеческом языке</h2>
+                    
+                    <div class="textarea-container">
+                        <label class="textarea-label">Введите текст:</label>
+                        <textarea id="inputText" placeholder="Введите текст на русском языке..."></textarea>
+                        <div class="real-time-info">
+                            <div class="real-time-indicator"></div>
+                            <span>Перевод в реальном времени</span>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="button secondary" onclick="clearInput()">
+                            <span>🗑️ Очистить</span>
+                        </button>
+                        <button class="button" onclick="copyInput()">
+                            <span>📋 Копировать текст</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <h2 class="section-title">🔢 Токены (цифры, +, -)</h2>
+                    
+                    <div class="textarea-container">
+                        <label class="textarea-label">Результат в токенах (можно редактировать):</label>
+                        <div class="result-text" id="outputText" contenteditable="true" placeholder="Токены появятся здесь..."></div>
+                        <div class="real-time-info">
+                            <div class="real-time-indicator"></div>
+                            <span>Обратный перевод в реальном времени</span>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="button secondary" onclick="clearOutput()">
+                            <span>🗑️ Очистить</span>
+                        </button>
+                        <button class="button" onclick="copyOutput()">
+                            <span>📋 Копировать токены</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="swap-button" onclick="swapTranslation()" title="Поменять местами">
+                <span style="font-size: 20px;">⇄</span>
+            </button>
+        </div>
+        
+        <div class="translation-info" style="margin: 0 32px 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>📊 Статистика перевода:</div>
+                <div class="database-badges">
+                    <span class="database-badge slova">slova.json</span>
+                    <span class="database-badge russian">russian.json</span>
+                    <span class="database-badge names">russian-names.json</span>
+                </div>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Символов текста:</span>
+                    <span class="info-value" id="charCount">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Токенов:</span>
+                    <span class="info-value" id="tokenCount">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Из slova.json:</span>
+                    <span class="info-value" id="slovaTokens">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Из russian.json:</span>
+                    <span class="info-value" id="russianTokens">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Из names.json:</span>
+                    <span class="info-value" id="namesTokens">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Частичных:</span>
+                    <span class="info-value" id="partialTokens">0</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="logger" style="margin: 0 32px 32px;">
+            <div class="logger-title">📊 Логгер загрузки токенов</div>
+            <div id="logContainer"></div>
+        </div>
+    </div>
+    
+    <div id="copyNotification" class="copy-notification hidden">
+        <span>✅ Скопировано в буфер обмена!</span>
+    </div>
+
+    <script>
+        let tokenMapSlova = new Map();
+        let tokenMapRussian = new Map();
+        let tokenMapNames = new Map();
+        let logs = [];
+        let isDarkMode = false;
+        let translationTimeout = null;
+        let reverseTranslationTimeout = null;
+        let isTranslating = false;
+        
+        const LOG_TYPES = {
+            SUCCESS: 'success',
+            ERROR: 'error',
+            WARNING: 'warning',
+            INFO: 'info'
+        };
+        
+        const DATABASE_PRIORITY = {
+            SLOVA: 0,
+            RUSSIAN: 1,
+            NAMES: 2
+        };
+        
+        function addLog(type, message) {
+            const logEntry = {
+                type,
+                message,
+                timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})
+            };
+            
+            logs.unshift(logEntry);
+            
+            if (logs.length > 10) {
+                logs = logs.slice(0, 10);
+            }
+            
+            updateLogDisplay();
+        }
+        
+        function updateLogDisplay() {
+            const container = document.getElementById('logContainer');
+            container.innerHTML = '';
+            
+            logs.forEach(log => {
+                const logElement = document.createElement('div');
+                logElement.className = 'log-entry fade-in';
+                
+                let icon = '📝';
+                if (log.type === LOG_TYPES.SUCCESS) icon = '✅';
+                if (log.type === LOG_TYPES.ERROR) icon = '❌';
+                if (log.type === LOG_TYPES.WARNING) icon = '⚠️';
+                if (log.type === LOG_TYPES.INFO) icon = 'ℹ️';
+                
+                logElement.innerHTML = `
+                    <span class="log-time">${log.timestamp}</span>
+                    <span class="log-message log-${log.type}">
+                        ${icon} ${log.message}
+                    </span>
+                `;
+                
+                container.appendChild(logElement);
+            });
+        }
+        
+        async function loadAllTokens() {
+            addLog(LOG_TYPES.INFO, 'Начинаю загрузку всех баз токенов...');
+            
+            try {
+                // Загрузка slova.json
+                addLog(LOG_TYPES.INFO, 'Загружаю slova.json...');
+                const response1 = await fetch('https://raw.githubusercontent.com/scream-dev/Scream-Dev.ru/refs/heads/main/cdn/slova.json');
+                const data1 = await response1.json();
+                tokenMapSlova = new Map(Object.entries(data1.token_to_id));
+                addLog(LOG_TYPES.SUCCESS, `Загружено ${tokenMapSlova.size} токенов из slova.json`);
+                
+                // Загрузка russian.json
+                addLog(LOG_TYPES.INFO, 'Загружаю russian.json...');
+                const response2 = await fetch('https://dl.dropboxusercontent.com/scl/fi/l7u0na2cp99btx3etxskx/russian.json?rlkey=wgi95f6vq32cpdt48nmzajxu0&st=28buk26k&dl=0');
+                const data2 = await response2.json();
+                tokenMapRussian = new Map(Object.entries(data2.token_to_id));
+                addLog(LOG_TYPES.SUCCESS, `Загружено ${tokenMapRussian.size} токенов из russian.json`);
+                
+                // Загрузка russian-names.json
+                addLog(LOG_TYPES.INFO, 'Загружаю russian-names.json...');
+                const response3 = await fetch('https://dl.dropboxusercontent.com/scl/fi/cfogog0iaoacjw77qxr3p/russian_surnames.json?rlkey=splkwdgmrncenwekwocs1b2jw&st=sfwcna67&dl=0');
+                const data3 = await response3.json();
+                tokenMapNames = new Map(Object.entries(data3.token_to_id));
+                addLog(LOG_TYPES.SUCCESS, `Загружено ${tokenMapNames.size} токенов из russian-names.json`);
+                
+                addLog(LOG_TYPES.SUCCESS, `Всего загружено ${tokenMapSlova.size + tokenMapRussian.size + tokenMapNames.size} токенов из всех баз`);
+                
+            } catch (error) {
+                addLog(LOG_TYPES.ERROR, `Ошибка загрузки: ${error.message}`);
+                console.error('Ошибка загрузки токенов:', error);
+            }
+        }
+        
+        function getTokenId(word) {
+            const normalizedWord = word.toLowerCase().trim();
+            
+            // Приоритетный поиск по базам
+            if (tokenMapSlova.has(normalizedWord)) {
+                return { id: tokenMapSlova.get(normalizedWord), source: DATABASE_PRIORITY.SLOVA };
+            }
+            if (tokenMapRussian.has(normalizedWord)) {
+                return { id: tokenMapRussian.get(normalizedWord), source: DATABASE_PRIORITY.RUSSIAN };
+            }
+            if (tokenMapNames.has(normalizedWord)) {
+                return { id: tokenMapNames.get(normalizedWord), source: DATABASE_PRIORITY.NAMES };
+            }
+            
+            return null;
+        }
+        
+        function findLongestToken(word, startIndex = 0) {
+            let longestMatch = '';
+            let longestTokenId = null;
+            let longestSource = null;
+            
+            const searchWord = word.toLowerCase();
+            
+            // Поиск в slova.json
+            for (const [token, id] of tokenMapSlova.entries()) {
+                if (searchWord.startsWith(token, startIndex) && token.length > longestMatch.length) {
+                    longestMatch = token;
+                    longestTokenId = id;
+                    longestSource = DATABASE_PRIORITY.SLOVA;
+                }
+            }
+            
+            // Поиск в russian.json
+            for (const [token, id] of tokenMapRussian.entries()) {
+                if (searchWord.startsWith(token, startIndex) && token.length > longestMatch.length) {
+                    longestMatch = token;
+                    longestTokenId = id;
+                    longestSource = DATABASE_PRIORITY.RUSSIAN;
+                }
+            }
+            
+            // Поиск в names.json
+            for (const [token, id] of tokenMapNames.entries()) {
+                if (searchWord.startsWith(token, startIndex) && token.length > longestMatch.length) {
+                    longestMatch = token;
+                    longestTokenId = id;
+                    longestSource = DATABASE_PRIORITY.NAMES;
+                }
+            }
+            
+            return longestMatch ? { 
+                token: longestMatch, 
+                id: longestTokenId, 
+                source: longestSource,
+                start: startIndex,
+                end: startIndex + longestMatch.length
+            } : null;
+        }
+        
+        function tokenizeWord(word) {
+            if (!word) return [];
+            
+            word = word.toLowerCase().trim();
+            const fullMatch = getTokenId(word);
+            
+            if (fullMatch) {
+                return [{ 
+                    token: word, 
+                    id: fullMatch.id, 
+                    isFull: true, 
+                    source: fullMatch.source,
+                    start: 0,
+                    end: word.length
+                }];
+            }
+            
+            const result = [];
+            let currentIndex = 0;
+            
+            while (currentIndex < word.length) {
+                const match = findLongestToken(word, currentIndex);
+                
+                if (match) {
+                    result.push({ 
+                        token: match.token, 
+                        id: match.id, 
+                        isFull: true, 
+                        source: match.source,
+                        start: match.start,
+                        end: match.end
+                    });
+                    currentIndex = match.end;
+                    
+                    // Добавляем разделитель "-" если это часть слова
+                    if (currentIndex < word.length && result.length > 0) {
+                        result.push({ separator: '-' });
+                    }
+                } else {
+                    // Ничего не нашлось - добавляем символ как частичный токен
+                    const char = word[currentIndex];
+                    result.push({ 
+                        token: char, 
+                        id: `[${char}]`, 
+                        isFull: false, 
+                        source: null,
+                        start: currentIndex,
+                        end: currentIndex + 1
+                    });
+                    currentIndex++;
+                    
+                    if (currentIndex < word.length) {
+                        result.push({ separator: '-' });
+                    }
+                }
+            }
+            
+            return result;
+        }
+        
+        function translateTextToTokens() {
+            if (isTranslating) return;
+            isTranslating = true;
+            
+            const inputText = document.getElementById('inputText').value.trim();
+            const outputText = document.getElementById('outputText');
+            
+            if (!inputText) {
+                outputText.textContent = '';
+                updateStats(0, 0, 0, 0, 0, 0);
+                isTranslating = false;
+                return;
+            }
+            
+            const words = inputText.split(/\s+/);
+            let allTokenized = [];
+            let tokenCount = 0;
+            let slovaCount = 0;
+            let russianCount = 0;
+            let namesCount = 0;
+            let partialCount = 0;
+            
+            words.forEach((word, wordIndex) => {
+                const tokenized = tokenizeWord(word);
+                
+                if (wordIndex > 0 && tokenized.length > 0) {
+                    allTokenized.push({ separator: '+' });
+                }
+                
+                tokenized.forEach((tokenObj, tokenIndex) => {
+                    if (tokenObj.separator) {
+                        allTokenized.push(tokenObj);
+                    } else {
+                        if (tokenIndex > 0 && !allTokenized[allTokenized.length - 1].separator) {
+                            allTokenized.push({ separator: '-' });
+                        }
+                        allTokenized.push(tokenObj);
+                        
+                        tokenCount++;
+                        if (tokenObj.isFull) {
+                            if (tokenObj.source === DATABASE_PRIORITY.SLOVA) slovaCount++;
+                            else if (tokenObj.source === DATABASE_PRIORITY.RUSSIAN) russianCount++;
+                            else if (tokenObj.source === DATABASE_PRIORITY.NAMES) namesCount++;
+                        } else {
+                            partialCount++;
+                        }
+                    }
+                });
+            });
+            
+            let resultText = '';
+            allTokenized.forEach(item => {
+                if (item.separator) {
+                    resultText += item.separator;
+                } else {
+                    resultText += item.id;
+                }
+            });
+            
+            outputText.textContent = resultText;
+            updateStats(inputText.length, tokenCount, slovaCount, russianCount, namesCount, partialCount);
+            
+            isTranslating = false;
+        }
+        
+        function translateTokensToText() {
+            if (isTranslating) return;
+            isTranslating = true;
+            
+            const outputText = document.getElementById('outputText').textContent.trim();
+            const inputText = document.getElementById('inputText');
+            
+            if (!outputText) {
+                inputText.value = '';
+                updateStats(0, 0, 0, 0, 0, 0);
+                isTranslating = false;
+                return;
+            }
+            
+            // Разбиваем на токены по разделителям + и -
+            const tokenIds = outputText.split(/[+\-]/).filter(id => id.trim() !== '');
+            let resultText = '';
+            let tokenCount = 0;
+            let slovaCount = 0;
+            let russianCount = 0;
+            let namesCount = 0;
+            let partialCount = 0;
+            
+            // Создаем обратные мапы для быстрого поиска по ID
+            const reverseMapSlova = new Map(Array.from(tokenMapSlova.entries()).map(([k, v]) => [v.toString(), k]));
+            const reverseMapRussian = new Map(Array.from(tokenMapRussian.entries()).map(([k, v]) => [v.toString(), k]));
+            const reverseMapNames = new Map(Array.from(tokenMapNames.entries()).map(([k, v]) => [v.toString(), k]));
+            
+            // Обрабатываем разделители
+            const tokensWithSeparators = [];
+            let lastWasSeparator = false;
+            
+            for (let i = 0; i < outputText.length; i++) {
+                const char = outputText[i];
+                if (char === '+' || char === '-') {
+                    if (!lastWasSeparator) {
+                        tokensWithSeparators.push({ type: 'separator', value: char });
+                        lastWasSeparator = true;
+                    }
+                } else {
+                    // Собираем последовательность цифр или [символ]
+                    let tokenStr = char;
+                    while (i + 1 < outputText.length && !['+', '-'].includes(outputText[i + 1])) {
+                        i++;
+                        tokenStr += outputText[i];
+                    }
+                    
+                    tokensWithSeparators.push({ type: 'token', value: tokenStr });
+                    lastWasSeparator = false;
+                }
+            }
+            
+            // Строим текст из токенов
+            let currentWord = '';
+            tokensWithSeparators.forEach((item, index) => {
+                if (item.type === 'token') {
+                    tokenCount++;
+                    
+                    // Проверяем частичный токен [символ]
+                    if (item.value.startsWith('[') && item.value.endsWith(']')) {
+                        const char = item.value.slice(1, -1);
+                        currentWord += char;
+                        partialCount++;
+                    } else {
+                        // Ищем токен в базах по приоритету
+                        let foundToken = null;
+                        let source = null;
+                        
+                        if (reverseMapSlova.has(item.value)) {
+                            foundToken = reverseMapSlova.get(item.value);
+                            source = DATABASE_PRIORITY.SLOVA;
+                            slovaCount++;
+                        } else if (reverseMapRussian.has(item.value)) {
+                            foundToken = reverseMapRussian.get(item.value);
+                            source = DATABASE_PRIORITY.RUSSIAN;
+                            russianCount++;
+                        } else if (reverseMapNames.has(item.value)) {
+                            foundToken = reverseMapNames.get(item.value);
+                            source = DATABASE_PRIORITY.NAMES;
+                            namesCount++;
+                        }
+                        
+                        if (foundToken) {
+                            currentWord += foundToken;
+                        }
+                    }
+                } else if (item.type === 'separator') {
+                    if (item.value === '+') {
+                        // + означает пробел между словами
+                        if (currentWord) {
+                            resultText += currentWord + ' ';
+                            currentWord = '';
+                        }
+                    } else if (item.value === '-') {
+                        // - означает продолжение слова (ничего не добавляем)
+                    }
+                }
+            });
+            
+            // Добавляем последнее слово
+            if (currentWord) {
+                resultText += currentWord;
+            }
+            
+            inputText.value = resultText.trim();
+            updateStats(resultText.length, tokenCount, slovaCount, russianCount, namesCount, partialCount);
+            
+            isTranslating = false;
+        }
+        
+        function translateTextDebounced() {
+            if (translationTimeout) {
+                clearTimeout(translationTimeout);
+            }
+            
+            translationTimeout = setTimeout(() => {
+                translateTextToTokens();
+                translationTimeout = null;
+            }, 300);
+        }
+        
+        function translateTokensDebounced() {
+            if (reverseTranslationTimeout) {
+                clearTimeout(reverseTranslationTimeout);
+            }
+            
+            reverseTranslationTimeout = setTimeout(() => {
+                translateTokensToText();
+                reverseTranslationTimeout = null;
+            }, 300);
+        }
+        
+        function updateStats(chars, tokens, slova, russian, names, partial) {
+            document.getElementById('charCount').textContent = chars;
+            document.getElementById('tokenCount').textContent = tokens;
+            document.getElementById('slovaTokens').textContent = slova;
+            document.getElementById('russianTokens').textContent = russian;
+            document.getElementById('namesTokens').textContent = names;
+            document.getElementById('partialTokens').textContent = partial;
+        }
+        
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            translateTextDebounced();
+            addLog(LOG_TYPES.INFO, 'Поле ввода очищено');
+        }
+        
+        function clearOutput() {
+            document.getElementById('outputText').textContent = '';
+            translateTokensDebounced();
+            addLog(LOG_TYPES.INFO, 'Поле токенов очищено');
+        }
+        
+        function copyInput() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) {
+                addLog(LOG_TYPES.WARNING, 'Нет текста для копирования');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyNotification('Текст скопирован!');
+            }).catch(err => {
+                addLog(LOG_TYPES.ERROR, 'Не удалось скопировать: ' + err.message);
+            });
+        }
+        
+        function copyOutput() {
+            const text = document.getElementById('outputText').textContent;
+            if (!text.trim()) {
+                addLog(LOG_TYPES.WARNING, 'Нет токенов для копирования');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                showCopyNotification('Токены скопированы!');
+            }).catch(err => {
+                addLog(LOG_TYPES.ERROR, 'Не удалось скопировать: ' + err.message);
+            });
+        }
+        
+        function swapTranslation() {
+            const inputText = document.getElementById('inputText').value;
+            const outputText = document.getElementById('outputText').textContent;
+            
+            document.getElementById('inputText').value = outputText;
+            document.getElementById('outputText').textContent = inputText;
+            
+            // Переводим в обратную сторону
+            translateTokensToText();
+            addLog(LOG_TYPES.INFO, 'Поля поменялись местами');
+        }
+        
+        function showCopyNotification(message) {
+            const notification = document.getElementById('copyNotification');
+            notification.querySelector('span').textContent = '✅ ' + message;
+            notification.classList.remove('hidden');
+            
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 2000);
+        }
+        
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggle.checked = true;
+                isDarkMode = true;
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                themeToggle.checked = false;
+                isDarkMode = false;
+            }
+            
+            themeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    isDarkMode = true;
+                } else {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    isDarkMode = false;
+                }
+            });
+        }
+        
+        function validateOutputInput(event) {
+            // Разрешаем только цифры, +, -, Backspace, Delete, стрелки
+            const allowedKeys = [
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                '+', '-',
+                'Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
+                'Home', 'End', 'Tab'
+            ];
+            
+            if (event.ctrlKey && ['a', 'c', 'v', 'x'].includes(event.key.toLowerCase())) {
+                return true; // Разрешаем Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            }
+            
+            if (!allowedKeys.includes(event.key) && !event.ctrlKey && !event.metaKey) {
+                event.preventDefault();
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function handleOutputPaste(event) {
+            event.preventDefault();
+            const pasteData = event.clipboardData.getData('text');
+            
+            // Фильтруем только разрешенные символы
+            const filteredData = pasteData.replace(/[^0-9+\-\[\]]/g, '');
+            
+            // Вставляем отфильтрованные данные
+            const selection = window.getSelection();
+            if (!selection.rangeCount) return;
+            
+            selection.deleteFromDocument();
+            selection.getRangeAt(0).insertNode(document.createTextNode(filteredData));
+            
+            // Запускаем обратный перевод
+            translateTokensDebounced();
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            loadAllTokens();
+            
+            // Инициализация полей
+            const inputText = document.getElementById('inputText');
+            const outputText = document.getElementById('outputText');
+            
+            // Настройка обработчиков для ввода текста
+            inputText.addEventListener('input', translateTextDebounced);
+            
+            // Настройка обработчиков для редактируемого div с токенами
+            outputText.addEventListener('input', translateTokensDebounced);
+            outputText.addEventListener('keydown', validateOutputInput);
+            outputText.addEventListener('paste', handleOutputPaste);
+            
+            // Установка плейсхолдера для outputText
+            outputText.addEventListener('focus', function() {
+                if (this.textContent === '') {
+                    this.dataset.placeholder = 'Токены появятся здесь...';
+                }
+            });
+            
+            outputText.addEventListener('blur', function() {
+                delete this.dataset.placeholder;
+            });
+            
+            addLog(LOG_TYPES.INFO, 'Двусторонний переводчик запущен');
+            addLog(LOG_TYPES.INFO, 'Вводите текст слева или токены справа');
+        });
+    </script>
+</body>
+</html>
