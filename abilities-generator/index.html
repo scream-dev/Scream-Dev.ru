@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Minecraft Datapack Ability Studio — AI</title>
+    <title>Abilities Generator — AI генерация функций Minecraft</title>
     <!-- Подключаем marked для markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -157,7 +157,7 @@
             color: #86efac;
         }
 
-        /* сообщения чата */
+        /* сообщения чата — исправлено наслоение */
         .messages-container {
             flex: 1;
             overflow-y: auto;
@@ -169,6 +169,7 @@
         .message {
             display: flex;
             animation: fadeSlideUp 0.3s ease-out;
+            clear: both;
         }
         .message.user {
             justify-content: flex-end;
@@ -183,6 +184,7 @@
             background: #1e293b;
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
             word-break: break-word;
+            overflow: auto;
         }
         .user .bubble {
             background: linear-gradient(125deg, #4f46e5, #7c3aed);
@@ -201,6 +203,7 @@
             overflow-x: auto;
             font-size: 0.75rem;
             margin: 0.5rem 0;
+            max-width: 100%;
         }
         .bubble code {
             background: #0a0f1c;
@@ -320,7 +323,7 @@
 <body>
 <div class="app-container">
     <div class="header">
-        <h1>⚡ ABILITY FORGE</h1>
+        <h1>⚡ ABILITIES GENERATOR</h1>
         <p>генерация функций Minecraft через нейросеть (OnlySq · GPT-5.1)</p>
     </div>
 
@@ -351,13 +354,7 @@
                 <button id="clearChatBtn" class="clear-chat" style="padding: 0.3rem 0.8rem;">🗑 Очистить диалог</button>
             </div>
             <div id="messagesContainer" class="messages-container">
-                <div class="message assistant">
-                    <div class="bubble">
-                        Загрузите <strong>abilities.json</strong> (экспорт датапака), затем напишите запрос.<br/>
-                        Я проанализирую структуру и сгенерирую рабочие функции для Minecraft (mcfunction).<br/>
-                        📌 Поддерживается диалог: можно уточнять и дополнять.
-                    </div>
-                </div>
+                <!-- сообщения будут загружены из истории или приветствие -->
             </div>
             <div class="input-bar">
                 <textarea id="promptInput" rows="2" placeholder="Напишите, какую способность или механику добавить... (например: 'добавить способность телепортации при низком здоровье')"></textarea>
@@ -368,7 +365,7 @@
             </div>
         </div>
     </div>
-    <footer>OnlySq API · Потоковый режим · Лимит 7 запросов/мин</footer>
+    <footer>OnlySq API · Потоковый режим · Лимит 7 запросов/мин · История сохраняется в браузере</footer>
 </div>
 
 <script>
@@ -384,7 +381,6 @@
     let streamingContent = "";
 
     // DOM элементы
-    const uploadInput = document.getElementById('jsonUpload');
     const uploadBtn = document.getElementById('uploadBtn');
     const loadServerBtn = document.getElementById('loadServerBtn');
     const fileStatusDiv = document.getElementById('fileStatus');
@@ -395,6 +391,31 @@
     const clearChatBtn = document.getElementById('clearChatBtn');
     const loadingHint = document.getElementById('loadingHint');
     const requestsLeftSpan = document.getElementById('requestsLeft');
+
+    // ---------- СОХРАНЕНИЕ ИСТОРИИ В localStorage ----------
+    const HISTORY_KEY = "abilities_generator_history";
+
+    // сохраняем только user/assistant сообщения
+    function saveChatHistory() {
+        const history = currentConversation.filter(msg => msg.role === 'user' || msg.role === 'assistant');
+        localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    }
+
+    // загружаем сохранённую историю
+    function loadChatHistory() {
+        const saved = localStorage.getItem(HISTORY_KEY);
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch(e) { return []; }
+        }
+        return [];
+    }
+
+    // очищаем историю в localStorage
+    function clearChatHistory() {
+        localStorage.removeItem(HISTORY_KEY);
+    }
 
     // ---------- ЛИМИТ ЗАПРОСОВ (localStorage) ----------
     const REQUEST_LIMIT = 7;
@@ -412,7 +433,6 @@
         localStorage.setItem(STORAGE_KEY, JSON.stringify(times));
     }
 
-    // очистка старых запросов (старше минуты)
     function cleanOldRequests() {
         let times = getRequestTimes();
         const now = Date.now();
@@ -422,31 +442,25 @@
         return filtered;
     }
 
-    // количество запросов за последнюю минуту
     function getCurrentRequestCount() {
-        const times = cleanOldRequests();
-        return times.length;
+        return cleanOldRequests().length;
     }
 
-    // добавить новый запрос
     function addRequestTimestamp() {
         let times = getRequestTimes();
         times.push(Date.now());
         saveRequestTimes(times);
         updateRateLimitDisplay();
-        // установить таймер на удаление через минуту
         setTimeout(() => {
             cleanOldRequests();
             updateRateLimitDisplay();
         }, 60 * 1000);
     }
 
-    // проверить, можно ли отправить запрос
     function canSendRequest() {
         return getCurrentRequestCount() < REQUEST_LIMIT;
     }
 
-    // обновить отображение лимита
     function updateRateLimitDisplay() {
         const used = getCurrentRequestCount();
         const left = Math.max(0, REQUEST_LIMIT - used);
@@ -510,10 +524,12 @@
                 addMessageToUI(msg.role, msg.content);
             }
         }
+        // если нет ни одного сообщения, показываем приветствие
         if (currentConversation.filter(m => m.role === 'assistant' || m.role === 'user').length === 0) {
             const welcome = "Загрузите abilities.json и задайте вопрос. Я помогу создать функции для Minecraft.";
             addMessageToUI('assistant', welcome);
             currentConversation.push({ role: "assistant", content: welcome });
+            saveChatHistory();
         }
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
@@ -588,25 +604,27 @@
 
         const jsonContext = `Вот текущая структура datapack (abilities.json):\n\`\`\`json\n${JSON.stringify(abilitiesJsonData, null, 2)}\n\`\`\``;
 
-        const oldHistory = currentConversation.filter(msg => msg.role === 'user' || msg.role === 'assistant');
+        // Сохраняем историю пользовательских сообщений
+        const history = currentConversation.filter(msg => msg.role === 'user' || msg.role === 'assistant');
         currentConversation = [
             { role: "system", content: systemInstruction },
             { role: "system", content: jsonContext },
-            ...oldHistory
+            ...history
         ];
         rebuildChatFromHistory();
         showInfo("Контекст датапака обновлён.");
+        saveChatHistory(); // сохраняем историю после обновления (только user/assistant)
     }
 
     function resetConversation() {
         if (!abilitiesJsonData) {
             currentConversation = [];
+            clearChatHistory();
             rebuildChatFromHistory();
             showInfo("Диалог очищен, но датапак не загружен.");
             return;
         }
-        const systemInstruction = `Ты — эксперт по Minecraft датапакам (Java Edition 1.21.10+). ...`; // (полная версия выше)
-        const fullInstruction = `Ты — эксперт по Minecraft датапакам (Java Edition 1.21.10+).
+        const systemInstruction = `Ты — эксперт по Minecraft датапакам (Java Edition 1.21.10+).
 Пользователь загрузил структуру своего датапака в виде JSON-дерева (экспорт packer.py). 
 Формат: корневой объект имеет поля "name", "type": "directory", "children". 
 Каждый файл с текстовым содержимым представлен как {"type": "file", "name": "файл.mcfunction", "content": "команды"}. 
@@ -620,9 +638,10 @@
 Правила по написанию кода: давать полный код без обрезаний, не редактировать лишнее, не добавлять неописанные функции, использовать проверенные библиотеки, после написания писать что изменилось.`;
         const jsonContext = `Вот текущая структура datapack:\n\`\`\`json\n${JSON.stringify(abilitiesJsonData, null, 2)}\n\`\`\``;
         currentConversation = [
-            { role: "system", content: fullInstruction },
+            { role: "system", content: systemInstruction },
             { role: "system", content: jsonContext }
         ];
+        clearChatHistory(); // при ручной очистке удаляем историю из localStorage
         rebuildChatFromHistory();
         showInfo("Чат сброшен, контекст датапака сохранён.");
     }
@@ -646,6 +665,7 @@
         addRequestTimestamp(); // увеличиваем счётчик
         addMessageToUI('user', userText);
         currentConversation.push({ role: "user", content: userText });
+        saveChatHistory(); // сохраняем после добавления сообщения пользователя
 
         isWaitingForResponse = true;
         sendBtn.disabled = true;
@@ -716,12 +736,14 @@
             }
             if (!streamingContent.trim()) streamingContent = "[AI не вернул содержимого]";
             currentConversation.push({ role: "assistant", content: streamingContent });
+            saveChatHistory(); // сохраняем после добавления ответа ассистента
             bubbleDiv.innerHTML = renderMarkdown(streamingContent);
         } catch (err) {
             showError(`Ошибка: ${err.message}`);
             if (lastAssistantMessageDiv) lastAssistantMessageDiv.remove();
             addMessageToUI('assistant', `⚠️ Ошибка: ${err.message}`);
             currentConversation.push({ role: "assistant", content: `Ошибка: ${err.message}` });
+            saveChatHistory();
         } finally {
             isWaitingForResponse = false;
             sendBtn.disabled = false;
@@ -735,6 +757,26 @@
     }
 
     // инициализация
+    function init() {
+        // загружаем сохранённую историю (только user/assistant)
+        const savedHistory = loadChatHistory();
+        if (savedHistory.length > 0) {
+            currentConversation = savedHistory;
+            rebuildChatFromHistory();
+            showInfo(`Загружена сохранённая история (${savedHistory.length} сообщений).`);
+        } else {
+            // если нет истории, показываем приветствие
+            currentConversation = [];
+            rebuildChatFromHistory();
+        }
+
+        // если датапак уже был загружен? Нет, при загрузке страницы его нет, нужно будет загрузить вручную.
+        // Пользователь загрузит датапак, тогда вызовется updateAbilitiesContextInConversation, который добавит системные сообщения.
+        // При этом история пользовательских сообщений останется.
+        updateRateLimitDisplay();
+    }
+
+    // обработчики событий
     uploadBtn.addEventListener('click', () => {
         const input = document.createElement('input');
         input.type = 'file';
@@ -748,12 +790,7 @@
         if (msg) sendUserMessage(msg);
     });
     clearChatBtn.addEventListener('click', () => {
-        if (abilitiesJsonData) resetConversation();
-        else {
-            currentConversation = [];
-            rebuildChatFromHistory();
-            showInfo("Диалог очищен (датапак не загружен)");
-        }
+        resetConversation();
     });
     promptInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -762,11 +799,7 @@
         }
     });
 
-    updateRateLimitDisplay();
-    if (!abilitiesJsonData) {
-        currentConversation = [];
-        rebuildChatFromHistory();
-    }
+    init();
 </script>
 </body>
 </html>
