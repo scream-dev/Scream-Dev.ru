@@ -1,0 +1,1242 @@
+{
+  "name": "abilities",
+  "type": "directory",
+  "children": [
+    {
+      "type": "file",
+      "name": "pack.mcmeta",
+      "content": "{\n  \"pack\": {\n    \"description\": \"By AnGrTea \\n Using ONLY on map\",\n    \"pack_format\": 81\n  }\n}"
+    },
+    {
+      "type": "directory",
+      "name": "data",
+      "children": [
+        {
+          "type": "directory",
+          "name": "ag001",
+          "children": [
+            {
+              "type": "directory",
+              "name": "function",
+              "children": [
+                {
+                  "type": "directory",
+                  "name": "abillity",
+                  "children": [
+                    {
+                      "type": "directory",
+                      "name": "active",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "check.mcfunction",
+                          "content": "execute as @a[tag=ab.darkrun] at @s if score @s abillity.darkrun matches 1.. unless items entity @s weapon.offhand carrot_on_a_stick run function ag001:abillity/active/darkrun/end with storage config abilities.darkrun\nexecute as @a[tag=ab.darkrun] at @s if items entity @s weapon.offhand carrot_on_a_stick run function ag001:abillity/active/darkrun/tick with storage config abilities.darkrun\nexecute as @a[tag=ab.vines] at @s if items entity @s weapon.offhand carrot_on_a_stick run function ag001:abillity/active/vine/start with storage config abilities.vines"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "darkrun",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "title @s times 0t 0t 6t\n\neffect clear @s\nscoreboard players reset @s abillity.darkrun\nparticle sonic_boom ~ ~1 ~\nparticle soul_fire_flame ~ ~1 ~ 0.5 1 0.5 0 10\nfunction ag001:abillity/hands/abilities/give_to_mainhand\nitem replace entity @s weapon.offhand with air\ntag @s remove dis.at\nexecute as @e[tag=darkrun.startposparticle,type=marker] run kill @s\ntag @s add abillity.incooldown\n$scoreboard players set @s cooldown.f $(cooldown)\nfunction ag001:abillity/hands/abilities/reset\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "title @s times 5t 30d 10t\nsummon marker ~ ~1 ~ {Tags:[darkrun.startposparticle]}\neffect give @s invisibility infinite 0 true\neffect give @s resistance infinite 5 true\n$effect give @s speed infinite $(speed) true\nparticle sonic_boom ~ ~1 ~\nparticle soul_fire_flame ~ ~1 ~ 0.5 1 0.5 0 10\nfunction ag001:abillity/subtitle/subtitle {symbol:\"\\uF001\"}\nfunction ag001:abillity/hands/abilities/player_schelude_darkrun\nitem replace entity @s weapon.offhand with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"air\"]}]"
+                            },
+                            {
+                              "type": "file",
+                              "name": "tick.mcfunction",
+                              "content": "execute if score @s abillity.darkrun matches 1 run function ag001:abillity/active/darkrun/start with storage config abilities.darkrun\nexecute if score @s abillity.darkrun matches 1.. run particle enchant ~ ~1 ~ 0.2 0.2 0.2 0.1 3\nexecute if score @s abillity.darkrun matches 1 run tag @s add dis.at\nexecute if score @s abillity.darkrun matches 1..10 at @e[tag=darkrun.startposparticle,type=marker] run particle sonic_boom\n$execute if score @s abillity.darkrun matches $(duration) run function ag001:abillity/active/darkrun/end with storage config abilities.darkrun\n\nfunction ag001:abillity/cooldown_rmb_bar/procent_calc with storage minecraft:config abilities.darkrun\n\nscoreboard players add @s abillity.darkrun 1"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "reset.mcfunction",
+                          "content": "tag @s remove ab.darkrun\ntag @s remove ab.vines\n"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "vine",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "create_vines.mcfunction",
+                              "content": "scoreboard players set @s ray_success 1\nexecute positioned over motion_blocking run particle explosion ~ ~10 ~\nexecute if entity @s[team=red] positioned over motion_blocking run summon armor_stand ~ ~10 ~ {Invisible:1b,NoBasePlate:1b,Small:1b,DisabledSlots:1052688,equipment:{head:{id:amethyst_shard,components:{custom_model_data:{strings:[vines]}}}},Tags:[\"vines_red\",\"vines\"]}\nexecute if entity @s[team=blue] positioned over motion_blocking run summon armor_stand ~ ~10 ~ {Invisible:1b,NoBasePlate:1b,Small:1b,DisabledSlots:1052688,equipment:{head:{id:amethyst_shard,components:{custom_model_data:{strings:[vines]}}}},Tags:[\"vines_blue\",\"vines\"]}\nschedule function ag001:abillity/active/vine/schelude_bypass 1t"
+                            },
+                            {
+                              "type": "file",
+                              "name": "create_vines_phase2.mcfunction",
+                              "content": "execute if data entity @s[type=armor_stand,nbt={OnGround:1b}] OnGround if entity @s[tag=vines_red] positioned over motion_blocking positioned ~ ~0.01 ~2.5 run summon minecraft:text_display ~ ~ ~ {alignment:\"center\",background:0,default_background:0b,line_width:200,see_through:0b,shadow:0b,text:\"쀁\",text_opacity:255,transformation:{left_rotation:[-0.7071068f,0.0f,0.0f,0.7071068f],right_rotation:[0.0f,0.0f,0.0f,1.0f],scale:[1.0000001f,0.99999994f,0.99999994f],translation:[0.0f,0.0f,0.0f]},Tags:[\"vines\",\"red\"]}\nexecute if data entity @s[type=armor_stand,nbt={OnGround:1b}] OnGround if entity @s[tag=vines_blue] positioned over motion_blocking positioned ~ ~0.01 ~2.5 run summon minecraft:text_display ~ ~ ~ {alignment:\"center\",background:0,default_background:0b,line_width:200,see_through:0b,shadow:0b,text:\"쀁\",text_opacity:255,transformation:{left_rotation:[-0.7071068f,0.0f,0.0f,0.7071068f],right_rotation:[0.0f,0.0f,0.0f,1.0f],scale:[1.0000001f,0.99999994f,0.99999994f],translation:[0.0f,0.0f,0.0f]},Tags:[\"vines\",\"blue\"]}\n\nexecute if data entity @s[type=armor_stand,nbt={OnGround:1b}] OnGround run kill @s\n\nexecute if data entity @s[type=armor_stand,nbt={OnGround:1b}] OnGround run particle minecraft:item_slime ~ ~ ~ 0 0 0 10 30\n\nexecute if entity @s[type=text_display] run scoreboard players add @s ai 1\n$execute if score @s[tag=blue] ai matches ..$(duration) at @s positioned ~ ~ ~-2.5 as @a[distance=..2.5,team=red] run function ag001:abillity/active/vine/damage/red with storage config abilities.vines\n$execute if score @s[tag=red] ai matches ..$(duration) at @s positioned ~ ~ ~-2.5 as @a[distance=..2.5,team=blue] run function ag001:abillity/active/vine/damage/blue with storage config abilities.vines\n$execute if score @s ai matches $(duration).. run function ag001:abillity/active/vine/end\nschedule function ag001:abillity/active/vine/schelude_bypass 7t"
+                            },
+                            {
+                              "type": "directory",
+                              "name": "damage",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "blue.mcfunction",
+                                  "content": "effect give @s slowness 1 30 true\n$damage @s $(damage) bypass:magic by @p[team=red]\nfunction ag001:elements/natural/set with storage config abilities.vines\nfunction ag001:elements/stopped/set with storage config abilities.vines.stopped"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "red.mcfunction",
+                                  "content": "effect give @s slowness 2 30 true\n$damage @s $(damage) bypass:magic by @p[team=blue]\nfunction ag001:elements/natural/set with storage config abilities.vines\nfunction ag001:elements/stopped/set with storage config abilities.vines.stopped"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "kill @s\nexecute positioned ~ ~ ~-2.5 run particle minecraft:totem_of_undying ~ ~ ~ 1 0 1 0.5 70"
+                            },
+                            {
+                              "type": "file",
+                              "name": "raycast.mcfunction",
+                              "content": "execute unless block ~ ~1 ~ #air run function ag001:abillity/active/vine/create_vines\nscoreboard players remove @s ray_steps 1\nexecute if score @s ray_steps matches 1.. if score @s ray_success matches 0 positioned ^ ^ ^0.1 run function ag001:abillity/active/vine/raycast\n\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "schelude_bypass.mcfunction",
+                              "content": "execute as @e[tag=vines] at @s run function ag001:abillity/active/vine/create_vines_phase2 with storage config abilities.vines"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "scoreboard players set @s ray_steps 200\nscoreboard players set @s ray_success 0\nfunction ag001:abillity/active/vine/raycast\nitem replace entity @s hotbar.5 with carrot_on_a_stick[use_cooldown={seconds:0.5}]\nitem replace entity @s weapon.offhand with air\ntag @s add abillity.incooldown\n$scoreboard players set @s cooldown.f $(cooldown)\nfunction ag001:abillity/subtitle/subtitle {symbol:\"\\uF002\"}"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "attack",
+                      "children": [
+                        {
+                          "type": "directory",
+                          "name": "bubbls",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "ai.mcfunction",
+                              "content": "execute as @e[type=marker,tag=at.bubbls] if score @s ai matches 1 at @s rotated as @p run tp @s ~ ~ ~ ~ ~\n\n## преследование\n$execute as @e[type=marker,tag=at.bubbls,tag=red] if score @s ai matches 1.. at @s positioned ^ ^ ^$(speed) run tp @s ~ ~ ~\n$execute as @e[type=marker,tag=at.bubbls,tag=blue] if score @s ai matches 1.. at @s positioned ^ ^ ^$(speed) run tp @s ~ ~ ~\n## партиклы\nexecute as @e[type=marker,tag=at.bubbls] if score @s ai matches 2.. at @s run particle bubble ~ ~ ~ 0.1 0.1 0.1 0 20\nexecute as @e[type=marker,tag=at.bubbls] if score @s ai matches 2.. at @s run particle bubble ^ ^ ^-0.05 0.1 0.1 0.1 0 20\n\n## добавить счёт\nexecute as @e[type=marker,tag=at.bubbls] run scoreboard players add @s ai 1\n\n## Нанести урон\nexecute as @e[type=marker,tag=at.bubbls,tag=red] at @s positioned ~ ~-1.5 ~ if entity @p[distance=..1,team=blue] run function ag001:abillity/attack/bubbls/damage/blue with storage config attacks.bubbls.shells\nexecute as @e[type=marker,tag=at.bubbls,tag=blue] at @s positioned ~ ~-1.5 ~ if entity @p[distance=..1,team=red] run function ag001:abillity/attack/bubbls/damage/red with storage config attacks.bubbls.shells\n\n## остальное\n$execute as @e[type=marker,tag=at.bubbls] if score @s ai matches ..$(live) run schedule function ag001:abillity/attack/bubbls/ai_scheule_bypass 1t\n$execute as @e[type=marker,tag=at.bubbls] if score @s ai matches $(live).. run function ag001:abillity/attack/bubbls/ai_end\n\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "ai_end.mcfunction",
+                              "content": "scoreboard players reset @s\nkill @s"
+                            },
+                            {
+                              "type": "file",
+                              "name": "ai_scheule_bypass.mcfunction",
+                              "content": "function ag001:abillity/attack/bubbls/ai with storage minecraft:config attacks.bubbls.shells"
+                            },
+                            {
+                              "type": "directory",
+                              "name": "damage",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "blue.mcfunction",
+                                  "content": "$damage @p[distance=..1,team=blue] $(damage) bypass:magic by @p[team=red]\nkill @s"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "red.mcfunction",
+                                  "content": "$damage @p[distance=..1,team=red] $(damage) bypass:magic by @p[team=blue]\nkill @s"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "scoreboard players reset @s attack.check\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "execute if entity @s[team=red] rotated ~ ~ run summon marker ~ ~1 ~ {Tags:[\"at.bubbls\",\"red\"]}\nexecute if entity @s[team=blue] rotated ~ ~ run summon marker ~ ~1 ~ {Tags:[\"at.bubbls\",\"blue\"]}\nplaysound block.bubble_column.bubble_pop player @s ~ ~ ~ 7"
+                            },
+                            {
+                              "type": "file",
+                              "name": "tick.mcfunction",
+                              "content": "\nexecute if score @s attack.check matches 1 run function ag001:abillity/attack/bubbls/start\nexecute if score @s attack.check matches 1 as @e[type=marker,tag=at.bubbls] run function ag001:abillity/attack/bubbls/ai_scheule_bypass\nscoreboard players add @s attack.check 1\nfunction ag001:abillity/cooldown_rmb_bar/procent_calc with storage minecraft:config attacks.bubbls.shells\n\n$execute if score @s attack.check matches $(recharge).. run function ag001:abillity/attack/bubbls/end\n"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "check.mcfunction",
+                          "content": "execute as @a[tag=at.magic1] unless entity @s[tag=dis.at] at @s if score @s attack.check matches 1.. run function ag001:abillity/attack/magic1/tick with storage minecraft:config attacks.magic1.shells\nexecute as @a[tag=at.bubbls] unless entity @s[tag=dis.at] at @s if score @s attack.check matches 1.. run function ag001:abillity/attack/bubbls/tick with storage minecraft:config attacks.bubbls.shells\nexecute as @a[tag=at.swing] unless entity @s[tag=dis.at] at @s if score @s attack.check matches 1.. run function ag001:abillity/attack/swing/tick with storage minecraft:config attacks.swing"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "magic1",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "ai.mcfunction",
+                              "content": "\n## преследование\n$execute as @e[type=marker,tag=at.magic1,tag=red] if score @s ai matches 15.. at @s positioned ^ ^ ^$(speed) run tp @s ~ ~ ~ facing entity @p[team=blue] eyes\n$execute as @e[type=marker,tag=at.magic1,tag=blue] if score @s ai matches 15.. at @s positioned ^ ^ ^$(speed) run tp @s ~ ~ ~ facing entity @p[team=red] eyes\n\n## партиклы\nexecute as @e[type=marker,tag=at.magic1] at @s run particle dragon_breath\nexecute as @e[type=marker,tag=at.magic1] at @s run particle electric_spark ~ ~ ~ 0.1 0.1 0.1 0 3\n\n## добавить счёт\nexecute as @e[type=marker,tag=at.magic1] run scoreboard players add @s ai 1\n\n## Нанести урон\nexecute as @e[type=marker,tag=at.magic1,tag=red] at @s positioned ~ ~-1.5 ~ if entity @p[distance=..0.3,team=blue] run function ag001:abillity/attack/magic1/damage/blue with storage config attacks.magic1.shells\nexecute as @e[type=marker,tag=at.magic1,tag=blue] at @s positioned ~ ~-1.5 ~ if entity @p[distance=..0.3,team=red] run function ag001:abillity/attack/magic1/damage/red with storage config attacks.magic1.shells\n\n## остальное\n$execute as @e[type=marker,tag=at.magic1] if score @s ai matches ..$(live) run schedule function ag001:abillity/attack/magic1/ai_scheule_bypass 1t\n$execute as @e[type=marker,tag=at.magic1] if score @s ai matches $(live).. run function ag001:abillity/attack/magic1/ai_end\n\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "ai_end.mcfunction",
+                              "content": "scoreboard players reset @s\nkill @s"
+                            },
+                            {
+                              "type": "file",
+                              "name": "ai_scheule_bypass.mcfunction",
+                              "content": "function ag001:abillity/attack/magic1/ai with storage minecraft:config attacks.magic1.shells"
+                            },
+                            {
+                              "type": "directory",
+                              "name": "damage",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "blue.mcfunction",
+                                  "content": "$damage @p[distance=..0.3,team=blue] $(damage) bypass:magic by @p[team=red]\nkill @s"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "red.mcfunction",
+                                  "content": "$damage @p[distance=..0.3,team=red] $(damage) bypass:magic by @p[team=blue]\nkill @s"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "scoreboard players reset @s attack.check\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "pre.mcfunction",
+                              "content": "function ag001:abillity/attack/magic1/random\nfunction ag001:abillity/attack/magic1/start with storage minecraft:config attacks.magic1"
+                            },
+                            {
+                              "type": "file",
+                              "name": "random.mcfunction",
+                              "content": "execute store result storage minecraft:config attacks.magic1.random1 float 0.1 run random value -10..10\nexecute store result storage minecraft:config attacks.magic1.random2 float 0.1 run random value 0..20\n\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "$execute if entity @s[team=red] positioned ^$(random1) ^$(random2) ^ run summon marker ~ ~0.5 ~ {Tags:[\"at.magic1\",\"red\"]}\n$execute if entity @s[team=blue] positioned ^$(random1) ^$(random2) ^ run summon marker ~ ~0.5 ~ {Tags:[\"at.magic1\",\"blue\"]}\n$execute if entity @s[team=red] positioned ^$(random2) ^$(random1) ^ run summon marker ~ ~0.5 ~ {Tags:[\"at.magic1\",\"red\"]}\n$execute if entity @s[team=blue] positioned ^$(random2) ^$(random1) ^ run summon marker ~ ~0.5 ~ {Tags:[\"at.magic1\",\"blue\"]}\nplaysound entity.ender_eye.death player @s"
+                            },
+                            {
+                              "type": "file",
+                              "name": "tick.mcfunction",
+                              "content": "execute if score @s attack.check matches 1 run function ag001:abillity/attack/magic1/pre\nexecute if score @s attack.check matches 1 as @e[type=marker,tag=at.magic1] run function ag001:abillity/attack/magic1/ai_scheule_bypass\nscoreboard players add @s attack.check 1\n\nfunction ag001:abillity/cooldown_rmb_bar/procent_calc with storage minecraft:config attacks.magic1.shells\n\n$execute if score @s attack.check matches $(recharge).. run function ag001:abillity/attack/magic1/end\n"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "reset.mcfunction",
+                          "content": "tag @s remove at.bubbls\ntag @s remove at.magic1\ntag @s remove at.swing"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "swing",
+                          "children": [
+                            {
+                              "type": "directory",
+                              "name": "damage",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "blue.mcfunction",
+                                  "content": "$damage @p[distance=..1,team=blue] $(damage) bypass:magic by @p[team=red]"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "red.mcfunction",
+                                  "content": "$damage @p[distance=..1,team=red] $(damage) bypass:magic by @p[team=blue]"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "scoreboard players reset @s attack.check\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "particle minecraft:sweep_attack ^ ^1.3 ^1.2 0.1 0.1 0.1 2 10\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "tick.mcfunction",
+                              "content": "\nexecute if score @s attack.check matches 1 run function ag001:abillity/attack/swing/start\n$execute if entity @s[team=red] if score @s attack.check matches 1..$(recharge1) if block ~ ~-1 ~ #air if block ^1 ^1.5 ^1 #air if block ^-1 ^1.5 ^1 #air if block ^ ^1.5 ^1 #air unless entity @p[tag=!in.swing,distance=..1,team=blue] run tp @s ^ ^ ^$(distance3ng)\n$execute if score @s[team=red] attack.check matches 1..$(recharge1) unless block ~ ~-1 ~ #air if block ^1 ^1.5 ^1 #air if block ^-1 ^1.5 ^1 #air if block ^ ^1.5 ^1 #air unless entity @p[tag=!in.swing,distance=..1,team=blue] rotated ~ 0 run tp @s ^ ^ ^$(distance3)\n\n$execute if entity @s[team=blue] if score @s attack.check matches 1..$(recharge1) if block ~ ~-1 ~ #air if block ^1 ^1.5 ^1 #air if block ^-1 ^1.5 ^1 #air if block ^ ^1.5 ^1 #air unless entity @p[tag=!in.swing,distance=..1,team=red] run tp @s ^ ^ ^$(distance3ng)\n$execute if score @s[team=blue] attack.check matches 1..$(recharge1) unless block ~ ~-1 ~ #air if block ^1 ^1.5 ^1 #air if block ^-1 ^1.5 ^1 #air if block ^ ^1.5 ^1 #air unless entity @p[tag=!in.swing,distance=..1,team=red] rotated ~ 0 run tp @s ^ ^ ^$(distance3)\n\n$execute if score @s attack.check matches 1..$(recharge) run tag @s add double.jumped\n$execute if score @s attack.check matches 1..$(recharge1) run particle minecraft:sweep_attack ^ ^1.3 ^ 0.1 0.1 0.1 0.1 10\nscoreboard players add @s attack.check 1\n$execute if score @s attack.check matches 1..$(recharge1) run playsound minecraft:entity.player.attack.sweep\ntag @s add in.swing\nexecute if entity @s[team=red] at @s positioned ~ ~ ~ if entity @p[tag=!in.swing,distance=..1,team=blue] run function ag001:abillity/attack/swing/damage/blue with storage config attacks.swing\nexecute if entity @s[team=blue] at @s positioned ~ ~ ~ if entity @p[tag=!in.swing,distance=..1,team=red] run function ag001:abillity/attack/swing/damage/red with storage config attacks.swing\ntag @s remove in.swing\nfunction ag001:abillity/cooldown_rmb_bar/procent_calc with storage minecraft:config attacks.swing\n$execute if score @s attack.check matches $(recharge).. run function ag001:abillity/attack/swing/end\n"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "cooldown",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "cooldown.mcfunction",
+                          "content": "execute if items entity @s weapon.offhand carrot_on_a_stick run function ag001:abillity/cooldown/f_return\nscoreboard players remove @s cooldown.f 1\nexecute if score @s cooldown.f matches ..0 run function ag001:abillity/cooldown/cooldown_end"
+                        },
+                        {
+                          "type": "file",
+                          "name": "cooldown_end.mcfunction",
+                          "content": "scoreboard players reset @s cooldown.f\ntag @s remove abillity.incooldown"
+                        },
+                        {
+                          "type": "file",
+                          "name": "f_return.mcfunction",
+                          "content": "item replace entity @s weapon.offhand with air\nfunction ag001:abillity/hands/abilities/give_to_mainhand\ntellraw @s [{\"text\":\"\",\"color\":\"red\"},\"\\n[\",{\"text\":\"⚡\"},\"] \",{\"selector\":\"@s\"},{\"text\":\" Способность \",\"color\":\"aqua\"}, \"перезаряжается! Подождите ещё \", {\"score\":{name:\"@s\",objective:\"cooldown.f\"}}, \" тиков.\\n\"]"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "cooldown_rmb_bar",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "procent_calc.mcfunction",
+                          "content": "execute if score *defuse-time planting matches 1.. run return fail\n\n$scoreboard players set @s consts $(recharge)\n\nscoreboard players operation @s procent.a = @s attack.check\nexecute if score @s procent.a = 0 consts run scoreboard players operation @s procent.a = @s abillity.darkrun\nscoreboard players operation @s procent.a *= 100 consts\nscoreboard players operation @s procent.a /= @s consts\n\nscoreboard players add @s animate_hands 1\n\ntitle @s times 0t 1d 0t\nexecute if score @s procent.a = 0 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA001\",shadow_color:0}]\nexecute if score @s procent.a = 10 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA002\",shadow_color:0}]\nexecute if score @s procent.a = 20 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA003\",shadow_color:0}]\nexecute if score @s procent.a = 30 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA004\",shadow_color:0}]\nexecute if score @s procent.a = 40 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA005\",shadow_color:0}]\nexecute if score @s procent.a = 50 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA006\",shadow_color:0}]\nexecute if score @s procent.a = 60 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA007\",shadow_color:0}]\nexecute if score @s procent.a = 70 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA008\",shadow_color:0}]\nexecute if score @s procent.a = 80 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA009\",shadow_color:0}]\nexecute if score @s procent.a = 90 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA010\",shadow_color:0}]\nexecute if score @s procent.a = 100 consts run title @s title [{translate:\"space.-220\"},{font:\"minecraft:death_ray_scale\",text:\"\\uA011\",shadow_color:0}]\n\nexecute if entity @s[tag=at.bubbls] if score @s animate_hands matches 1 unless score @s abillity.darkrun matches 1.. run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"bubbls_animate_2\"]}]\nexecute if entity @s[tag=at.bubbls] if score @s animate_hands matches 3 unless score @s abillity.darkrun matches 1.. run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"bubbls_animate_1\"]}]\n\nexecute if entity @s[tag=at.swing] if score @s animate_hands matches 1 unless score @s abillity.darkrun matches 1.. run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"swing_animate_1\"]}]\nexecute if entity @s[tag=at.swing] if score @s animate_hands matches 2 unless score @s abillity.darkrun matches 1.. run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"swing_animate_2\"]}]\nexecute if entity @s[tag=at.swing] if score @s animate_hands matches 3 unless score @s abillity.darkrun matches 1.. run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"swing_animate_1\"]}]\nexecute if entity @s[tag=at.swing] if score @s animate_hands matches 4 unless score @s abillity.darkrun matches 1.. run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"swing_animate_0\"]}]\n\nexecute if score @s procent.a = 100 consts run scoreboard players reset @s animate_hands\n"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "cooldown_ultimate",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "cooldown.mcfunction",
+                          "content": "execute if score @s ult.check matches 1.. run function ag001:abillity/cooldown_ultimate/q_return\nscoreboard players remove @s cooldown.q 1\nexecute if score @s cooldown.q matches ..0 run function ag001:abillity/cooldown_ultimate/cooldown_end"
+                        },
+                        {
+                          "type": "file",
+                          "name": "cooldown_end.mcfunction",
+                          "content": "scoreboard players reset @s cooldown.q\ntag @s remove ultimate.incooldown\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "q_return.mcfunction",
+                          "content": "item replace entity @s weapon.offhand with air\nfunction ag001:abillity/hands/abilities/give_to_mainhand\nscoreboard players reset @s ult.check\nkill @n[type=item,nbt={Item:{id:\"minecraft:carrot_on_a_stick\"}}]\ntellraw @s[tag=!ult.electricball] [{\"text\":\"\",\"color\":\"red\"},\"\\n[\",{\"text\":\"⚡\",\"color\":\"yellow\"},\"] \",{\"selector\":\"@s\"},{\"text\":\", Ультимейт \",\"color\":\"yellow\"}, \"перезаряжается! До перезарядки \", {\"score\":{name:\"@s\",objective:\"cooldown.q\"}}, \" тиков\\n\"]\ntellraw @s[tag=ult.electricball] [{\"text\":\"\",\"color\":\"red\"},\"\\n[\",{\"text\":\"⚡\",\"color\":\"yellow\"},\"] \",{\"selector\":\"@s\"},{\"text\":\", У ультимейта \",\"color\":\"yellow\"}, \"закончились заряды! До перезарядки следующего \", {\"score\":{name:\"@s\",objective:\"ult.timeruses\"}}, \" тиков\\n\"]\n"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "hands",
+                      "children": [
+                        {
+                          "type": "directory",
+                          "name": "abilities",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "give_to_mainhand.mcfunction",
+                              "content": "execute if entity @s[tag=at.bubbls] run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"bubbls_animate_1\"]}]\nexecute if entity @s[tag=at.swing] run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"swing_animate_1\"]}]\nexecute if entity @s[tag=at.magic1] run item replace entity @s hotbar.5 with minecraft:carrot_on_a_stick[custom_model_data={strings:[\"magic1_animate_1\"]}]\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "player_schelude_darkrun.mcfunction",
+                              "content": "execute unless entity @s[tag=ability_hands_animation] run tag @s add ability_hands_animation\nexecute if entity @s[tag=ability_hands_animation] run scoreboard players add @s ability_hands_animation 1\nexecute if score @s ability_hands_animation matches 1 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"darkrun_animate_0\"]}]\nexecute if score @s ability_hands_animation matches 4 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"darkrun_animate_1\"]}]\nexecute if score @s ability_hands_animation matches 7 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"darkrun_animate_2\"]}]\nexecute if score @s ability_hands_animation matches 10 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"darkrun_animate_1\"]}]\nexecute if score @s ability_hands_animation matches 13 run scoreboard players reset @s ability_hands_animation\nexecute if entity @s[tag=ability_hands_animation] run schedule function ag001:abillity/hands/abilities/schelude 1t\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "reset.mcfunction",
+                              "content": "tag @s remove ability_hands_animation\nscoreboard players reset @s ability_hands_animation"
+                            },
+                            {
+                              "type": "file",
+                              "name": "schelude.mcfunction",
+                              "content": "execute as @a[tag=ability_hands_animation] run function ag001:abillity/hands/abilities/player_schelude_darkrun"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "directory",
+                          "name": "ultimates",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "player_schelude_electricball.mcfunction",
+                              "content": "execute unless entity @s[tag=ultimate_hands_animation] run tag @s add ultimate_hands_animation\nexecute if entity @s[tag=ultimate_hands_animation] run scoreboard players add @s ultimate_hands_animation 1\nexecute if score @s ultimate_hands_animation matches 1 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"electricball_animate_0\"]}]\nexecute if score @s ultimate_hands_animation matches 3 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"electricball_animate_1\"]}]\nexecute if score @s ultimate_hands_animation matches 5 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"electricball_animate_2\"]}]\nexecute if score @s ultimate_hands_animation matches 7 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"electricball_animate_3\"]}]\nexecute if score @s ultimate_hands_animation matches 15 run item replace entity @s hotbar.5 with minecraft:music_disc_13[custom_model_data={strings:[\"electricball_animate_4\"]}]\nexecute if score @s ultimate_hands_animation matches 20.. run scoreboard players reset @s ultimate_hands_animation\nexecute if entity @s[tag=ultimate_hands_animation] run schedule function ag001:abillity/hands/ultimates/schelude 1t\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "reset.mcfunction",
+                              "content": "tag @s remove ultimate_hands_animation\nscoreboard players reset @s ultimate_hands_animation"
+                            },
+                            {
+                              "type": "file",
+                              "name": "schelude.mcfunction",
+                              "content": "execute as @a[tag=ultimate_hands_animation] run function ag001:abillity/hands/ultimates/player_schelude_electricball"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "passive",
+                      "children": []
+                    },
+                    {
+                      "type": "directory",
+                      "name": "subtitle",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "schelude_bypass.mcfunction",
+                          "content": "execute as @a[tag=subtitle.used] run function ag001:abillity/subtitle/subtitle {symbol:\"\"}"
+                        },
+                        {
+                          "type": "file",
+                          "name": "subtitle.mcfunction",
+                          "content": "scoreboard players add @s misc 1\nexecute if score @s misc matches 1 run tag @s add subtitle.used\n$execute if score @s misc matches 1 run title @s subtitle [{translate:\"space.-370\"},{font:\"minecraft:small_icons\",text:\"$(symbol)\"},{font:\"small_caps\",text:\"x1 использовано\"}]\nexecute if score @s misc matches ..54 run schedule function ag001:abillity/subtitle/schelude_bypass 1t\nexecute if score @s misc matches 55 run title @s subtitle \"\"\nexecute if score @s misc matches 55 run scoreboard players reset @s misc"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "ultimate",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "check.mcfunction",
+                          "content": "execute as @a[tag=ult.electricball] at @s if score @s ult.check matches 1.. run function ag001:abillity/ultimate/electricball/tick with storage minecraft:config ultimate.electricball\nexecute as @a[tag=ult.windcause] unless entity @s[tag=dis.at] at @s if score @s ult.check matches 1.. run function ag001:abillity/ultimate/wind_cause/start"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "electricball",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "ai.mcfunction",
+                              "content": "\n## преследование\n\nexecute as @e[type=marker,tag=ult.electricball,tag=red] at @s positioned ^ ^ ^1 rotated as @p[team=red] if score @s ai matches ..5 run tp @s ~ ~ ~ ~ ~\nexecute as @e[type=marker,tag=ult.electricball,tag=blue] at @s positioned ^ ^ ^1 rotated as @p[team=blue] if score @s ai matches ..5 run tp @s ~ ~ ~\n$execute as @e[type=marker,tag=ult.electricball,tag=red] at @s positioned ^ ^ ^$(speed) run tp @s ~ ~ ~ facing entity @p[team=blue] eyes\n$execute as @e[type=marker,tag=ult.electricball,tag=blue] at @s positioned ^ ^ ^$(speed) run tp @s ~ ~ ~ facing entity @p[team=red] eyes\n\n## партиклы\nexecute as @e[type=marker,tag=ult.electricball] at @s run particle end_rod ~ ~ ~ 0.25 0.25 0.25 0 6\nexecute as @e[type=marker,tag=ult.electricball] at @s run particle electric_spark ~ ~ ~ 0.4 0.4 0.4 0 35\n\n## добавить счёт\nexecute as @e[type=marker,tag=ult.electricball] run scoreboard players add @s ai 1\n\n## Нанести урон\nexecute as @e[type=marker,tag=ult.electricball,tag=red] at @s positioned ~ ~-1.5 ~ if entity @p[distance=..3,team=blue] run function ag001:abillity/ultimate/electricball/damage/blue with storage config ultimate.electricball\nexecute as @e[type=marker,tag=ult.electricball,tag=blue] at @s positioned ~ ~-1.5 ~ if entity @p[distance=..3,team=red] run function ag001:abillity/ultimate/electricball/damage/red with storage config ultimate.electricball\n\n## остальное\n$execute as @e[type=marker,tag=ult.electricball] if score @s ai matches ..$(live) run schedule function ag001:abillity/ultimate/electricball/ai_scheule_bypass 1t\n$execute as @e[type=marker,tag=ult.electricball] if score @s ai matches $(live).. run function ag001:abillity/ultimate/electricball/ai_end\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "ai_end.mcfunction",
+                              "content": "scoreboard players reset @s\nkill @s"
+                            },
+                            {
+                              "type": "file",
+                              "name": "ai_scheule_bypass.mcfunction",
+                              "content": "function ag001:abillity/ultimate/electricball/ai with storage minecraft:config ultimate.electricball"
+                            },
+                            {
+                              "type": "directory",
+                              "name": "damage",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "blue.mcfunction",
+                                  "content": "$damage @p[distance=..3,team=blue] $(damage) bypass:magic by @p[team=red]\nexecute as @p[distance=..3,team=blue] at @s run function ag001:elements/electrical/set with storage minecraft:config ultimate.electricball\nexecute as @p[distance=..3,team=blue] run effect give @s slowness 4 1 false\n\nkill @s\n"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "red.mcfunction",
+                                  "content": "$damage @p[distance=..3,team=red] $(damage) bypass:magic by @p[team=blue]\nexecute as @p[distance=..3,team=red] at @s run function ag001:elements/electrical/set with storage minecraft:config ultimate.electricball\nexecute as @p[distance=..3,team=red] run effect give @s slowness 4 1 false\nkill @s\n"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "tag @s add ultimate.incooldown\n$scoreboard players set @s cooldown.q $(cooldown)\nfunction ag001:abillity/hands/ultimates/reset\ntag @s remove dis.at\ntag @s remove ultimate_hands_animation\nscoreboard players remove @s ult.uses 1\nfunction ag001:datagen/qapply/exe_in1sats\nscoreboard players reset @s ult.check\nfunction ag001:abillity/hands/abilities/give_to_mainhand\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "kill @n[type=item,nbt={Item:{id:\"minecraft:carrot_on_a_stick\"}}]\nfunction ag001:abillity/subtitle/subtitle {symbol:\"\\uD003\"}\nfunction ag001:abillity/hands/ultimates/player_schelude_electricball\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "summon_ball.mcfunction",
+                              "content": "execute if entity @s[team=red] positioned ^ ^ ^0.5 run summon marker ~ ~0.5 ~ {Tags:[\"ult.electricball\",\"red\"]}\nexecute if entity @s[team=blue] positioned ^ ^ ^0.5 run summon marker ~ ~0.5 ~ {Tags:[\"ult.electricball\",\"blue\"]}\nplaysound entity.ender_eye.death player @s\nexecute as @e[type=marker,tag=ult.electricball] run function ag001:abillity/ultimate/electricball/ai_scheule_bypass\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "tick.mcfunction",
+                              "content": "\nexecute if score @s ult.uses matches ..0 if score @s ult.check matches 1.. run return run function ag001:abillity/cooldown_ultimate/q_return\n\nexecute if score @s ult.check matches 1 run function ag001:abillity/ultimate/electricball/start with storage minecraft:config ultimate.electricball\nexecute if score @s ult.check matches 1 run tag @s add dis.at\nscoreboard players add @s ult.check 1\nexecute if score @s ult.check matches 1.. run particle enchant ~ ~1 ~ 0.2 0.2 0.2 0.1 3\nexecute if score @s ult.check matches 15 run function ag001:abillity/ultimate/electricball/summon_ball with storage minecraft:config ultimate.electricball\nexecute if score @s ult.check matches 20 run function ag001:abillity/ultimate/electricball/end with storage minecraft:config ultimate.electricball\n "
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "reset.mcfunction",
+                          "content": "tag @s remove ult.electricball\ntag @s remove ult.windcause"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "uses",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "tick.mcfunction",
+                              "content": "execute as @a[tag=ult.electricball] run function ag001:abillity/ultimate/uses/ultimate/electricball"
+                            },
+                            {
+                              "type": "directory",
+                              "name": "ultimate",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "electricball.mcfunction",
+                                  "content": "execute if score @s ult.uses = @s ult.usesM run return fail\nscoreboard players remove @s ult.timeruses 1\nexecute if score @s ult.timeruses matches ..0 run scoreboard players add @s ult.uses 1\nexecute if score @s ult.timeruses matches ..0 run function ag001:datagen/qapply/exe_in1sats\nexecute if score @s ult.timeruses matches ..0 if entity @s[tag=ult.electricball] store result score @s ult.timeruses run data get storage config ultimate.electricball.cooldown\n"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "directory",
+                          "name": "wind_cause",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "ai.mcfunction",
+                              "content": "$execute unless score @s ai matches -10.. run scoreboard players set @s ai $(duration)\nexecute run scoreboard players remove @s ai 1\nexecute at @s positioned ~-2 ~ ~-2 as @a[dx=3,dz=3,dy=9] run effect give @s levitation 1 15 true\n\nexecute at @s run particle minecraft:cloud ~ ~ ~ 1.2 0 1.2 0 4 force\nexecute at @s run particle minecraft:trial_spawner_detection_ominous ~ ~ ~ 1.2 5 1.2 0 50 force\nexecute if score @s ai matches ..0 run kill @s\nexecute if entity @n[type=marker,tag=wind_cause] run schedule function ag001:abillity/ultimate/wind_cause/bypass 1t"
+                            },
+                            {
+                              "type": "file",
+                              "name": "bypass.mcfunction",
+                              "content": "execute as @e[type=marker,tag=wind_cause] run function ag001:abillity/ultimate/wind_cause/ai with storage config ultimate.windcause"
+                            },
+                            {
+                              "type": "file",
+                              "name": "elbonus-blue.mcfunction",
+                              "content": "$scoreboard players add @a[team=blue] element-damage_bonus $(eldamage_multiple)\ntag @a[team=blue] add wind_cause_elbonus\nfunction ag001:elements/bonus/set {tick:160}"
+                            },
+                            {
+                              "type": "file",
+                              "name": "elbonus-red.mcfunction",
+                              "content": "$scoreboard players add @a[team=red] element-damage_bonus $(eldamage_multiple)\ntag @a[team=red] add wind_cause_elbonus\nfunction ag001:elements/bonus/set {tick:160}"
+                            },
+                            {
+                              "type": "file",
+                              "name": "end.mcfunction",
+                              "content": "tag @s add ultimate.incooldown\n$scoreboard players set @s cooldown.q $(cooldown)\nkill @n[type=item,nbt={Item:{id:\"minecraft:carrot_on_a_stick\"}}]\nitem replace entity @s hotbar.5 with carrot_on_a_stick\nscoreboard players reset @s ult.check"
+                            },
+                            {
+                              "type": "file",
+                              "name": "start.mcfunction",
+                              "content": "execute align zx run summon marker ~.5 ~ ~.5 {Tags:[wind_cause]}\n\nfunction ag001:abillity/ultimate/wind_cause/end with storage config ultimate.windcause\n\nexecute if entity @s[team=blue] run function ag001:abillity/ultimate/wind_cause/elbonus-blue with storage config ultimate.windcause\nexecute if entity @s[team=red] run function ag001:abillity/ultimate/wind_cause/elbonus-red with storage config ultimate.windcause\nfunction ag001:abillity/ultimate/wind_cause/ai with storage config ultimate.windcause\nfunction ag001:abillity/subtitle/subtitle {symbol:\"\\uD004\"}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "directory",
+                  "name": "choose_abilities",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "abilities.mcfunction",
+                      "content": "execute if score @s f.check matches 1 run function ag001:choose_abilities/ability/animate_start\n\nexecute if score @s SelectedItemSlot = @s SelectedItemSlot-1 run function ag001:choose_abilities/ability/animate_up\nexecute if score @s SelectedItemSlot = @s SelectedItemSlot+1 run function ag001:choose_abilities/ability/animate_down\nitem replace entity @s weapon.mainhand with air\nscoreboard players add @s f.check 1\ntag @s add choose.in1"
+                    },
+                    {
+                      "type": "directory",
+                      "name": "ability",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "animate_down.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nscoreboard players remove @s abil.slot 1\nexecute if score @s abil.slot matches ..0 run scoreboard players set @s abil.slot 2\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"1\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Теневой бег\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/active/reset\nexecute if score @s abil.slot matches 1 run tag @s add ab.darkrun\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ult 1\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"2\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Лианы\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/active/reset\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ab 2\nexecute if score @s abil.slot matches 2 run tag @s add ab.vines\nscoreboard players reset @s ult.check\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "animate_start.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nexecute if score @s abil.slot matches 3.. run scoreboard players set @s abil.slot 1\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"1\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Теневой бег\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/active/reset\nexecute if score @s abil.slot matches 1 run tag @s add ab.darkrun\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ult 1\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"2\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Лианы\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/active/reset\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ab 2\nexecute if score @s abil.slot matches 2 run tag @s add ab.vines\nscoreboard players reset @s ult.check"
+                        },
+                        {
+                          "type": "file",
+                          "name": "animate_up.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nscoreboard players add @s abil.slot 1\nexecute if score @s abil.slot matches 3.. run scoreboard players set @s abil.slot 1\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"1\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Теневой бег\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/active/reset\nexecute if score @s abil.slot matches 1 run tag @s add ab.darkrun\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ult 1\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"2\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Лианы\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/active/reset\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ab 2\nexecute if score @s abil.slot matches 2 run tag @s add ab.vines\nscoreboard players reset @s ult.check"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "attack",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "animate_down.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nscoreboard players remove @s abil.slot 1\nexecute if score @s abil.slot matches ..0 run scoreboard players set @s abil.slot 3\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"1\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Волшебная палочка\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 1 run tag @s add at.magic1\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ab 1\n\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"2\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Пузырьки\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ab 2\nexecute if score @s abil.slot matches 2 run tag @s add at.bubbls\n\nexecute if score @s abil.slot matches 3 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"3\"}]\nexecute if score @s abil.slot matches 3 run title @s subtitle \"Разящий удар\"\nexecute if score @s abil.slot matches 3 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 3 run scoreboard players set @s choose.ab 3\nexecute if score @s abil.slot matches 3 run tag @s add at.bubbls"
+                        },
+                        {
+                          "type": "file",
+                          "name": "animate_start.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nexecute if score @s abil.slot matches 4.. run scoreboard players set @s abil.slot 1\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"1\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Волшебная палочка\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 1 run tag @s add at.magic1\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ab 1\n\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"2\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Пузырьки\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ab 2\nexecute if score @s abil.slot matches 2 run tag @s add at.bubbls\n\nexecute if score @s abil.slot matches 3 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"3\"}]\nexecute if score @s abil.slot matches 3 run title @s subtitle \"Разящий удар\"\nexecute if score @s abil.slot matches 3 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 3 run scoreboard players set @s choose.ab 3\nexecute if score @s abil.slot matches 3 run tag @s add at.swing\nscoreboard players add @s attack.check 1"
+                        },
+                        {
+                          "type": "file",
+                          "name": "animate_up.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nscoreboard players add @s abil.slot 1\nexecute if score @s abil.slot matches 4.. run scoreboard players set @s abil.slot 1\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"1\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Волшебная палочка\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 1 run tag @s add at.magic1\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ab 1\n\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"2\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Пузырьки\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ab 2\nexecute if score @s abil.slot matches 2 run tag @s add at.bubbls\n\nexecute if score @s abil.slot matches 3 run title @s title [{shadow_color:0,font:\"minecraft:choose_at\",text:\"3\"}]\nexecute if score @s abil.slot matches 3 run title @s subtitle \"Разящий удар\"\nexecute if score @s abil.slot matches 3 run function ag001:abillity/attack/reset\nexecute if score @s abil.slot matches 3 run scoreboard players set @s choose.ab 3\nexecute if score @s abil.slot matches 3 run tag @s add at.bubbls"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "file",
+                      "name": "attack.mcfunction",
+                      "content": "execute if score @s attack.check matches 1 run function ag001:choose_abilities/attack/animate_start\nexecute if score @s SelectedItemSlot = @s SelectedItemSlot-1 run function ag001:choose_abilities/attack/animate_up\nexecute if score @s SelectedItemSlot = @s SelectedItemSlot+1 run function ag001:choose_abilities/attack/animate_down\ntag @s add choose.in1"
+                    },
+                    {
+                      "type": "file",
+                      "name": "no_title.mcfunction",
+                      "content": "title @s title \"\"\ntitle @s subtitle \"\"\nscoreboard players reset @s f.check\nscoreboard players reset @s q.check\nscoreboard players reset @s attack.check\ntag @s remove choose.in1"
+                    },
+                    {
+                      "type": "file",
+                      "name": "start.mcfunction",
+                      "content": "tag @s add choose.ultimate\n"
+                    },
+                    {
+                      "type": "file",
+                      "name": "stop_choose.mcfunction",
+                      "content": "function ag001:choose_abilities/no_title\ntag @s remove choose.in"
+                    },
+                    {
+                      "type": "file",
+                      "name": "tick.mcfunction",
+                      "content": "execute unless entity @s[tag=choose.in] run return fail\nitem replace entity @s weapon.mainhand with carrot_on_a_stick[use_cooldown={seconds:0.5}]\n\n\nexecute if score @s attack.check matches 1..2 run scoreboard players reset @s ult.check\nexecute if score @s attack.check matches 1..2 run item replace entity @s weapon.offhand with air\n\nexecute store result score @s SelectedItemSlot run data get entity @s SelectedItemSlot\n\n\nexecute if score @s ult.check matches 1 run function ag001:choose_abilities/ultimate\nexecute if score @s ult.check matches 2.. run function ag001:choose_abilities/title\nexecute if score @s ult.check matches 2.. run scoreboard players reset @s ult.check\nexecute if items entity @s weapon.offhand carrot_on_a_stick run function ag001:choose_abilities/abilities\n\nexecute unless score @s ult.check matches 1.. unless items entity @s weapon.offhand carrot_on_a_stick if score @s f.check matches 1.. run function ag001:choose_abilities/title\n\nexecute if score @s attack.check matches 1..2 run function ag001:choose_abilities/attack\nexecute if score @s attack.check matches 3.. run function ag001:choose_abilities/title\n\nscoreboard players set @s SelectedItemSlot+1 1\nscoreboard players set @s SelectedItemSlot-1 -1\nscoreboard players operation @s SelectedItemSlot+1 += @s SelectedItemSlot\nscoreboard players operation @s SelectedItemSlot-1 += @s SelectedItemSlot\nexecute if score @s SelectedItemSlot+1 matches 9 run scoreboard players set @s SelectedItemSlot+1 0\nexecute if score @s SelectedItemSlot-1 matches -1 run scoreboard players set @s SelectedItemSlot-1 8"
+                    },
+                    {
+                      "type": "file",
+                      "name": "title.mcfunction",
+                      "content": "title @s title \"Нажмите Q, F или ПКМ\"\ntitle @s subtitle \"для выбора способности\"\nscoreboard players reset @s f.check\nscoreboard players reset @s q.check\nscoreboard players reset @s attack.check\ntag @s remove choose.in1\nexecute run title @s times 7t 1d 0t"
+                    },
+                    {
+                      "type": "directory",
+                      "name": "trigger",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "tick.mcfunction",
+                          "content": "execute if score @s choose matches 1.. run tag @s add choose.in\nexecute if score @s choose matches 1.. run function ag001:choose_abilities/title\nexecute if score @s choose matches 1.. run scoreboard players enable @s choose_stop\nexecute if score @s choose matches 1.. run scoreboard players reset @s choose\n\nexecute if score @s choose_stop matches 1.. run tag @s remove choose.in\nexecute if score @s choose_stop matches 1.. run function ag001:choose_abilities/no_title\nexecute if score @s choose_stop matches 1.. run clear @s carrot_on_a_stick\nexecute if score @s choose_stop matches 1.. run scoreboard players enable @s choose\nexecute if score @s choose_stop matches 1.. run scoreboard players reset @s choose_stop"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "ultimate",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "animate_down.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nscoreboard players remove @s abil.slot 1\nexecute if score @s abil.slot matches ..0 run scoreboard players set @s abil.slot 2\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"3\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Электро Шар\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/ultimate/reset\nexecute if score @s abil.slot matches 1 run tag @s add ult.electricball\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ult 3\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"4\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Ветродуй\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/ultimate/reset\nexecute if score @s abil.slot matches 2 run tag @s add ult.windcause\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ult 4\nitem replace entity @s weapon.mainhand with carrot_on_a_stick[use_cooldown={seconds:0.5}]\nitem replace entity @s weapon.offhand with air"
+                        },
+                        {
+                          "type": "file",
+                          "name": "animate_start.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nexecute if score @s abil.slot matches ..0 run scoreboard players set @s abil.slot 2\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"3\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Электро Шар\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/ultimate/reset\nexecute if score @s abil.slot matches 1 run tag @s add ult.electricball\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ult 3\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"4\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Ветродуй\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/ultimate/reset\nexecute if score @s abil.slot matches 2 run tag @s add ult.windcause\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ult 4\nitem replace entity @s weapon.mainhand with carrot_on_a_stick[use_cooldown={seconds:0.5}]\nitem replace entity @s weapon.offhand with air\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "animate_up.mcfunction",
+                          "content": "execute run title @s times 7t 1d 0t\nscoreboard players add @s abil.slot 1\nexecute if score @s abil.slot matches 3.. run scoreboard players set @s abil.slot 1\nexecute if score @s abil.slot matches 1 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"3\"}]\nexecute if score @s abil.slot matches 1 run title @s subtitle \"Электро Шар\"\nexecute if score @s abil.slot matches 1 run function ag001:abillity/ultimate/reset\nexecute if score @s abil.slot matches 1 run tag @s add ult.electricball\nexecute if score @s abil.slot matches 1 run scoreboard players set @s choose.ult 3\nexecute if score @s abil.slot matches 2 run title @s title [{shadow_color:0,font:\"minecraft:choose\",text:\"4\"}]\nexecute if score @s abil.slot matches 2 run title @s subtitle \"Ветродуй\"\nexecute if score @s abil.slot matches 2 run function ag001:abillity/ultimate/reset\nexecute if score @s abil.slot matches 2 run tag @s add ult.windcause\nexecute if score @s abil.slot matches 2 run scoreboard players set @s choose.ult 4\nitem replace entity @s weapon.mainhand with carrot_on_a_stick[use_cooldown={seconds:0.5}]\nitem replace entity @s weapon.offhand with air"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "file",
+                      "name": "ultimate.mcfunction",
+                      "content": "execute if score @s q.check matches 1 run function ag001:choose_abilities/ultimate/animate_start\n\nexecute if score @s SelectedItemSlot = @s SelectedItemSlot-1 run function ag001:choose_abilities/ultimate/animate_up\nexecute if score @s SelectedItemSlot = @s SelectedItemSlot+1 run function ag001:choose_abilities/ultimate/animate_down\ntag @s add choose.in1\nscoreboard players add @s q.check 1"
+                    }
+                  ]
+                },
+                {
+                  "type": "file",
+                  "name": "configuration.mcfunction",
+                  "content": "## CONFIG\n\n## GAMES\n\ndata modify storage config games.planting.secondsaxolotl set value 90\ndata modify storage config games.planting.roundstowin set value 9\ndata modify storage config games.planting.roundchangeside set value 7\ndata modify storage config games.planting.roundtime_mins set value 4\ndata modify storage config games.planting.defuse_ticks set value 35\n\n## ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE \n## ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE \n## ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE \n## ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE \n## ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE \n## ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE ABILITIES HERE \n\n## ABILITY DARK RUN \n\n# duration (ticks)\ndata modify storage config abilities.darkrun.duration set value 80\n# recharge there is for blue bar in left\ndata modify storage config abilities.darkrun.recharge set from storage config abilities.darkrun.duration\n# speed level (0 = 1, 1 = 2, etc.)\ndata modify storage config abilities.darkrun.speed set value 9\n# cooldown (in ticks)\ndata modify storage config abilities.darkrun.cooldown set value 90\n\n\n## ABILITY VINES\n\n# duration (in seconds/2)\ndata modify storage config abilities.vines.duration set value 10\n# cooldown (in ticks)\ndata modify storage config abilities.vines.cooldown set value 280\n# damage\ndata modify storage config abilities.vines.damage set value 1\n# element count (seconds)\ndata modify storage config abilities.vines.elcount set value 7\n\ndata modify storage config abilities.vines.stopped.elcount set value 2\n\n# -----------------------------------------------------------\n\n## ATTACK MAGIC 1 \n\n# speed\ndata modify storage config attacks.magic1.shells.speed set value 0.35\n# live duration (in ticks)\ndata modify storage config attacks.magic1.shells.live set value 50\n# recharge duration (in ticks)\ndata modify storage config attacks.magic1.shells.recharge set value 10\n# damage\ndata modify storage config attacks.magic1.shells.damage set value 0.2\n\n\n## ATTACK SWING\n# distance / recharge1\ndata modify storage config attacks.swing.distance3 set value 1.11\n# distance / recharge1 in flying (ng - not ground)\ndata modify storage config attacks.swing.distance3ng set value 1.66\n# recharge duration (in ticks)\ndata modify storage config attacks.swing.recharge1 set value 5\ndata modify storage config attacks.swing.recharge set value 10\n\n# damage\ndata modify storage config attacks.swing.damage set value 1.5\ndata modify storage config attacks.swing.damage2 set value 1.5\n\n## ATTACK BUBBLS\n\n# speed\ndata modify storage config attacks.bubbls.shells.speed set value 0.55\n# live duration (in ticks)\ndata modify storage config attacks.bubbls.shells.live set value 100\n# recharge duration (in ticks)\ndata modify storage config attacks.bubbls.shells.recharge set value 5\n# damage\ndata modify storage config attacks.bubbls.shells.damage set value 2\n## ULTIMATES -----------------------------------------------------------\n\n## ULTIMATE ELECTRIC BALL\n\n# speed\ndata modify storage config ultimate.electricball.speed set value 0.4\n# live duration (in ticks)\ndata modify storage config ultimate.electricball.live set value 200\n# recharge duration (in ticks)\ndata modify storage config ultimate.electricball.cooldown set value 80\n# damage\ndata modify storage config ultimate.electricball.damage set value 3\n# element count (seconds)\ndata modify storage config ultimate.electricball.elcount set value 5\n# use count \ndata modify storage config ultimate.electricball.uses set value 3\n\n## ULTIMATE WIND CAUSE\n\n# live duration (in ticks)\ndata modify storage config ultimate.windcause.duration set value 160\n# recharge duration (in ticks)\ndata modify storage config ultimate.windcause.cooldown set value 550\n# 1.x count of multiple elemental damage.\ndata modify storage config ultimate.windcause.eldamage_multiple set value 2"
+                },
+                {
+                  "type": "directory",
+                  "name": "datagen",
+                  "children": [
+                    {
+                      "type": "directory",
+                      "name": "qapply",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "apply_to_data.mcfunction",
+                          "content": "\n\n$data modify storage ids $(getid).id set value $(getid)\n$execute if entity @s[tag=ult.electricball] run data modify storage ids $(getid).abq set value \"\\uD003\"\n$execute if entity @s[tag=ult.windcause] run data modify storage ids $(getid).abq set value \"\\uD004\"\n\n$execute if entity @s[tag=ab.darkrun] run data modify storage ids $(getid).ab set value \"\\uF001\"\n$execute if entity @s[tag=ab.vines] run data modify storage ids $(getid).ab set value \"\\uF002\"\n\n$execute if entity @s[tag=at.magic1] run data modify storage ids $(getid).at set value \"\\uA001\"\n$execute if entity @s[tag=at.bubbls] run data modify storage ids $(getid).at set value \"\\uA002\"\n$execute if entity @s[tag=at.swing] run data modify storage ids $(getid).at set value \"\\uA003\"\n## ELEMENTS\n\n$execute if entity @s[tag=el.natural] run data modify storage ids $(getid).el1 set value \"\\uE004\"\n$execute unless entity @s[tag=el.natural] run data modify storage ids $(getid).el1 set value \"\"\n\n$execute if entity @s[tag=el.stopped] run data modify storage ids $(getid).el2 set value \"\\uE001\"\n$execute unless entity @s[tag=el.stopped] run data modify storage ids $(getid).el2 set value \"\"\n\n$execute if entity @s[tag=el.water] run data modify storage ids $(getid).el3 set value \"\\uE003\"\n$execute unless entity @s[tag=el.water] run data modify storage ids $(getid).el3 set value \"\"\n\n$execute if entity @s[tag=el.electrical] run data modify storage ids $(getid).el4 set value \"\\uE002\"\n$execute unless entity @s[tag=el.electrical] run data modify storage ids $(getid).el4 set value \"\"\n\n$execute if entity @s[tag=el.less_speed] run data modify storage ids $(getid).less set value \"\\uE006\"\n$execute unless entity @s[tag=el.less_speed] run data modify storage ids $(getid).less set value \"\"\n\n$execute if entity @s[tag=el.more_speed] run data modify storage ids $(getid).more set value \"\\uE007\"\n$execute unless entity @s[tag=el.more_speed] run data modify storage ids $(getid).more set value \"\"\n\n$function ag001:datagen/qapply/display with storage ids $(getid)\n\ndata remove storage ids getid\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "display.mcfunction",
+                          "content": "$title @s[tag=!now.plant] actionbar [{translate:\"space.10\"},{\"storage\":\"ids\",\"nbt\":\"$(id).at\",\"shadow_color\":0,font:\"new_displayer\"},{\"storage\":\"ids\",\"nbt\":\"$(id).ab\",\"shadow_color\":0,font:\"new_displayer\"},{\"storage\":\"ids\",\"nbt\":\"$(id).abq\",\"shadow_color\":0,font:\"new_displayer\"}, {shadow_color:0,font:\"minecraft:small_caps_upp\",score:{name:\"@s\", objective:\"ult.uses\"}}]\n\n$title @s[tag=old_displayer,tag=!now.plant] actionbar [{translate:\"space.650\"},{\"storage\":\"ids\",\"nbt\":\"$(id).abq\",\"shadow_color\":0},{\"storage\":\"ids\",\"nbt\":\"$(id).at\",\"shadow_color\":0},\" \",{\"storage\":\"ids\",\"nbt\":\"$(id).ab\",\"shadow_color\":0}]\n\n$scoreboard players display numberformat @s effects_displayer fixed [{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions\",\"nbt\":\"$(id).el1\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions\",score:{name:\"@s\",objective:\"element-natural\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions\",\"nbt\":\"$(id).el2\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions\",score:{name:\"@s\",objective:\"element-stopped\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions\",\"nbt\":\"$(id).el3\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions\",score:{name:\"@s\",objective:\"\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions\",\"nbt\":\"$(id).el4\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions\",score:{name:\"@s\",objective:\"element-electrical\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions\",\"nbt\":\"$(id).less\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions\",score:{name:\"@s\",objective:\"\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions\",\"nbt\":\"$(id).more\"}]\n\n$bossbar set id.$(id) players @s\n\n$bossbar set id.$(id) name [{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions_bigver\",\"nbt\":\"$(id).el1\"}   ,{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions_bigver\",score:{name:\"@s\",objective:\"element-natural\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions_bigver\",\"nbt\":\"$(id).el2\"}   ,{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions_bigver\",score:{name:\"@s\",objective:\"element-stopped\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions_bigver\",\"nbt\":\"$(id).el3\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions_bigver\",score:{name:\"@s\",objective:\"\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions_bigver\",\"nbt\":\"$(id).el4\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions_bigver\",score:{name:\"@s\",objective:\"element-electrical\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions_bigver\",\"nbt\":\"$(id).less\"},{font:\"minecraft:default\",\"translate\": \"offset.-7\",\"with\": [{font:\"minecraft:reactions_bigver\",score:{name:\"@s\",objective:\"\"}}]},{\"shadow_color\":0,\"storage\":\"ids\",font:\"minecraft:reactions_bigver\",\"nbt\":\"$(id).more\"}]"
+                        },
+                        {
+                          "type": "file",
+                          "name": "exe_in1s.mcfunction",
+                          "content": "execute as @a run function ag001:datagen/qapply/get_id\nschedule function ag001:datagen/qapply/exe_in1s 1s"
+                        },
+                        {
+                          "type": "file",
+                          "name": "exe_in1sats.mcfunction",
+                          "content": "execute as @s run function ag001:datagen/qapply/get_id"
+                        },
+                        {
+                          "type": "file",
+                          "name": "get_id.mcfunction",
+                          "content": "execute store result storage ids getid int 1 run scoreboard players get @s id\nfunction ag001:datagen/qapply/apply_to_data with storage ids\n"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "file",
+                      "name": "registring.mcfunction",
+                      "content": "tag @s add registred\nscoreboard players add *genid datagen 1\nscoreboard players operation @s id = *genid datagen\n"
+                    }
+                  ]
+                },
+                {
+                  "type": "directory",
+                  "name": "double_jump",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "check.mcfunction",
+                      "content": "execute if entity @s[nbt={OnGround:1b}] run function ag001:double_jump/onground\nexecute unless entity @s[tag=double.jumped] if score @s doublejump.testsneaking matches 1.. unless score @s doublejump.time matches 1.. run scoreboard players add @s doublejump.time 1\nexecute if score @s doublejump.time matches 1.. run scoreboard players add @s doublejump.time 1\n\nexecute if score @s doublejump.time matches 2 run effect give @s levitation 2 35 true\nexecute if score @s doublejump.time matches 2 run playsound entity.wind_charge.wind_burst\nexecute if score @s doublejump.time matches 2 run particle gust_emitter_small\nexecute if score @s doublejump.time matches 5 run function ag001:double_jump/end\n"
+                    },
+                    {
+                      "type": "file",
+                      "name": "end.mcfunction",
+                      "content": "effect clear @s levitation\ntag @s add double.jumped\nscoreboard players reset @s doublejump.time\nscoreboard players reset @s doublejump.testsneaking"
+                    },
+                    {
+                      "type": "file",
+                      "name": "onground.mcfunction",
+                      "content": "tag @s remove double.jumped\nscoreboard players reset @s doublejump.testsneaking"
+                    }
+                  ]
+                },
+                {
+                  "type": "directory",
+                  "name": "elements",
+                  "children": [
+                    {
+                      "type": "directory",
+                      "name": "bonus",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "end.mcfunction",
+                          "content": "execute if entity @s[tag=wind_cause_elbonus] run scoreboard players remove @s element-damage_bonus 2\nexecute if entity @s[tag=wind_cause_elbonus] run tag @s remove wind_cause_elbonus\ntag @s remove elbonus\nscoreboard players reset @s element_bonus-tick"
+                        },
+                        {
+                          "type": "file",
+                          "name": "remove.mcfunction",
+                          "content": "execute if entity @s[tag=wind_cause_elbonus] run tag @s remove wind_cause_elbonus\ntag @s remove elbonus\nscoreboard players reset @s element_bonus-tick\nscoreboard players reset @s element-damage_bonus"
+                        },
+                        {
+                          "type": "file",
+                          "name": "schelude_bypass.mcfunction",
+                          "content": "execute as @a[tag=elbonus] run function ag001:elements/bonus/tick"
+                        },
+                        {
+                          "type": "file",
+                          "name": "set.mcfunction",
+                          "content": "$scoreboard players add @s element_bonus-tick $(tick)\ntag @s add elbonus"
+                        },
+                        {
+                          "type": "file",
+                          "name": "tick.mcfunction",
+                          "content": "scoreboard players remove @s element_bonus-tick 1\nexecute if score @s element_bonus-tick matches ..0 run function ag001:elements/bonus/end\n\n\n"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "electrical",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "main.mcfunction",
+                          "content": "scoreboard players remove @s element-electrical 1\nexecute unless score @s element-electrical matches 1.. run function ag001:elements/electrical/remove\nfunction ag001:datagen/qapply/exe_in1sats"
+                        },
+                        {
+                          "type": "file",
+                          "name": "remove.mcfunction",
+                          "content": "scoreboard players reset @s element-electrical\ntag @s remove el.electrical\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "set.mcfunction",
+                          "content": "$scoreboard players set @s element-electrical $(elcount)\ntag @s add el.electrical\nexecute positioned ^-1 ^ ^-0.35 run summon area_effect_cloud ~ ~1 ~ {Radius:0,RadiusPerTick:-1,Duration:6,CustomName:[{text:\"Электризован!\",color:\"#f6d75e\"}],CustomNameVisible:1b,potion_contents:{custom_color:15787602},Tags:[\"el.displayer\"]}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "electro-natural",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "damage.mcfunction",
+                          "content": "$damage @s $(counts)\ndata remove storage element counts\ndata remove storage element bonus\nscoreboard players set @s element-damage_bonus 10\nscoreboard players reset @s element_natural-electrical\nscoreboard players reset @s element-electrical\nscoreboard players reset @s element-natural"
+                        },
+                        {
+                          "type": "file",
+                          "name": "damage_count-check.mcfunction",
+                          "content": "scoreboard players operation @s element_natural-electrical += @s element-natural\nscoreboard players operation @s element_natural-electrical += @s element-electrical\nscoreboard players operation @s element_natural-electrical -= *-17 presets\n$execute store result storage element counts float $(bonus) run scoreboard players get @s element_natural-electrical\n\ntellraw @s [\"status: \",{score:{name:\"@s\",objective:element-natural}},\" \",{score:{name:\"@s\",objective:element-electrical}},{score:{name:\"@s\",objective:element_natural-electrical}}]\n\nfunction ag001:elements/electro-natural/damage with storage element"
+                        },
+                        {
+                          "type": "file",
+                          "name": "set_tick.mcfunction",
+                          "content": "execute store result storage element bonus float 0.1 run scoreboard players get @s element-damage_bonus\nexecute if score @s element-electrical matches 1.. if score @s element-natural matches 1.. run function ag001:elements/electro-natural/damage_count-check with storage element\n"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "natural",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "main.mcfunction",
+                          "content": "scoreboard players remove @s element-natural 1\nexecute unless score @s element-natural matches 1.. run function ag001:elements/natural/remove\nfunction ag001:datagen/qapply/exe_in1sats"
+                        },
+                        {
+                          "type": "file",
+                          "name": "remove.mcfunction",
+                          "content": "scoreboard players reset @s element-natural\ntag @s remove el.natural"
+                        },
+                        {
+                          "type": "file",
+                          "name": "set.mcfunction",
+                          "content": "$scoreboard players set @s element-natural $(elcount)\ntag @s add el.natural\nexecute positioned ^1 ^ ^0.35 run summon area_effect_cloud ~ ~1 ~ {Radius:0,RadiusPerTick:-1,Duration:6,CustomName:[{text:\"Природа!\",color:dark_green}],CustomNameVisible:1b,potion_contents:{custom_color:6192150},Tags:[\"el.displayer\"]}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "stopped",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "main.mcfunction",
+                          "content": "scoreboard players remove @s element-stopped 1\nexecute unless score @s element-stopped matches 1.. run function ag001:elements/stopped/remove\nfunction ag001:datagen/qapply/exe_in1sats"
+                        },
+                        {
+                          "type": "file",
+                          "name": "remove.mcfunction",
+                          "content": "scoreboard players reset @s element-stopped\ntag @s remove el.stopped\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "set.mcfunction",
+                          "content": "$scoreboard players set @s element-stopped $(elcount)\ntag @s add el.stopped\nexecute positioned ^-1 ^ ^-0.35 run summon area_effect_cloud ~ ~1 ~ {Radius:0,RadiusPerTick:-1,Duration:6,CustomName:[{text:\"Остановлен!\",color:dark_gray}],CustomNameVisible:1b,potion_contents:{custom_color:1776667},Tags:[\"el.displayer\"]}"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "file",
+                      "name": "tick.mcfunction",
+                      "content": "execute as @a[tag=el.natural] run function ag001:elements/natural/main\nexecute as @a[tag=el.stopped] run function ag001:elements/stopped/main\nexecute as @a[tag=el.electrical] run function ag001:elements/electrical/main\n\nschedule function ag001:elements/tick 1s"
+                    }
+                  ]
+                },
+                {
+                  "type": "directory",
+                  "name": "games",
+                  "children": [
+                    {
+                      "type": "directory",
+                      "name": "planting",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "end_end.mcfunction",
+                          "content": "scoreboard players reset * capture.point\nscoreboard players set *stage sett 2\nscoreboard players reset *game sett\nfunction ag001:choose_abilities/no_title\nbossbar set minecraft:red_capture players qwwq\nbossbar set minecraft:blue_capture players wqqw\nschedule clear ag001:games/planting/timer\nschedule clear ag001:games/planting/game-things/timer-seconds\nschedule clear ag001:games/planting/game-things/axolotl/axolotl-timer-seconds\nscoreboard players reset * planting\ntag @a remove with_axolotl\nbossbar set planting players 1\nfunction ag001:load\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "end_win.mcfunction",
+                          "content": "function ag001:choose_abilities/no_title\n$execute if score *wins-red planting matches $(roundstowin).. run scoreboard players set *winner planting 1\n$execute if score *wins-blue planting matches $(roundstowin).. run scoreboard players set *winner planting 2\nscoreboard players add *end planting 1\n"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "game-things",
+                          "children": [
+                            {
+                              "type": "directory",
+                              "name": "axolotl",
+                              "children": [
+                                {
+                                  "type": "file",
+                                  "name": "add_score.mcfunction",
+                                  "content": "scoreboard players add *defuse-time planting 1\nscoreboard players remove @s defuse_check 1\nscoreboard players reset *reset-defude-timer planting"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "axolotl-timer-seconds.mcfunction",
+                                  "content": "execute if score *time-axolotl planting matches ..0 run return run function ag001:games/planting/wins/red with storage config games.planting\nexecute if score *axolotl-defused planting matches 1 run return run function ag001:games/planting/wins/blue with storage config games.planting\n\nscoreboard players remove *time-axolotl planting 1\n\nbossbar set minecraft:planting name [\"⚠ \",{font:\"minecraft:small_caps_upp\",score:{name:\"*time-axolotl\",objective:\"planting\"}},\" ⚠\"]\n\nschedule function ag001:games/planting/game-things/timer-seconds 1s"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "defuse.mcfunction",
+                                  "content": "execute as @a[team=blue] unless items entity @s hotbar.4 air run item replace entity @s hotbar.4 with warped_fungus_on_a_stick\nexecute as @a[team=blue] at @s if entity @s[x_rotation=50..90] if entity @e[type=axolotl,tag=axolotl_plant,distance=..1] if score @s defuse_check matches 1.. run function ag001:games/planting/game-things/axolotl/add_score\nexecute as @a[team=blue] unless entity @s[x_rotation=50..90] if score @s defuse_check matches 1.. run function ag001:games/planting/game-things/axolotl/defuse_fail\nexecute as @a[team=blue] at @s unless entity @e[type=axolotl,tag=axolotl_plant,distance=..1] if score @s defuse_check matches 1.. run scoreboard players remove @s defuse_check 1\nscoreboard players add *reset-defude-timer planting 1\nexecute as @a[team=blue] if score *defuse-time planting matches 1.. if score *reset-defude-timer planting matches 6.. unless score @s defuse_check matches 1.. run function ag001:games/planting/game-things/axolotl/defuse_fail\n$execute if score *defuse-time planting matches $(defuse_ticks).. run function ag001:games/planting/game-things/axolotl/defuse_successful\nexecute if score *defuse-time planting matches 1.. as @a run function ag001:games/planting/game-things/axolotl/procent_calc with storage config games.planting\ntellraw @a[tag=debug] [{score:{name:\"*daytime\",objective:\"daytime\"}},\"debug: defuse.mcfunction\"]"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "defuse_fail.mcfunction",
+                                  "content": "scoreboard players reset *defuse-time planting\ntellraw @s \"Неудача!\"\nscoreboard players reset @s defuse_check\nscoreboard players reset *reset-defude-timer planting\ntitle @a title \"\"\nscoreboard players reset *ticks-while-defuse planting"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "defuse_successful.mcfunction",
+                                  "content": "function ag001:games/planting/wins/blue with storage config games.planting"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "hands_animate.mcfunction",
+                                  "content": "execute if score *axolotl-planting-ticks planting matches 29 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_0\"]}]\nexecute if score *axolotl-planting-ticks planting matches 32 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_1\"]}]\nexecute if score *axolotl-planting-ticks planting matches 35 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_2\"]}]\nexecute if score *axolotl-planting-ticks planting matches 38 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_3\"]}]\nexecute if score *axolotl-planting-ticks planting matches 41 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_4\"]}]\nexecute if score *axolotl-planting-ticks planting matches 44 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_5\"]}]\nexecute if score *axolotl-planting-ticks planting matches 47 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_6\"]}]\nexecute if score *axolotl-planting-ticks planting matches 50 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_7\"]}]\nexecute if score *axolotl-planting-ticks planting matches 53 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_8\"]}]\nexecute if score *axolotl-planting-ticks planting matches 55 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_9\"]}]\nexecute if score *axolotl-planting-ticks planting matches 60 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_10\"]}]\nexecute if score *axolotl-planting-ticks planting matches 65 run item replace entity @s hotbar.5 with minecraft:music_disc_11[custom_model_data={strings:[\"axolotl_planting_11\"]}]\nexecute if score *axolotl-planting-ticks planting matches 70 run function ag001:abillity/hands/abilities/give_to_mainhand"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "here_planted.mcfunction",
+                                  "content": "function ag001:games/planting/game-things/axolotl_mode with storage config games.planting\ntag @a remove with_axolotl\nscoreboard players reset *axolotl-planting-ticks\nsummon axolotl ~ ~ ~ {NoAI:true,Silent:true,Invulnerable:true,Tags:[\"axolotl_plant\"]}\nscoreboard players set *axolotl-planted planting 1\ntag @s remove dis.at\neffect clear @s slowness\ntag @s remove now.plant\nitem replace entity @s armor.head with air"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "planting.mcfunction",
+                                  "content": "execute as @a[tag=with_axolotl] at @s if block ~ ~-1 ~ gray_glazed_terracotta if score @s doublejump.testsneaking matches 1.. run scoreboard players add *axolotl-planting-ticks planting 1\nexecute if score *axolotl-planting-ticks planting matches 1.. as @a[tag=with_axolotl] run tag @s add now.plant\nexecute if score *axolotl-planting-ticks planting matches 1.. as @a[tag=with_axolotl] at @s run tag @s add dis.at\nexecute if score *axolotl-planting-ticks planting matches 1.. as @a[tag=with_axolotl] at @s run effect give @s slowness 1 25 true\nexecute as @a[tag=with_axolotl] at @s if score *axolotl-planting-ticks planting matches 25.. run function ag001:games/planting/game-things/axolotl/hands_animate\nexecute if score *axolotl-planting-ticks planting matches 70.. as @a[tag=with_axolotl] at @s run function ag001:games/planting/game-things/axolotl/here_planted\nexecute as @a[tag=with_axolotl] at @s if score *axolotl-planting-ticks planting matches 1.. unless score @s doublejump.testsneaking matches 1.. run function ag001:games/planting/game-things/axolotl/reset\nexecute if score *axolotl-planting-ticks planting matches 1..10 as @a[tag=with_axolotl] at @s run title @s actionbar [{font:\"minecraft:default\",translate:\"space.15\"},{font:\"minecraft:small_caps_upp\",text:\"Кормим \\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\sаксолотля.\",\"color\":\"red\"}]\nexecute if score *axolotl-planting-ticks planting matches 11..20 as @a[tag=with_axolotl] at @s run title @s actionbar [{font:\"minecraft:default\",translate:\"space.15\"},{font:\"minecraft:small_caps_upp\",text:\"Кормим \\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\sаксолотля..\",\"color\":\"red\"}]\nexecute if score *axolotl-planting-ticks planting matches 21..28 as @a[tag=with_axolotl] at @s run title @s actionbar [{font:\"minecraft:default\",translate:\"space.15\"},{font:\"minecraft:small_caps_upp\",text:\"Кормим \\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\sаксолотля...\",\"color\":\"red\"}]\nexecute if score *axolotl-planting-ticks planting matches 29.. as @a[tag=with_axolotl] at @s run title @s actionbar [{font:\"minecraft:default\",translate:\"space.15\"},{font:\"minecraft:small_caps_upp\",text:\"Установка \\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\s\\sаксолотля...\",\"color\":\"red\"}]\nexecute if score *axolotl-planting-ticks planting matches 1.. as @a[tag=with_axolotl] at @s unless block ~ ~-1 ~ gray_glazed_terracotta run function ag001:games/planting/game-things/axolotl/reset\ntellraw @a[tag=debug] [{score:{name:\"*daytime\",objective:\"daytime\"}},\"debug: planting.mcfunction\"]"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "procent_calc.mcfunction",
+                                  "content": "$scoreboard players set @s consts $(defuse_ticks)\n\nscoreboard players operation @s procent.a = *defuse-time planting\nscoreboard players operation @s procent.a *= 100 consts\nscoreboard players operation @s procent.a /= @s consts\nscoreboard players add *ticks-while-defuse planting 1\n\nexecute if score *ticks-while-defuse planting matches 1 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA001\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 2 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA002\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 3 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA003\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 4 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA004\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 5 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA005\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 6 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA006\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 7 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA007\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 8 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA008\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 9 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA009\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 10 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA010\",shadow_color:0}]\nexecute if score *ticks-while-defuse planting matches 11 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA011\",shadow_color:0}]\n\ntitle @s times 0t 1d 0t\nexecute if score *ticks-while-defuse planting matches ..12 run return fail\nexecute if score @s procent.a matches 10..11 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA013\",shadow_color:0}]\nexecute if score @s procent.a matches 12..13 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA014\",shadow_color:0}]\nexecute if score @s procent.a matches 14..15 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA015\",shadow_color:0}]\nexecute if score @s procent.a matches 16..17 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA016\",shadow_color:0}]\nexecute if score @s procent.a matches 18..19 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA017\",shadow_color:0}]\nexecute if score @s procent.a matches 20..21 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA018\",shadow_color:0}]\nexecute if score @s procent.a matches 22..23 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA019\",shadow_color:0}]\nexecute if score @s procent.a matches 24..25 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA020\",shadow_color:0}]\nexecute if score @s procent.a matches 26..27 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA021\",shadow_color:0}]\nexecute if score @s procent.a matches 28..29 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA022\",shadow_color:0}]\nexecute if score @s procent.a matches 30..31 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA023\",shadow_color:0}]\nexecute if score @s procent.a matches 32..33 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA024\",shadow_color:0}]\nexecute if score @s procent.a matches 34..35 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA025\",shadow_color:0}]\nexecute if score @s procent.a matches 36..37 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA026\",shadow_color:0}]\nexecute if score @s procent.a matches 38..39 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA027\",shadow_color:0}]\nexecute if score @s procent.a matches 40..41 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA028\",shadow_color:0}]\nexecute if score @s procent.a matches 42..43 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA029\",shadow_color:0}]\nexecute if score @s procent.a matches 44..45 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA030\",shadow_color:0}]\nexecute if score @s procent.a matches 46..47 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA031\",shadow_color:0}]\nexecute if score @s procent.a matches 48..49 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA032\",shadow_color:0}]\nexecute if score @s procent.a matches 50..51 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA033\",shadow_color:0}]\nexecute if score @s procent.a matches 52..53 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA034\",shadow_color:0}]\nexecute if score @s procent.a matches 54..55 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA035\",shadow_color:0}]\nexecute if score @s procent.a matches 56..57 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA036\",shadow_color:0}]\nexecute if score @s procent.a matches 58..59 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA037\",shadow_color:0}]\nexecute if score @s procent.a matches 60..61 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA038\",shadow_color:0}]\nexecute if score @s procent.a matches 62..63 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA039\",shadow_color:0}]\nexecute if score @s procent.a matches 64..65 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA040\",shadow_color:0}]\nexecute if score @s procent.a matches 66..67 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA041\",shadow_color:0}]\nexecute if score @s procent.a matches 68..69 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA042\",shadow_color:0}]\nexecute if score @s procent.a matches 70..71 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA043\",shadow_color:0}]\nexecute if score @s procent.a matches 72..73 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA044\",shadow_color:0}]\nexecute if score @s procent.a matches 74..75 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA045\",shadow_color:0}]\nexecute if score @s procent.a matches 76..77 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA046\",shadow_color:0}]\nexecute if score @s procent.a matches 78..79 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA047\",shadow_color:0}]\nexecute if score @s procent.a matches 80..81 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA048\",shadow_color:0}]\nexecute if score @s procent.a matches 82..83 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA049\",shadow_color:0}]\nexecute if score @s procent.a matches 84..85 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA050\",shadow_color:0}]\nexecute if score @s procent.a matches 86..87 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA051\",shadow_color:0}]\nexecute if score @s procent.a matches 88..100 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA052\",shadow_color:0}]\nexecute if score @s procent.a matches 92..100 run title @s title [{font:\"minecraft:planting_axolotl_scale\",text:\"\\uA053\",shadow_color:0}]\n\nexecute if score @s procent.a matches 100 run scoreboard players reset *ticks-while-defuse planting"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "reset.mcfunction",
+                                  "content": " scoreboard players reset *axolotl-planting-ticks planting\ntag @s remove dis.at\neffect clear @s slowness\nfunction ag001:abillity/hands/abilities/give_to_mainhand\ntag @s remove now.plant\ntitle @s actionbar [{font:\"minecraft:default\",translate:\"space.15\"},{font:\"minecraft:small_caps_upp\",text:\"Неудача\",\"color\":\"red\"}]\nscoreboard players reset *ticks-while-defuse planting"
+                                },
+                                {
+                                  "type": "file",
+                                  "name": "stop_defusing.mcfunction",
+                                  "content": "execute as @a[team=blue] if score @s defuse_check matches 1.. run scoreboard players remove @s defuse_check 1"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "file",
+                              "name": "axolotl_mode.mcfunction",
+                              "content": "function ag001:games/planting/game-things/axolotl/axolotl-timer-seconds\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "timer-seconds.mcfunction",
+                              "content": "execute if score *axolotl-planted planting matches 1 run return run function ag001:games/planting/game-things/axolotl_mode with storage config games.planting\nexecute if score *axolotl-planted planting matches 1 run return fail\nexecute if score *time-round planting matches ..0 run return run function ag001:games/planting/wins/blue with storage config games.planting\n\nexecute unless score *times planting matches 1.. run scoreboard players remove *time-round planting 1\n\nbossbar set minecraft:planting name {font:\"minecraft:small_caps_upp\",score:{name:\"*time-round\",objective:\"planting\"}}\n\n schedule function ag001:games/planting/game-things/timer-seconds 1s"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "new_round.mcfunction",
+                          "content": "$execute if score *wins-red planting matches $(roundstowin).. run return run function ag001:games/planting/end_win with storage config games.planting\n$execute if score *wins-blue planting matches $(roundstowin).. run return run function ag001:games/planting/end_win with storage config games.planting\n$execute if score *wins-blue planting matches $(roundstowin).. run return fail\n$execute if score *wins-red planting matches $(roundstowin).. run return fail\ntp @a[team=red] 422 22 134 180 0\ntp @a[team=blue] 353 43 13 0 0\nfunction ag001:games/planting/timer\neffect give @a saturation 15 255 true\nscoreboard players set @a ult.usesM 0\nexecute as @a[tag=ult.electricball] store result score @s ult.usesM run data get storage config ultimate.electricball.uses\nscoreboard players reset *axolotl-planting-ticks\nscoreboard players reset *axolotl-planted planting\ntag @r[team=red] add with_axolotl\ntellraw @a[tag=with_axolotl] \"У вас аксолотль!\"\nkill @e[type=axolotl,tag=axolotl_plant]"
+                        },
+                        {
+                          "type": "file",
+                          "name": "start.mcfunction",
+                          "content": "spawnpoint @a[team=red] 422 22 134 180\nspawnpoint @a[team=blue] 353 43 13 0\ntp @a[team=red] 422 22 134 180 0\ntp @a[team=blue] 353 43 13 0 0\nitem replace entity @a hotbar.5 with carrot_on_a_stick\nscoreboard players set *stage sett 1\nscoreboard players set *game sett 2\nfunction ag001:games/planting/timer\neffect give @a saturation 15 255 true\nscoreboard players set @a ult.usesM 0\nexecute as @a[tag=ult.electricball] store result score @s ult.usesM run data get storage config ultimate.electricball.uses\nfunction ag001:games/planting/wins/first_round with storage config games.planting\ntag @r[team=red] add with_axolotl\ntellraw @a[tag=with_axolotl] \"У вас аксолотль!\"\nscoreboard players set *rounds planting 1\nfunction ag001:games/planting/tick"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "teams",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "add_to_displayer_red.mcfunction",
+                              "content": ""
+                            },
+                            {
+                              "type": "file",
+                              "name": "points_blue.mcfunction",
+                              "content": "scoreboard players add *blue-percent capture.point 1\ndata modify storage game ponts_displayer append value \"\\uE011󏿿\"\nscoreboard players reset *blue capture.point\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "points_red.mcfunction",
+                              "content": "scoreboard players add *red-percent capture.point 1\nscoreboard players reset *red capture.point\n\n\n# Получаем текущее значение как строку\ndata modify storage game:points_displayer current_text set from storage game:points_displayer text\n\n# Добавляем символ к строке\ndata modify storage game:points_displayer current_text set value \"{{{current_text}\\uE010󏿿}}\"\n\n# Обновляем основное хранилище\ndata modify storage game:points_displayer text set from storage game:points_displayer current_text\nbossbar set minecraft:red_capture name {\"storage\":\"game\",\"nbt\":\"ponts_displayer\"}\n"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "tick.mcfunction",
+                          "content": "tellraw @a[tag=debug] [{score:{name:\"*daytime\",objective:\"daytime\"}},\"| TICK FUNCTIONS: \\ndebug: tick.mcfunction\"]\n\nitem replace entity @a[tag=with_axolotl] armor.head with minecraft:music_disc_13[custom_model_data={strings:[\"axolotl\"]}]\nexecute as @a if items entity @s inventory.* minecraft:music_disc_13[custom_model_data={strings:[\"axolotl\"]}] run clear @s minecraft:music_disc_13\n\nexecute as @a[team=blue] if items entity @s hotbar.4 air run item replace entity @s hotbar.4 with warped_fungus_on_a_stick\n\nexecute as @a if items entity @s player.cursor minecraft:music_disc_13[custom_model_data={strings:[\"axolotl\"]}] run item replace entity @s player.cursor with air\nexecute if score *end planting matches 1 run title @a times 0t 100t 20t\nexecute if score *end planting matches 1 run title @a title \"\\uE0037\"\nexecute if score *end planting matches 15 run tp @a 32 -58 17\nexecute if score *end planting matches 15 run title @a subtitle {font:small_caps,text:\"П\"}\nexecute if score *end planting matches 16 run title @a subtitle {font:small_caps,text:\"По\"}\nexecute if score *end planting matches 17 run title @a subtitle {font:small_caps,text:\"Поб\"}\nexecute if score *end planting matches 18 run title @a subtitle {font:small_caps,text:\"Побе\"}\nexecute if score *end planting matches 19 run title @a subtitle {font:small_caps,text:\"Побед\"}\nexecute if score *end planting matches 20 run title @a subtitle {font:small_caps,text:\"Победа\"}\nexecute if score *end planting matches 21 run title @a subtitle {font:small_caps,text:\"Победа\"}\nexecute if score *end planting matches 22 run title @a subtitle {font:small_caps,text:\"Победа: \"}\n\nexecute if score *winner planting matches 2 if score *end planting matches 30 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"С\"}]\nexecute if score *winner planting matches 2 if score *end planting matches 31 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Си\"}]\nexecute if score *winner planting matches 2 if score *end planting matches 32 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Син\"}]\nexecute if score *winner planting matches 2 if score *end planting matches 33 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Сини\"}]\nexecute if score *winner planting matches 2 if score *end planting matches 34 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Синие\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 30 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"К\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 31 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Кр\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 32 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Кра\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 33 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Крас\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 34 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Красн\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 35 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Красны\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 36 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Красные\"}]\nexecute if score *winner planting matches 1 if score *end planting matches 36.. run function ag001:games/planting/end_end\nexecute if score *end planting matches 1.. run scoreboard players add *end planting 1\nfunction ag001:games/planting/game-things/axolotl/planting\nfunction ag001:games/planting/game-things/axolotl/defuse with storage minecraft:config games.planting\nexecute if score *end planting matches 100.. run function ag001:games/planting/end_end"
+                        },
+                        {
+                          "type": "file",
+                          "name": "timer.mcfunction",
+                          "content": "scoreboard players add *times planting 1\nexecute if score *rounds planting matches 1 if score *times planting matches 1 run title @a title \"\"\nexecute if score *rounds planting matches 1 if score *times planting matches 1 run title @a subtitle {font:small_caps,\"text\":\"15 секунд!\",\"color\":\"yellow\"}\nexecute if score *times planting matches 5 run title @a title \"\"\nexecute if score *times planting matches 5 run title @a subtitle {font:small_caps,\"text\":\"10 секунд!\",\"color\":\"yellow\"}\nexecute if score *times planting matches 10 run title @a title \"\"\nexecute if score *times planting matches 10 run title @a subtitle {font:small_caps,\"text\":\"5 секунд!\",\"color\":\"yellow\"}\nexecute if score *times planting matches 13 run title @a title \"\"\nexecute if score *times planting matches 13 run title @a subtitle {font:small_caps,\"text\":\"3 секунды!\",\"color\":\"yellow\"}\nexecute if score *times planting matches 14 run title @a title \"\"\nexecute if score *times planting matches 14 run title @a subtitle {font:small_caps,\"text\":\"2 секунды!\",\"color\":\"red\"}\nexecute if score *times planting matches 15 run title @a title \"\"\nexecute if score *times planting matches 15 run title @a subtitle {font:small_caps,\"text\":\"1 секунда!\",\"color\":\"red\"}\n\nexecute if score *times planting matches ..15 run schedule function ag001:games/planting/timer 1s\nexecute if score *times planting matches 16 run function ag001:games/planting/timer_end\nbossbar set planting players @a\nexecute if score *times planting matches 16.. run scoreboard players reset *times planting\n\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "timer_end.mcfunction",
+                          "content": "title @a title \"\"\ntitle @a subtitle \"\"\nfunction ag001:games/planting/game-things/timer-seconds\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "winner_title_0.mcfunction",
+                          "content": "$scoreboard players set *$(win)-title planting 1\nexecute if score *red-title planting matches 1 run function ag001:games/planting/winner_title_red\nexecute if score *blue-title planting matches 1 run function ag001:games/planting/winner_title_blue"
+                        },
+                        {
+                          "type": "file",
+                          "name": "winner_title_blue.mcfunction",
+                          "content": "\ntitle @a times 0t 100t 20t\ntitle @a title \"\\uE007\"\nscoreboard players add *blue-title planting 1\nexecute if score *blue-title planting matches 2 run title @a subtitle \"Р\"\nexecute if score *blue-title planting matches 3 run title @a subtitle \"Ра\"\nexecute if score *blue-title planting matches 4 run title @a subtitle \"Рау\"\nexecute if score *blue-title planting matches 5 run title @a subtitle \"Раун\"\nexecute if score *blue-title planting matches 6 run title @a subtitle \"Раунд\"\nexecute if score *blue-title planting matches 7 run title @a subtitle \"Раунд з\"\nexecute if score *blue-title planting matches 8 run title @a subtitle \"Раунд за\"\nexecute if score *blue-title planting matches 9 run title @a subtitle \"Раунд за:\"\nexecute if score *blue-title planting matches 17 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:blue,text:\"С\"}]\nexecute if score *blue-title planting matches 18 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:blue,text:\"Си\"}]\nexecute if score *blue-title planting matches 19 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:blue,text:\"Син\"}]\nexecute if score *blue-title planting matches 20 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:blue,text:\"Сини\"}]\nexecute if score *blue-title planting matches 21 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:blue,text:\"Синим\"}]\nexecute if score *blue-title planting matches 22 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:blue,text:\"Синими\"}]\nexecute if score *blue-title planting matches ..21 run schedule function ag001:games/planting/winner_title_blue 1t\nexecute if score *blue-title planting matches 22 run scoreboard players reset *blue-title planting"
+                        },
+                        {
+                          "type": "file",
+                          "name": "winner_title_red.mcfunction",
+                          "content": "\ntitle @a times 0t 100t 20t\ntitle @a title \"\\uE007\"\nscoreboard players add *red-title planting 1\nexecute if score *red-title planting matches 2 run title @a subtitle \"Р\"\nexecute if score *red-title planting matches 3 run title @a subtitle \"Ра\"\nexecute if score *red-title planting matches 4 run title @a subtitle \"Рау\"\nexecute if score *red-title planting matches 5 run title @a subtitle \"Раун\"\nexecute if score *red-title planting matches 6 run title @a subtitle \"Раунд\"\nexecute if score *red-title planting matches 7 run title @a subtitle \"Раунд з\"\nexecute if score *red-title planting matches 8 run title @a subtitle \"Раунд за\"\nexecute if score *red-title planting matches 9 run title @a subtitle \"Раунд за:\"\nexecute if score *red-title planting matches 17 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"К\"}]\nexecute if score *red-title planting matches 18 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Кр\"}]\nexecute if score *red-title planting matches 19 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Кра\"}]\nexecute if score *red-title planting matches 20 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Крас\"}]\nexecute if score *red-title planting matches 21 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Красн\"}]\nexecute if score *red-title planting matches 22 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Красны\"}]\nexecute if score *red-title planting matches 23 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Красным\"}]\nexecute if score *red-title planting matches 24 run title @a subtitle [\"Раунд за: \",{font:small_caps,color:red,text:\"Красными\"}]\nexecute if score *red-title planting matches ..23 run schedule function ag001:games/planting/winner_title_red 1t\nexecute if score *red-title planting matches 24 run scoreboard players reset *red-title planting"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "wins",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "blue.mcfunction",
+                              "content": "scoreboard players reset *time-axolotl planting\n$scoreboard players set *time-round planting $(roundtime_mins)\n$scoreboard players set *time-axolotl planting $(secondsaxolotl)\nscoreboard players operation *time-round planting *= 60 consts\nscoreboard players add *rounds planting 1\nscoreboard players add *wins-blue planting 1\nfunction ag001:games/planting/new_round with storage config games.planting\nfunction ag001:games/planting/winner_title_0 {win:blue}\nscoreboard players reset *defuse-time planting\nscoreboard players reset @a defuse_check\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "first_round.mcfunction",
+                              "content": "$scoreboard players set *time-round planting $(roundtime_mins)\n$scoreboard players set *time-axolotl planting $(secondsaxolotl)\nscoreboard players operation *time-round planting *= 60 consts\nbossbar set minecraft:blue_capture players 1\nbossbar set minecraft:red_capture players 1\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "red.mcfunction",
+                              "content": "scoreboard players reset *time-axolotl planting\n$scoreboard players set *time-round planting $(roundtime_mins)\n$scoreboard players set *time-axolotl planting $(secondsaxolotl)\nscoreboard players operation *time-round planting *= 60 consts\nscoreboard players add *rounds planting 1\nscoreboard players add *wins-red planting 1\nfunction ag001:games/planting/new_round with storage config games.planting\nfunction ag001:games/planting/winner_title_0 {win:red}\nscoreboard players reset *defuse-time planting\nscoreboard players reset @a defuse_check\n"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "directory",
+                      "name": "point",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "end_end.mcfunction",
+                          "content": "scoreboard players reset * capture.point\nscoreboard players set *stage sett 2\nfunction ag001:choose_abilities/no_title\nbossbar set minecraft:red_capture players qwwq\nbossbar set minecraft:blue_capture players wqqw\nschedule clear ag001:games/point/timer"
+                        },
+                        {
+                          "type": "file",
+                          "name": "end_win.mcfunction",
+                          "content": "\n\nexecute if score *red-percent capture.point matches 100.. run scoreboard players set *winner capture.point 1\nexecute if score *blue-percent capture.point matches 100.. run scoreboard players set *winner capture.point 2\nscoreboard players add *end capture.point 1\nscoreboard players reset *blue-percent capture.point\nscoreboard players reset *red-percent capture.point\nscoreboard players reset *blue capture.point\nscoreboard players reset *red capture.point\nfunction ag001:choose_abilities/no_title\nbossbar set minecraft:red_capture players qwwq\nbossbar set minecraft:blue_capture players wqqw\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "start.mcfunction",
+                          "content": "spawnpoint @a[team=red] 13 -57 78 45\nspawnpoint @a[team=blue] 63 -57 150 -135\ntp @a[team=red] 134.9 -57.00 78.9 45 0\ntp @a[team=blue] 63.0 -57.00 150.9 -135 0\nitem replace entity @a hotbar.5 with carrot_on_a_stick\nscoreboard players set *stage sett 1\nbossbar set minecraft:red_capture players @a\nbossbar set minecraft:blue_capture players @a\nfunction ag001:games/point/timer\neffect give @a saturation 15 255 true\nfill 128 -56 86 136 -56 86 minecraft:barrier\nfill 128 -56 86 128 -56 77 minecraft:barrier\nscoreboard players set @a ult.usesM 0\nexecute as @a[tag=ult.electricball] store result score @s ult.usesM run data get storage config ultimate.electricball.uses"
+                        },
+                        {
+                          "type": "file",
+                          "name": "summon.mcfunction",
+                          "content": "summon marker ~ ~ ~ {Tags:[\"game.capturing_marker\"]}"
+                        },
+                        {
+                          "type": "directory",
+                          "name": "teams",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "add_to_displayer_red.mcfunction",
+                              "content": ""
+                            },
+                            {
+                              "type": "file",
+                              "name": "points_blue.mcfunction",
+                              "content": "scoreboard players add *blue-percent capture.point 1\ndata modify storage game ponts_displayer append value \"\\uE011󏿿\"\nscoreboard players reset *blue capture.point\n"
+                            },
+                            {
+                              "type": "file",
+                              "name": "points_red.mcfunction",
+                              "content": "scoreboard players add *red-percent capture.point 1\nscoreboard players reset *red capture.point\n\n\n# Получаем текущее значение как строку\ndata modify storage game:points_displayer current_text set from storage game:points_displayer text\n\n# Добавляем символ к строке\ndata modify storage game:points_displayer current_text set value \"{{{current_text}\\uE010󏿿}}\"\n\n# Обновляем основное хранилище\ndata modify storage game:points_displayer text set from storage game:points_displayer current_text\nbossbar set minecraft:red_capture name {\"storage\":\"game\",\"nbt\":\"ponts_displayer\"}\n"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "file",
+                          "name": "tick.mcfunction",
+                          "content": "execute if score *end capture.point matches 1 run title @a times 0t 100t 20t\nexecute if score *end capture.point matches 1 run title @a title \"\\uE007\"\nexecute if score *end capture.point matches 15 run tp @a 32 -58 17\nexecute if score *end capture.point matches 15 run title @a subtitle {font:small_caps,text:\"П\"}\nexecute if score *end capture.point matches 16 run title @a subtitle {font:small_caps,text:\"По\"}\nexecute if score *end capture.point matches 17 run title @a subtitle {font:small_caps,text:\"Поб\"}\nexecute if score *end capture.point matches 18 run title @a subtitle {font:small_caps,text:\"Побе\"}\nexecute if score *end capture.point matches 19 run title @a subtitle {font:small_caps,text:\"Побед\"}\nexecute if score *end capture.point matches 20 run title @a subtitle {font:small_caps,text:\"Победа\"}\nexecute if score *end capture.point matches 21 run title @a subtitle {font:small_caps,text:\"Победа\"}\nexecute if score *end capture.point matches 22 run title @a subtitle {font:small_caps,text:\"Победа: \"}\n\nexecute if score *winner capture.point matches 2 if score *end capture.point matches 30 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"С\"}]\nexecute if score *winner capture.point matches 2 if score *end capture.point matches 31 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Си\"}]\nexecute if score *winner capture.point matches 2 if score *end capture.point matches 32 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Син\"}]\nexecute if score *winner capture.point matches 2 if score *end capture.point matches 33 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Сини\"}]\nexecute if score *winner capture.point matches 2 if score *end capture.point matches 34 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:blue,text:\"Синие\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 30 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"К\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 31 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Кр\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 32 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Кра\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 33 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Крас\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 34 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Красн\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 35 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Красны\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 36 run title @a subtitle [{font:small_caps,text:\"Победа: \"},{color:red,text:\"Красные\"}]\nexecute if score *winner capture.point matches 1 if score *end capture.point matches 36.. run function ag001:games/point/end_end\nexecute if score *end capture.point matches 1.. run scoreboard players add *end capture.point 1\n\nexecute if score *end capture.point matches 200.. run scoreboard players reset *end capture.point\nexecute as @e[tag=game.capturing_marker,type=marker] at @s if entity @a[team=red,distance=..10] run scoreboard players add *red capture.point 1\nexecute as @e[tag=game.capturing_marker,type=marker] at @s if entity @a[team=blue,distance=..10] run scoreboard players add *blue capture.point 1\nexecute as @e[tag=game.capturing_marker,type=marker] at @s if entity @a[team=red,distance=..10] if entity @a[team=blue,distance=..10] run scoreboard players remove *blue capture.point 1\nexecute as @e[tag=game.capturing_marker,type=marker] at @s if entity @a[team=red,distance=..10] if entity @a[team=blue,distance=..10] run scoreboard players remove *red capture.point 1\nexecute if score *red capture.point matches 20.. run function ag001:games/point/teams/points_red\nexecute if score *blue capture.point matches 20.. run function ag001:games/point/teams/points_blue\nexecute if score *red-percent capture.point matches 100.. run function ag001:games/point/end_win\nexecute if score *blue-percent capture.point matches 100.. run function ag001:games/point/end_win\nexecute store result bossbar red_capture value run scoreboard players get *red-percent capture.point \nexecute store result bossbar blue_capture value run scoreboard players get *blue-percent capture.point\nexecute as @e[tag=game.capturing_marker,type=marker] at @s positioned ^ ^ ^-10 run particle flame\nexecute as @e[tag=game.capturing_marker,type=marker] at @s positioned ^10 ^ ^ run particle flame\nexecute as @e[tag=game.capturing_marker,type=marker] at @s positioned ^-10 ^ ^ run particle flame\nexecute as @e[tag=game.capturing_marker,type=marker] at @s positioned ^ ^ ^10 run particle flame\n# bossbar set minecraft:red_capture players @a\n# bossbar set minecraft:blue_capture players @a\nexecute as @e[tag=game.capturing_marker,type=marker] at @s run tp @s ~ ~ ~ ~2 ~"
+                        },
+                        {
+                          "type": "file",
+                          "name": "timer.mcfunction",
+                          "content": "scoreboard players add *times capture.point 1\ntitle @s times 1s 4s 1s\nexecute if score *times capture.point matches 1 run title @a title \"\"\nexecute if score *times capture.point matches 1 run title @a subtitle {font:small_caps,\"text\":\"15 секунд!\",\"color\":\"yellow\"}\nexecute if score *times capture.point matches 5 run title @a title \"\"\nexecute if score *times capture.point matches 5 run title @a subtitle {font:small_caps,\"text\":\"10 секунд!\",\"color\":\"yellow\"}\nexecute if score *times capture.point matches 10 run title @a title \"\"\nexecute if score *times capture.point matches 10 run title @a subtitle {font:small_caps,\"text\":\"5 секунд!\",\"color\":\"yellow\"}\nexecute if score *times capture.point matches 13 run title @a title \"\"\nexecute if score *times capture.point matches 13 run title @a subtitle {font:small_caps,\"text\":\"3 секунды!\",\"color\":\"yellow\"}\nexecute if score *times capture.point matches 14 run title @a title \"\"\nexecute if score *times capture.point matches 14 run title @a subtitle {font:small_caps,\"text\":\"2 секунды!\",\"color\":\"red\"}\nexecute if score *times capture.point matches 15 run title @a title \"\"\nexecute if score *times capture.point matches 15 run title @a subtitle {font:small_caps,\"text\":\"1 секунда!\",\"color\":\"red\"}\nexecute if score *times capture.point matches ..14 run schedule function ag001:games/point/timer 1s\nexecute if score *times capture.point matches 15 run function ag001:games/point/timer_end\n\nexecute if score *times capture.point matches 15.. run scoreboard players reset *times capture.point\n"
+                        },
+                        {
+                          "type": "file",
+                          "name": "timer_end.mcfunction",
+                          "content": "fill 128 -56 86 136 -56 86 minecraft:air\nfill 128 -56 86 128 -56 77 minecraft:air\ntitle @s subtitle \"\" "
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "file",
+                  "name": "load.mcfunction",
+                  "content": "scoreboard objectives add misc dummy\nscoreboard objectives add sett dummy\nscoreboard objectives add choose_1_abillity dummy\nscoreboard objectives add choose_2_abillity dummy\nscoreboard objectives add choose_3_abillity dummy\nscoreboard objectives add abillity.darkrun dummy\nscoreboard objectives add cooldown.f dummy\nscoreboard objectives add cooldown.q dummy\nscoreboard objectives add attack.check used:carrot_on_a_stick\nscoreboard objectives add ai dummy\nscoreboard objectives add datagen dummy\nscoreboard objectives add id dummy\nscoreboard objectives add ult.check dropped:carrot_on_a_stick\nscoreboard objectives add doublejump.testsneaking minecraft.custom:minecraft.sneak_time\nscoreboard objectives add doublejump.time dummy\nscoreboard objectives add ray_success dummy\nscoreboard objectives add ray_steps dummy\nscoreboard objectives add presets dummy\nscoreboard objectives add capture.point dummy\n\nscoreboard objectives add daytime dummy\n\nscoreboard objectives add planting dummy\n\nscoreboard objectives add element-natural dummy\nscoreboard objectives add element-water dummy\nscoreboard objectives add element-electrical dummy\nscoreboard objectives add element-stopped dummy\nscoreboard objectives add element_natural-electrical dummy\nscoreboard objectives add element-damage_bonus dummy\nscoreboard objectives add element_bonus-tick dummy\nscoreboard objectives add abil.slot dummy\nscoreboard objectives add choose.ticks dummy\nscoreboard objectives add SelectedItemSlot dummy\nscoreboard objectives add SelectedItemSlot+1 dummy\nscoreboard objectives add SelectedItemSlot-1 dummy\nscoreboard objectives add f.check dummy\nscoreboard objectives add q.check dummy\n\nscoreboard objectives add defuse_check used:warped_fungus_on_a_stick\n\nscoreboard objectives add choose trigger\nscoreboard objectives add choose_stop trigger\nscoreboard players enable @a choose\nscoreboard objectives add animate_hands dummy\nscoreboard objectives add ability_hands_animation dummy\nscoreboard objectives add ultimate_hands_animation dummy\nscoreboard objectives add ult.uses dummy\nscoreboard objectives add ult.usesM dummy\nscoreboard objectives add ult.timeruses dummy\nscoreboard objectives add choose.ult dummy\nscoreboard objectives add choose.ab dummy\nbossbar add planting \"\"\nbossbar add red_capture {color:red,text:\"Красные:\"}\nbossbar add blue_capture {color:blue,text:\"Синие:\"}\nbossbar set minecraft:red_capture style progress\nbossbar set minecraft:blue_capture style progress\nbossbar set minecraft:red_capture color red\nbossbar set minecraft:blue_capture color blue\nbossbar set minecraft:red_capture max 100\nbossbar set minecraft:blue_capture max 100\nbossbar set minecraft:planting players 12\nbossbar set minecraft:red_capture players qw\nbossbar set minecraft:blue_capture players qw\nbossbar set title players @a\nscoreboard objectives add procent.a dummy\nscoreboard objectives add consts dummy\nscoreboard players set 0 consts 0\nscoreboard players set 1 consts 1\nscoreboard players set 2 consts 2\nscoreboard players set 3 consts 3\nscoreboard players set 20 consts 20\nscoreboard players set 40 consts 40\nscoreboard players set 60 consts 60\nscoreboard players set 80 consts 80\nscoreboard players set 100 consts 100\n\n\nteam add red\nteam add blue\nfunction ag001:configuration\nschedule function ag001:datagen/qapply/exe_in1s 1s\nfunction ag001:elements/tick"
+                },
+                {
+                  "type": "directory",
+                  "name": "misc",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "buttons.mcfunction",
+                      "content": "execute as @n[type=interaction,tag=play_button] if data entity @s interaction.player run scoreboard players set *lobby_door misc 30\nexecute as @n[type=interaction,tag=play_button] if data entity @s interaction.player run scoreboard players set *lobby_door_choose misc 1\nexecute as @n[type=interaction,tag=play_button] if data entity @s interaction.player run data remove entity @s interaction\n\nexecute as @n[type=interaction,tag=autor_button] if data entity @s interaction.player run scoreboard players set *lobby_door misc 30\nexecute as @n[type=interaction,tag=autor_button] if data entity @s interaction.player run scoreboard players set *lobby_door_choose misc 2\nexecute as @n[type=interaction,tag=autor_button] if data entity @s interaction.player run data remove entity @s interaction\n"
+                    },
+                    {
+                      "type": "file",
+                      "name": "door_animate.mcfunction",
+                      "content": "scoreboard players add *lobby_door misc 1\n\nexecute if score *lobby_door misc matches 1 run setblock 30 -56 23 air destroy\nexecute if score *lobby_door misc matches 3 run setblock 29 -56 23 air destroy\nexecute if score *lobby_door misc matches 5 run setblock 28 -56 23 air destroy\nexecute if score *lobby_door misc matches 7 run setblock 30 -57 23 air destroy\nexecute if score *lobby_door misc matches 9 run setblock 29 -57 23 air destroy\nexecute if score *lobby_door misc matches 11 run setblock 28 -57 23 air destroy\nexecute if score *lobby_door misc matches 13 run setblock 30 -58 23 air destroy\nexecute if score *lobby_door misc matches 15 run setblock 29 -58 23 air destroy\nexecute if score *lobby_door misc matches 17 run setblock 28 -58 23 air destroy\n\nexecute if score *lobby_door misc matches 1 run setblock 30 -45 23 air destroy\nexecute if score *lobby_door misc matches 3 run setblock 29 -45 23 air destroy\nexecute if score *lobby_door misc matches 5 run setblock 28 -45 23 air destroy\nexecute if score *lobby_door misc matches 7 run setblock 30 -46 23 air destroy\nexecute if score *lobby_door misc matches 9 run setblock 29 -46 23 air destroy\nexecute if score *lobby_door misc matches 11 run setblock 28 -46 23 air destroy\nexecute if score *lobby_door misc matches 13 run setblock 30 -47 23 air destroy\nexecute if score *lobby_door misc matches 15 run setblock 29 -47 23 air destroy\nexecute if score *lobby_door misc matches 17 run setblock 28 -47 23 air destroy\n\nexecute if score *lobby_door misc matches 17..30 run scoreboard players reset *lobby_door\n\nexecute if score *lobby_door misc matches 31 run setblock 30 -56 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 33 run setblock 29 -56 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 35 run setblock 28 -56 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 37 run setblock 30 -57 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 39 run setblock 29 -57 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 41 run setblock 28 -57 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 43 run setblock 30 -58 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 45 run setblock 29 -58 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 47 run setblock 28 -58 23 smooth_sandstone destroy\n\nexecute if score *lobby_door misc matches 31 run setblock 30 -45 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 33 run setblock 29 -45 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 35 run setblock 28 -45 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 37 run setblock 30 -46 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 39 run setblock 29 -46 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 41 run setblock 28 -46 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 43 run setblock 30 -47 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 45 run setblock 29 -47 23 smooth_sandstone destroy\nexecute if score *lobby_door misc matches 47 run setblock 28 -47 23 smooth_sandstone destroy\n\nexecute if score *lobby_door misc matches 48 if score *lobby_door_choose misc matches 1 as @a at @s run tp @s ~ ~-11 ~ ~ ~\nexecute if score *lobby_door misc matches 48 if score *lobby_door_choose misc matches 2 as @a at @s run tp @s ~ ~11 ~ ~ ~\n\nexecute if score *lobby_door misc matches 60.. run scoreboard players set *lobby_door misc 0\n"
+                    },
+                    {
+                      "type": "file",
+                      "name": "effect_application.mcfunction",
+                      "content": "effect give @a speed infinite 3 true\neffect give @a night_vision infinite 0 true\neffect give @a haste infinite 255 true\n\nexecute as @a run attribute @s minecraft:knockback_resistance base set 1\nexecute as @a run attribute @s minecraft:jump_strength base set 0.7\nexecute as @a run attribute @s minecraft:step_height base set 1\nexecute as @a run attribute @s minecraft:camera_distance base set 5\nexecute as @a run attribute @s minecraft:attack_speed base set -120\n"
+                    },
+                    {
+                      "type": "file",
+                      "name": "effect_application_lobby.mcfunction",
+                      "content": "effect give @a night_vision infinite 0 true\neffect give @a saturation 2 255 true\nexecute as @a run attribute @s minecraft:attack_speed base reset\n"
+                    }
+                  ]
+                },
+                {
+                  "type": "directory",
+                  "name": "mobs",
+                  "children": [
+                    {
+                      "type": "directory",
+                      "name": "villagers",
+                      "children": [
+                        {
+                          "type": "file",
+                          "name": "ai.mcfunction",
+                          "content": ""
+                        },
+                        {
+                          "type": "directory",
+                          "name": "player",
+                          "children": [
+                            {
+                              "type": "file",
+                              "name": "check.mcfunction",
+                              "content": ""
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "file",
+                  "name": "test.mcfunction",
+                  "content": "# bossbar set 1 name [\"Тиков ел. бонуса: \",{color:yellow,score:{name:\"@s\",objective:\"element_bonus-tick\"}},\"| Ел. Бонус: \",{color:yellow,score:{name:\"@s\",objective:\"element-damage_bonus\"}}]"
+                },
+                {
+                  "type": "file",
+                  "name": "tick.mcfunction",
+                  "content": "execute as @a unless entity @s[tag=registred] run function ag001:datagen/registring\nexecute store result score *daytime daytime run time query gametime\n\nexecute if score *stage sett matches 2 if score *lobby_door misc matches 0.. run function ag001:misc/door_animate\nexecute if score *stage sett matches 2 run function ag001:misc/buttons\nexecute if score *stage sett matches 2 as @e[type=item] run kill @s\n\n# execute as @a run bossbar set choose name [{shadow_color:0,font:\"minecraft:choose\",text:\"\\uE001\"},{shadow_color:0,font:\"minecraft:choose\",score:{name:\"@s\",objective:\"choose.ab\"}},{shadow_color:0,font:\"minecraft:choose\",text:\"\\uE002\"},{shadow_color:0,font:\"minecraft:choose\",score:{name:\"@s\",objective:\"choose.ult\"}}]\nexecute as @a if score *stage sett matches 2 run function ag001:choose_abilities/tick\nexecute as @a run function ag001:choose_abilities/trigger/tick\n\nexecute unless score *stage sett matches 1 run return fail\nfunction ag001:abillity/attack/check\nexecute if entity @a[tag=abillity.incooldown] as @a[tag=abillity.incooldown] run function ag001:abillity/cooldown/cooldown\nkill @e[type=item,nbt={Item:{id:\"minecraft:music_disc_13\"}}]\nfunction ag001:abillity/active/check\nfunction ag001:abillity/ultimate/check\nfunction ag001:misc/effect_application\nexecute if score *game sett matches 1 run function ag001:games/point/tick\nexecute if score *game sett matches 2 run function ag001:games/planting/tick\nfunction ag001:abillity/ultimate/uses/tick\nexecute as @a at @s run function ag001:double_jump/check\nexecute as @a if score @s element_bonus-tick matches 1.. run function ag001:elements/bonus/schelude_bypass"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "ai",
+          "children": [
+            {
+              "type": "directory",
+              "name": "function",
+              "children": []
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "bypass",
+          "children": [
+            {
+              "type": "directory",
+              "name": "damage_type",
+              "children": [
+                {
+                  "type": "file",
+                  "name": "magic.json",
+                  "content": "{\n  \"exhaustion\": 0.0,\n  \"message_id\": \"mob\",\n  \"scaling\": \"when_caused_by_living_non_player\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "directory",
+          "name": "minecraft",
+          "children": [
+            {
+              "type": "directory",
+              "name": "tags",
+              "children": [
+                {
+                  "type": "directory",
+                  "name": "damage_type",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "bypasses_cooldown.json",
+                      "content": "{\n\t\"values\": [\n\t\t\"bypass:magic\"\n\t]\n}"
+                    }
+                  ]
+                },
+                {
+                  "type": "directory",
+                  "name": "function",
+                  "children": [
+                    {
+                      "type": "file",
+                      "name": "load.json",
+                      "content": "{\n    \"values\": [\n    \"ag001:load\"\n]\n}"
+                    },
+                    {
+                      "type": "file",
+                      "name": "tick.json",
+                      "content": "{\n    \"values\": [\n    \"ag001:tick\"\n]\n}"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
