@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>План достижения 50к кубков в Brawl Stars</title>
+    <title>План достижения 70к кубков в Brawl Stars</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -453,18 +453,18 @@
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-trophy brawl-icon"></i> План достижения 50,000 кубков <i class="fas fa-trophy brawl-icon"></i></h1>
+            <h1><i class="fas fa-trophy brawl-icon"></i> План достижения 70,000 кубков <i class="fas fa-trophy brawl-icon"></i></h1>
             <div class="goal-progress">
                 <div class="current-trophies">
                     <div class="stat-label">Текущие кубки</div>
-                    <div class="stat-value" id="current-trophies">47,227</div>
+                    <div class="stat-value" id="current-trophies">58.478</div>
                 </div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="progress-fill"></div>
                 </div>
                 <div class="target-trophies">
                     <div class="stat-label">Цель</div>
-                    <div class="stat-value">50,000</div>
+                    <div class="stat-value">70.000</div>
                 </div>
             </div>
         </header>
@@ -554,11 +554,11 @@
 
     <script>
         // Начальные данные
-        const startTrophies = 58000;
-        const targetTrophies = 65000;
-        const startDate = new Date('2026-06-11');
-        const endDate = new Date('2026-07-17');
-        const MIN_DAILY_PLAN = 55; // Минимальный план на день
+        const startTrophies = 58478;
+        const targetTrophies = 70000;
+        const startDate = new Date('2026-06-01');
+        const endDate = new Date('2026-07-31');
+        const MIN_DAILY_PLAN = 150; // Минимальный план на день
         
         // Получаем элементы DOM
         const novemberCalendar = document.getElementById('november-calendar');
@@ -825,11 +825,11 @@
                 // Определяем месяц для этого дня
                 let month, year;
                 if (day.closest('#november-calendar')) {
-                    month = 10; // Ноябрь (0-11)
-                    year = 2025;
+                    month = 06; // Ноябрь (0-11)
+                    year = 2026;
                 } else if (day.closest('#december-calendar')) {
-                    month = 11; // Декабрь (0-11)
-                    year = 2025;
+                    month = 07; // Декабрь (0-11)
+                    year = 2026;
                 }
                 
                 if (month !== undefined && year !== undefined) {
@@ -846,8 +846,8 @@
             loadData();
             
             // Создаем календари
-            createCalendar(10, 2025, novemberCalendar); // Ноябрь (месяцы в JS: 0-11)
-            createCalendar(11, 2025, decemberCalendar); // Декабрь
+            createCalendar(06, 2026, novemberCalendar); // Ноябрь (месяцы в JS: 0-11)
+            createCalendar(07, 2026, decemberCalendar); // Декабрь
             
             // Устанавливаем сегодняшнюю дату
             selectedDate = new Date();
@@ -867,8 +867,8 @@
                 updateStats();
                 
                 // Пересоздаем календари для обновления отображения
-                createCalendar(10, 2025, novemberCalendar);
-                createCalendar(11, 2025, decemberCalendar);
+                createCalendar(06, 2026, novemberCalendar);
+                createCalendar(07, 2026, decemberCalendar);
             });
         }
         
