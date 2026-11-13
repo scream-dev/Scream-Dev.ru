@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#050505" />
+  <title>BS // TELETEXT</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050505;
+      --panel-border: #1a1a1a;
+      --summary-color: #ffb000;      /* Янтарно-жёлтый для саммари */
+      --summary-accent: #00ff66;     /* Неоново-зелёный для таймкодов */
+      --ticker-color: #6e8878;       /* Приглушённый серо-зелёный для EN лога */
+      --muted: #444444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100dvh;
+      background-color: var(--bg);
+      color: var(--summary-color);
+      font-family: 'JetBrains Mono', 'Courier New', monospace;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Верхний статус-бар */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--panel-border);
+      font-size: 11px;
+      background: #080808;
+      flex-shrink: 0;
+    }
+
+    .status-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff3333;
+    }
+
+    .dot.online {
+      background: var(--summary-accent);
+      box-shadow: 0 0 6px var(--summary-accent);
+    }
+
+    .controls {
+      display: flex;
+      gap: 6px;
+    }
+
+    button {
+      background: #0d0d0d;
+      color: #888;
+      border: 1px solid #262626;
+      padding: 3px 7px;
+      font-family: inherit;
+      font-size: 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+
+    button.active {
+      color: var(--summary-accent);
+      border-color: #1f5c35;
+      background: #081a0f;
+    }
+
+    /* ВЕРХНЯЯ ПОЛОВИНА: САММАРИ РАУНДОВ (RU) */
+    #summaries {
+      flex: 55;
+      overflow-y: auto;
+      padding: 10px;
+      border-bottom: 2px solid var(--panel-border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      scroll-behavior: smooth;
+    }
+
+    .summary-card {
+      background: #0a0a0a;
+      border-left: 3px solid var(--summary-color);
+      padding: 8px 10px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--summary-color);
+      white-space: pre-wrap;
+    }
+
+    .summary-time {
+      font-size: 10px;
+      color: var(--summary-accent);
+      margin-bottom: 4px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    /* НИЖНЯЯ ПОЛОВИНА: БЕГУЩИЙ ЛОГ КАСТЕРОВ (EN) */
+    #ticker {
+      flex: 45;
+      overflow-y: auto;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      scroll-behavior: smooth;
+    }
+
+    .ticker-line {
+      font-size: 11.5px;
+      line-height: 1.35;
+      color: var(--ticker-color);
+      word-break: break-word;
+    }
+
+    .ticker-time {
+      color: var(--muted);
+      margin-right: 6px;
+      font-size: 10px;
+    }
+
+    /* Скрытие скроллбаров для чистого телетекст-вида */
+    #summaries::-webkit-scrollbar,
+    #ticker::-webkit-scrollbar {
+      width: 3px;
+    }
+    #summaries::-webkit-scrollbar-thumb,
+    #ticker::-webkit-scrollbar-thumb {
+      background: #1f1f1f;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="status-wrap">
+      <div id="statusDot" class="dot"></div>
+      <span id="statusText">OFFLINE</span>
+    </div>
+    <div class="controls">
+      <button id="wakeBtn" onclick="toggleWakeLock()">WAKE: OFF</button>
+      <button onclick="configureServer()">WS URL</button>
+    </div>
+  </header>
+
+  <section id="summaries"></section>
+  <section id="ticker"></section>
+
+  <script>
+    const summariesEl = document.getElementById('summaries');
+    const tickerEl = document.getElementById('ticker');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    const wakeBtn = document.getElementById('wakeBtn');
+
+    // URL WebSocket-сервера (можно сменить кнопкой WS URL прямо с телефона)
+    const DEFAULT_WS_URL = 'wss://your-vps-domain.com/ws';
+    let wsUrl = localStorage.getItem('bs_teletext_ws') || DEFAULT_WS_URL;
+    let ws = null;
+    let reconnectTimer = null;
+    let pingInterval = null;
+
+    function configureServer() {
+      const input = prompt('Введите WebSocket URL вашего VPS (wss://... или ws://...):', wsUrl);
+      if (input && input.trim()) {
+        wsUrl = input.trim();
+        localStorage.setItem('bs_teletext_ws', wsUrl);
+        connectWebSocket();
+      }
+    }
+
+    function isNearBottom(el, threshold = 60) {
+      return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
+    }
+
+    function appendSummary(item, forceScroll = false) {
+      const shouldScroll = forceScroll || isNearBottom(summariesEl);
+      const card = document.createElement('div');
+      card.className = 'summary-card';
+
+      const timeEl = document.createElement('div');
+      timeEl.className = 'summary-time';
+      timeEl.textContent = `[${item.timestamp}] РАУНД-АПДЕЙТ`;
+
+      const bodyEl = document.createElement('div');
+      bodyEl.textContent = item.text;
+
+      card.appendChild(timeEl);
+      card.appendChild(bodyEl);
+      summariesEl.appendChild(card);
+
+      // Ограничиваем DOM до 30 карточек
+      while (summariesEl.children.length > 30) {
+        summariesEl.removeChild(summariesEl.firstChild);
+      }
+
+      if (shouldScroll) {
+        summariesEl.scrollTop = summariesEl.scrollHeight;
+      }
+    }
+
+    function appendRawLog(item, forceScroll = false) {
+      const shouldScroll = forceScroll || isNearBottom(tickerEl);
+      const line = document.createElement('div');
+      line.className = 'ticker-line';
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'ticker-time';
+      timeSpan.textContent = item.timestamp;
+
+      const textNode = document.createTextNode(item.text);
+
+      line.appendChild(timeSpan);
+      line.appendChild(textNode);
+      tickerEl.appendChild(line);
+
+      // Ограничиваем DOM до 80 строк
+      while (tickerEl.children.length > 80) {
+        tickerEl.removeChild(tickerEl.firstChild);
+      }
+
+      if (shouldScroll) {
+        tickerEl.scrollTop = tickerEl.scrollHeight;
+      }
+    }
+
+    function connectWebSocket() {
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
+      clearTimeout(reconnectTimer);
+      clearInterval(pingInterval);
+
+      statusDot.classList.remove('online');
+      statusText.textContent = 'CONNECTING...';
+
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch (e) {
+        statusText.textContent = 'BAD WS URL';
+        return;
+      }
+
+      ws.onopen = () => {
+        statusDot.classList.add('online');
+        statusText.textContent = 'LIVE';
+        pingInterval = setInterval(() => {
+          if (ws.readyState === WebSocket.OPEN) ws.send('ping');
+        }, 15000);
+      };
+
+      ws.onmessage = (event) => {
+        if (event.data === 'pong') return;
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'history') {
+            summariesEl.innerHTML = '';
+            tickerEl.innerHTML = '';
+            (data.summaries || []).forEach(s => appendSummary(s, true));
+            (data.raw_logs || []).forEach(r => appendRawLog(r, true));
+          } else if (data.type === 'summary') {
+            appendSummary(data);
+          } else if (data.type === 'raw') {
+            appendRawLog(data);
+          }
+        } catch (err) {
+          console.error('Parse error:', err);
+        }
+      };
+
+      ws.onclose = () => {
+        statusDot.classList.remove('online');
+        statusText.textContent = 'RECONNECTING...';
+        clearInterval(pingInterval);
+        reconnectTimer = setTimeout(connectWebSocket, 2500);
+      };
+    }
+
+    // Wake Lock API — чтобы экран телефона не гас на минимальной яркости
+    let wakeLock = null;
+
+    async function requestWakeLock() {
+      if (!('wakeLock' in navigator)) {
+        wakeBtn.textContent = 'WAKE: N/A';
+        return;
+      }
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeBtn.classList.add('active');
+        wakeBtn.textContent = 'WAKE: ON';
+        wakeLock.addEventListener('release', () => {
+          wakeBtn.classList.remove('active');
+          wakeBtn.textContent = 'WAKE: OFF';
+        });
+      } catch (err) {
+        wakeBtn.classList.remove('active');
+        wakeBtn.textContent = 'WAKE: ERR';
+      }
+    }
+
+    async function toggleWakeLock() {
+      if (wakeLock !== null && !wakeLock.released) {
+        await wakeLock.release();
+        wakeLock = null;
+      } else {
+        await requestWakeLock();
+      }
+    }
+
+    // Автоматический перезахват WakeLock при сворачивании/разворачивании браузера
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && wakeBtn.classList.contains('active')) {
+        requestWakeLock();
+      }
+    });
+
+    connectWebSocket();
+  </script>
+</body>
+</html>
