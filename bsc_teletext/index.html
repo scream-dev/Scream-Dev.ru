@@ -12,17 +12,13 @@
     :root {
       --bg: #050505;
       --panel-border: #1a1a1a;
-      --summary-color: #ffb000;      /* Янтарно-жёлтый для саммари */
-      --summary-accent: #00ff66;     /* Неоново-зелёный для таймкодов */
-      --ticker-color: #6e8878;       /* Приглушённый серо-зелёный для EN лога */
+      --summary-color: #ffb000;
+      --summary-accent: #00ff66;
+      --ticker-color: #6e8878;
       --muted: #444444;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     html, body {
       width: 100%;
@@ -36,7 +32,6 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Верхний статус-бар */
     header {
       display: flex;
       align-items: center;
@@ -48,11 +43,7 @@
       flex-shrink: 0;
     }
 
-    .status-wrap {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
+    .status-wrap { display: flex; align-items: center; gap: 6px; }
 
     .dot {
       width: 8px;
@@ -64,11 +55,6 @@
     .dot.online {
       background: var(--summary-accent);
       box-shadow: 0 0 6px var(--summary-accent);
-    }
-
-    .controls {
-      display: flex;
-      gap: 6px;
     }
 
     button {
@@ -88,7 +74,6 @@
       background: #081a0f;
     }
 
-    /* ВЕРХНЯЯ ПОЛОВИНА: САММАРИ РАУНДОВ (RU) */
     #summaries {
       flex: 55;
       overflow-y: auto;
@@ -118,7 +103,6 @@
       letter-spacing: 0.5px;
     }
 
-    /* НИЖНЯЯ ПОЛОВИНА: БЕГУЩИЙ ЛОГ КАСТЕРОВ (EN) */
     #ticker {
       flex: 45;
       overflow-y: auto;
@@ -142,15 +126,10 @@
       font-size: 10px;
     }
 
-    /* Скрытие скроллбаров для чистого телетекст-вида */
     #summaries::-webkit-scrollbar,
-    #ticker::-webkit-scrollbar {
-      width: 3px;
-    }
+    #ticker::-webkit-scrollbar { width: 3px; }
     #summaries::-webkit-scrollbar-thumb,
-    #ticker::-webkit-scrollbar-thumb {
-      background: #1f1f1f;
-    }
+    #ticker::-webkit-scrollbar-thumb { background: #1f1f1f; }
   </style>
 </head>
 <body>
@@ -158,61 +137,65 @@
   <header>
     <div class="status-wrap">
       <div id="statusDot" class="dot"></div>
-      <span id="statusText">OFFLINE</span>
+      <span id="statusText">CONNECTING...</span>
     </div>
-    <div class="controls">
-      <button id="wakeBtn" onclick="toggleWakeLock()">WAKE: OFF</button>
-      <button onclick="configureServer()">WS URL</button>
-    </div>
+    <button id="wakeBtn">WAKE: OFF</button>
   </header>
 
   <section id="summaries"></section>
   <section id="ticker"></section>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      query,
+      limitToLast,
+      onChildAdded,
+      onValue
+    } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+
+    // ВСТАВЬ СЮДА СВОЙ firebaseConfig ИЗ НАСТРОЕК ПРОЕКТА FIREBASE:
+    const firebaseConfig = {
+      apiKey: "ТВОЙ_API_KEY",
+      authDomain: "ТВОЙ-ПРОЕКТ.firebaseapp.com",
+      databaseURL: "https://ТВОЙ-ПРОЕКТ-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "ТВОЙ-ПРОЕКТ",
+      storageBucket: "ТВОЙ-ПРОЕКТ.firebasestorage.app",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:000000000000"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     const summariesEl = document.getElementById('summaries');
     const tickerEl = document.getElementById('ticker');
     const statusDot = document.getElementById('statusDot');
     const statusText = document.getElementById('statusText');
     const wakeBtn = document.getElementById('wakeBtn');
 
-    // URL WebSocket-сервера (можно сменить кнопкой WS URL прямо с телефона)
-    const DEFAULT_WS_URL = 'wss://your-vps-domain.com/ws';
-    let wsUrl = localStorage.getItem('bs_teletext_ws') || DEFAULT_WS_URL;
-    let ws = null;
-    let reconnectTimer = null;
-    let pingInterval = null;
-
-    function configureServer() {
-      const input = prompt('Введите WebSocket URL вашего VPS (wss://... или ws://...):', wsUrl);
-      if (input && input.trim()) {
-        wsUrl = input.trim();
-        localStorage.setItem('bs_teletext_ws', wsUrl);
-        connectWebSocket();
-      }
-    }
-
     function isNearBottom(el, threshold = 60) {
       return el.scrollHeight - el.scrollTop - el.clientHeight <= threshold;
     }
 
-    function appendSummary(item, forceScroll = false) {
-      const shouldScroll = forceScroll || isNearBottom(summariesEl);
+    function appendSummary(item) {
+      const shouldScroll = isNearBottom(summariesEl);
       const card = document.createElement('div');
       card.className = 'summary-card';
 
       const timeEl = document.createElement('div');
       timeEl.className = 'summary-time';
-      timeEl.textContent = `[${item.timestamp}] РАУНД-АПДЕЙТ`;
+      timeEl.textContent = `[${item.timestamp || '--:--:--'}] РАУНД-АПДЕЙТ`;
 
       const bodyEl = document.createElement('div');
-      bodyEl.textContent = item.text;
+      bodyEl.textContent = item.text || '';
 
       card.appendChild(timeEl);
       card.appendChild(bodyEl);
       summariesEl.appendChild(card);
 
-      // Ограничиваем DOM до 30 карточек
       while (summariesEl.children.length > 30) {
         summariesEl.removeChild(summariesEl.firstChild);
       }
@@ -222,22 +205,21 @@
       }
     }
 
-    function appendRawLog(item, forceScroll = false) {
-      const shouldScroll = forceScroll || isNearBottom(tickerEl);
+    function appendRawLog(item) {
+      const shouldScroll = isNearBottom(tickerEl);
       const line = document.createElement('div');
       line.className = 'ticker-line';
 
       const timeSpan = document.createElement('span');
       timeSpan.className = 'ticker-time';
-      timeSpan.textContent = item.timestamp;
+      timeSpan.textContent = item.timestamp || '';
 
-      const textNode = document.createTextNode(item.text);
+      const textNode = document.createTextNode(item.text || '');
 
       line.appendChild(timeSpan);
       line.appendChild(textNode);
       tickerEl.appendChild(line);
 
-      // Ограничиваем DOM до 80 строк
       while (tickerEl.children.length > 80) {
         tickerEl.removeChild(tickerEl.firstChild);
       }
@@ -247,60 +229,32 @@
       }
     }
 
-    function connectWebSocket() {
-      if (ws) {
-        ws.onclose = null;
-        ws.close();
-      }
-      clearTimeout(reconnectTimer);
-      clearInterval(pingInterval);
-
-      statusDot.classList.remove('online');
-      statusText.textContent = 'CONNECTING...';
-
-      try {
-        ws = new WebSocket(wsUrl);
-      } catch (e) {
-        statusText.textContent = 'BAD WS URL';
-        return;
-      }
-
-      ws.onopen = () => {
+    // Индикатор реального статуса соединения с Firebase
+    onValue(ref(db, ".info/connected"), (snap) => {
+      if (snap.val() === true) {
         statusDot.classList.add('online');
         statusText.textContent = 'LIVE';
-        pingInterval = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) ws.send('ping');
-        }, 15000);
-      };
-
-      ws.onmessage = (event) => {
-        if (event.data === 'pong') return;
-        try {
-          const data = JSON.parse(event.data);
-          if (data.type === 'history') {
-            summariesEl.innerHTML = '';
-            tickerEl.innerHTML = '';
-            (data.summaries || []).forEach(s => appendSummary(s, true));
-            (data.raw_logs || []).forEach(r => appendRawLog(r, true));
-          } else if (data.type === 'summary') {
-            appendSummary(data);
-          } else if (data.type === 'raw') {
-            appendRawLog(data);
-          }
-        } catch (err) {
-          console.error('Parse error:', err);
-        }
-      };
-
-      ws.onclose = () => {
+      } else {
         statusDot.classList.remove('online');
         statusText.textContent = 'RECONNECTING...';
-        clearInterval(pingInterval);
-        reconnectTimer = setTimeout(connectWebSocket, 2500);
-      };
-    }
+      }
+    });
 
-    // Wake Lock API — чтобы экран телефона не гас на минимальной яркости
+    // Подписка на последние 15 саммари + новые в реальном времени
+    const summariesQuery = query(ref(db, 'teletext/summaries'), limitToLast(15));
+    onChildAdded(summariesQuery, (snapshot) => {
+      const data = snapshot.val();
+      if (data) appendSummary(data);
+    });
+
+    // Подписка на последние 50 строк транскрипта + новые в реальном времени
+    const rawQuery = query(ref(db, 'teletext/raw'), limitToLast(50));
+    onChildAdded(rawQuery, (snapshot) => {
+      const data = snapshot.val();
+      if (data) appendRawLog(data);
+    });
+
+    // Wake Lock API
     let wakeLock = null;
 
     async function requestWakeLock() {
@@ -316,29 +270,26 @@
           wakeBtn.classList.remove('active');
           wakeBtn.textContent = 'WAKE: OFF';
         });
-      } catch (err) {
+      } catch {
         wakeBtn.classList.remove('active');
         wakeBtn.textContent = 'WAKE: ERR';
       }
     }
 
-    async function toggleWakeLock() {
+    wakeBtn.addEventListener('click', async () => {
       if (wakeLock !== null && !wakeLock.released) {
         await wakeLock.release();
         wakeLock = null;
       } else {
         await requestWakeLock();
       }
-    }
+    });
 
-    // Автоматический перезахват WakeLock при сворачивании/разворачивании браузера
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && wakeBtn.classList.contains('active')) {
         requestWakeLock();
       }
     });
-
-    connectWebSocket();
   </script>
 </body>
 </html>
